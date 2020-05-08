@@ -80,3 +80,6 @@ apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10
 
 
+for i in clangd clang lld lldb; do {
+  ln -sfv $i-10 /usr/bin/$i
+}; done
