@@ -15,7 +15,7 @@
 5. Open the project folder in VSCode
 6. It should prompt to "Reopen in Container", do that. else do Command Pallette -> "Reopen in Container"
   - Note: You can ignore the message about git missing, it will get installed in the next step
-7. Once it's loaded in the new container run the "setup dev environment" task. Command Pallette -> "Run Task"... On a fresh system that might take a while, go-ahead and install the extensions below
+7. Once it's loaded in the new container run the "setup dev environment" task. Command Pallette -> "Run Task"
 8. Re-open window (so that vscode will realize git is now installed)
 9. Run the default build task to build...
 
