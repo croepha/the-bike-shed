@@ -17,6 +17,8 @@ EOF
 }; fi
 
 
+apt update
+apt install -y gnupg
 apt-key add - << EOF
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.12 (GNU/Linux)
@@ -72,10 +74,7 @@ bXb5c6gCHESH5PXwPU4jQEE7Ib9J6sbk7ZT2Mw==
 -----END PGP PUBLIC KEY BLOCK-----
 EOF
 
-apt update
-apt install -y gnupg
 echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main" > /etc/apt/sources.list.d/shed.list
-
 apt update
 apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
