@@ -72,6 +72,8 @@ bXb5c6gCHESH5PXwPU4jQEE7Ib9J6sbk7ZT2Mw==
 -----END PGP PUBLIC KEY BLOCK-----
 EOF
 
+apt update
+apt install -y gnupg
 echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main" > /etc/apt/sources.list.d/shed.list
 
 apt update
