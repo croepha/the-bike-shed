@@ -4,17 +4,19 @@
 
 
 ## Getting started on Development using VSCode
-0. For best results, listen to this on repeat: youtu.be/YUvOeN1zNYg
+0. For best results, listen to this on repeat: https://youtu.be/YUvOeN1zNYg
 1. Install Visual Studio Code
-2. Install and setup docker desktop
+2. Install and setup docker:
+  - Windows & MAC install docker desktop
+  - Ubuntu: `sudo apt install docker.io; sudo usermod -aG docker $USER` re-login
+  - Linux follow directions for your distro...
 3. Install the "Remote - Containers" (`ms-vscode-remote.remote-containers`)  exension
 4. Clone this code locally ex: `cd ~/my_projects/ && git clone --depth=1 git@github.com:croepha/the-bike-shed.git`
 5. Open the project folder in VSCode
 6. It should prompt to "Reopen in Container", do that. else do Command Pallette -> "Reopen in Container"
   - Note: You can ignore the message about git missing, it will get installed in the next step
 7. Once it's loaded in the new container run the "setup dev environment" task. Command Pallette -> "Run Task"... On a fresh system that might take a while, go-ahead and install the extensions below
-8. Add these extensions inside the Docker workspace:
-  - clangd (llvm-vs-code-extensions.vscode-clangd)
+8. Re-open window (so that vscode will realize git is now installed)
 9. Run the default build task to build...
 
 
