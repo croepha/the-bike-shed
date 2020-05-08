@@ -20,7 +20,7 @@
 
 
 #### TODO:
-- create skelleton code for shed
+- create skeleton code for shed
   - async curl
   - p2p UDP packets...
   - Periodic autosave
