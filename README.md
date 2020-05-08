@@ -4,7 +4,7 @@
 
 
 ## Getting started on Development using VSCode
-0. For best results, listen to this on repeat: https://youtu.be/YUvOeN1zNYg
+0. For best results, listen to this on repeat: https://youtu.be/T1CowKULMx8
 1. Install Visual Studio Code
 2. Install and setup docker:
   - Windows & MAC install docker desktop
