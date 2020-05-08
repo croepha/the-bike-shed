@@ -1,3 +1,4 @@
 build/
 .clangd/
 clangd.log
+compile_commands.json
