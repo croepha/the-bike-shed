@@ -24,7 +24,8 @@ apt install -y build-essential wget unar libtinfo5 \
 
 if [ ! -e /opt/llvm ]; then {
     wget $LLVM_URL -O /tmp/llvm.tar.xz
-    unar /tmp/llvm.tar.xz -o /opt/llvm/
+    mkdir -p /opt/llvm
+    tar xvf /tmp/llvm.tar.xz --strip 1 -C /opt/llvm
     rm /tmp/llvm.tar.xz
 }; fi
 

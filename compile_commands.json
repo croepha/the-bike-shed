@@ -1,0 +1,14 @@
+[
+  {
+    "directory": "/workspaces/the-bike-shed",
+    "command": "clang -O0 -gfull -fPIC -fsanitize=address -Wno-writable-strings -Werror -Wshadow -Wall helloworld.c -c -o build/helloworld.c.o -MF build/helloworld.c.o.d -MMD",
+    "file": "helloworld.c",
+    "output": "build/helloworld.c.o"
+  },
+  {
+    "directory": "/workspaces/the-bike-shed",
+    "command": "clang -fuse-ld=lld build/helloworld.c.o -fsanitize=address -o build/helloworld.exec ",
+    "file": "build/helloworld.c.o",
+    "output": "build/helloworld.exec"
+  }
+]

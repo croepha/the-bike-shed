@@ -4,7 +4,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "run setup script",
+            "label": "build",
+            "type": "shell",
+            "command": "bash build.bash",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "setup dev environment",
             "type": "shell",
             "command": "bash setup_dev_environment.bash",
             "problemMatcher": []
