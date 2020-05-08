@@ -37,6 +37,7 @@ link_exec  helloworld
 
 export NINJA_STATUS="[%f/%t %e] "
 ninja -f ./build/build.ninja -t compdb > compile_commands.json
+# ninja -f ./build/build.ninja -t clean
 ninja -f ./build/build.ninja | cat
 
 ./build/helloworld.exec
