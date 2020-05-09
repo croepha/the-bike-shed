@@ -13,11 +13,11 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 
 0. Install and setup docker:
   - Windows & MAC install docker desktop
-  - Ubuntu: 
+  - Ubuntu:
     0. `sudo apt install docker.io; sudo usermod -aG docker $USER`
     1. re-login
   - Linux follow directions for your distro...
-  
+
 1. Install the "Remote - Containers"
    (`ms-vscode-remote.remote-containers`) exension
 
@@ -29,7 +29,7 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
    `Command Pallette -> "Reopen in Container"`
   - Note: You can ignore the message about git missing, it will get
     installed in the next step
-  
+
 5. Once it's loaded in the new container run the "setup dev
    environment" task. Command Pallette -> "Run Task"
 
@@ -39,6 +39,20 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
    - To clean and rebuild: uncomment line 44 and then comment out
      lines 45 & 47 of build.bash. Save and run build task again. Then
      undo and run build task again
+
+Hardware List
+--------------------------------------------------
+
+This list is a work in progress.
+
+ - Raspberry PI (`@TODO` what type? link?)
+ - PI0 GPIO keypad (`@TODO` what type? link?)
+ - PI0 GPIO LCD 2x16 Char display (`@TODO` what type? link?)
+ - SD Card (`@TODO` what type? link?)
+ - Communication (See `TODO -> Hardware Research`)
+ - Mains Power supply (See `TODO -> Hardware Research`)
+ - Solenoid / electric strike (See `TODO -> Hardware Research`)
+ - Internal 5v regulator (See `TODO -> Hardware Research`)
 
 
 TODO
@@ -102,7 +116,7 @@ are <strike>striked out</strike>.
   - Canidate: [RS-25-12][rs25] (Probably is overkill?)
 - ☐ Internal 5v regulator:
   - StackExchange: [Powering a PI from 12v][se12v]
-  
+
 [max232]: https://en.wikipedia.org/wiki/MAX232
 [lock]: https://www.amazon.com/dp/B01MXZ0EKQ
 [bas]: https://www.embeddedrelated.com/showarticle/77.php
