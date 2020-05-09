@@ -128,5 +128,5 @@ Streatch Goals (TODOs for after MVP)
     - Small address space, trivially brute-forced, especially on clippercards
   - Possible Solutions:
     - Use bigger (1k) payloads
-    - Use Challenge responce NFC
+    - Use Challenge response NFC
     - Use BLE (phone?)
