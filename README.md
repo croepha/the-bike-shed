@@ -46,7 +46,7 @@ This list is a work in progress.
  - Mains Power supply (See `TODO -> Hardware Research`)
  - Solenoid / electric strike (See `TODO -> Hardware Research`)
  - Internal 5v regulator (See `TODO -> Hardware Research`)
- - 
+ -
 
 TODO
 --------------------------------------------------
@@ -101,6 +101,7 @@ are <strike>striked out</strike>.
 - ☐ Research into ATMEL - RPI long distance/cheap/reliable
   communication...
     - TTL? [MAX232][max232]? MAX485?
+    - Research reliabiliy options like parity? or CRC?
 - ☐ Research into solenoid/electric strike, need to pin down voltage
   - Candidate: [(DC12V) Failure Secure ANSI Standard Heavy Duty Electric Strike Lock][lock]
 - ☐ Power mosfet
