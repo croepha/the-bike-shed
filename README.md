@@ -18,6 +18,7 @@
 7. Once it's loaded in the new container run the "setup dev environment" task. Command Pallette -> "Run Task"
 8. Re-open window (so that vscode will realize git is now installed)
 9. Run the default build task to build...
+	-To clean and rebuild:  uncomment line 44 and then comment out lines 45 & 47 of build.bash. Save and run build task again. Then undo and run build task again
 
 
 
