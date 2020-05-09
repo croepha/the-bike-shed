@@ -35,6 +35,10 @@ OBJ_FILES=""
 compile    helloworld
 link_exec  helloworld
 
+OBJ_FILES=""
+compile    shed
+link_exec  shed
+
 export NINJA_STATUS="[%f/%t %e] "
 ninja -f ./build/build.ninja -t compdb > compile_commands.json
 # ninja -f ./build/build.ninja -t clean

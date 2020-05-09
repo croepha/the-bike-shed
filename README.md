@@ -44,8 +44,10 @@
 
 - Crypto all the things
   - sign p2p configs? have peer keys in master-config?
-  - argon2d for
+  - argon2d for RFID serials
   - Encrypt the list of IPs in the master-config
 
 - Make buildroot config
 - Make schematics for exterior board
+- SDCARD leveling torture test, need to make sure that the SDcard will last for the lifetime, 30 new accesses per day * 365 days * 5 years should be plenty
+
