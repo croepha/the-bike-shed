@@ -12,33 +12,26 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 ### [VSCode](https://code.visualstudio.com/)
 
 0. Install and setup docker:
-  - Windows & MAC install docker desktop
-  - Ubuntu:
-    0. `sudo apt install docker.io; sudo usermod -aG docker $USER`
-    1. re-login
-  - Linux follow directions for your distro...
-
+    - Windows & MAC install docker desktop
+    - Ubuntu:
+        0. `sudo apt install docker.io; sudo usermod -aG docker $USER`
+        1. re-login
+    - Linux follow directions for your distro...
 1. Install the "Remote - Containers"
    (`ms-vscode-remote.remote-containers`) exension
-
 2. Clone this code locally.
-
 3. Open the project folder in VSCode
-
 4. It should prompt to "Reopen in Container", do that. else do
    `Command Pallette -> "Reopen in Container"`
-  - Note: You can ignore the message about git missing, it will get
-    installed in the next step
-
+    - Note: You can ignore the message about git missing, it will get
+      installed in the next step
 5. Once it's loaded in the new container run the "setup dev
    environment" task. Command Pallette -> "Run Task"
-
 6. Re-open window (so that vscode will realize git is now installed)
-
 7. Run the default build task to build...
-   - To clean and rebuild: uncomment line 44 and then comment out
-     lines 45 & 47 of build.bash. Save and run build task again. Then
-     undo and run build task again
+    - To clean and rebuild: uncomment line 44 and then comment out
+      lines 45 & 47 of build.bash. Save and run build task again. Then
+      undo and run build task again
 
 Hardware List
 --------------------------------------------------
@@ -53,7 +46,7 @@ This list is a work in progress.
  - Mains Power supply (See `TODO -> Hardware Research`)
  - Solenoid / electric strike (See `TODO -> Hardware Research`)
  - Internal 5v regulator (See `TODO -> Hardware Research`)
-
+ - 
 
 TODO
 --------------------------------------------------
