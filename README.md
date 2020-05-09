@@ -130,3 +130,9 @@ Streatch Goals (TODOs for after MVP)
     - Use bigger (1k) payloads
     - Use Challenge response NFC
     - Use BLE (phone?)
+
+
+Temporary Protoyping parts list: ( Just some notes of parts im considering buying )
+--------------------------------------------------
+
+https://www.digikey.com/product-detail/en/MAX489CPD%2b/MAX489CPD%2b-ND/948035
