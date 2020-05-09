@@ -38,8 +38,11 @@
     - Research into solenoid/electric strike, need to pin down voltage
       - Candidate: https://www.amazon.com/Failure-Standard-Electric-American-Holding/dp/B01MXZ0EKQ
     - Power mosfet
-      - Candidate: 
-    - Power supply:
+      - https://www.embeddedrelated.com/showarticle/77.php
+    - Mains Power supply:
+      - Candidate: https://www.digikey.com/product-detail/en/mean-well-usa-inc/RS-25-12/1866-4140-ND/7706175 Probably is overkill?
+    - Internal 5v regulator:
+      - https://raspberrypi.stackexchange.com/a/19964
 
 - LIBCURL grab master-config from server
 - Parse master config
