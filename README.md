@@ -38,7 +38,7 @@ Hardware List
 
 This list is a work in progress.
 
- - Raspberry PI (`@TODO` what type? link?)
+ - [Raspberry PI Zero W][pi0w]
  - PI0 GPIO keypad (`@TODO` what type? link?)
  - PI0 GPIO LCD 2x16 Char display (`@TODO` what type? link?)
  - SD Card (`@TODO` what type? link?)
@@ -46,7 +46,8 @@ This list is a work in progress.
  - Mains Power supply (See `TODO -> Hardware Research`)
  - Solenoid / electric strike (See `TODO -> Hardware Research`)
  - Internal 5v regulator (See `TODO -> Hardware Research`)
- -
+
+[pi0w]: https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
 TODO
 --------------------------------------------------
@@ -116,3 +117,16 @@ are <strike>striked out</strike>.
 [bas]: https://www.embeddedrelated.com/showarticle/77.php
 [rs25]: https://www.digikey.com/product-detail/en/mean-well-usa-inc/RS-25-12/1866-4140-ND/7706175
 [se12v]: https://raspberrypi.stackexchange.com/a/19964
+
+
+Streatch Goals (TODOs for after MVP)
+--------------------------------------------------
+
+- ☐ Research alternate auth mechanisms:
+  - Just using serials from NFC has a few security issues:
+    - Easily skimmed
+    - Small address space, trivially brute-forced, especially on clippercards
+  - Possible Solutions:
+    - Use bigger (1k) payloads
+    - Use Challenge responce NFC
+    - Use BLE (phone?)
