@@ -33,8 +33,14 @@
 - prototype code for PI0 GPIO LCD 2x16 Char display
   - memfd device file...
 
-- Research into ATMEL - RPI long distance/cheap/reliable communication...
-  - TTL? MAX232?
+- Hardware research:
+    - Research into ATMEL - RPI long distance/cheap/reliable communication...
+        - TTL? MAX232? MAX485?
+    - Research into solenoid/electric strike, need to pin down voltage
+      - Candidate: https://www.amazon.com/Failure-Standard-Electric-American-Holding/dp/B01MXZ0EKQ
+    - Power mosfet
+      - Candidate: 
+    - Power supply:
 
 - LIBCURL grab master-config from server
 - Parse master config
