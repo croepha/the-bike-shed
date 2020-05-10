@@ -41,6 +41,10 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
       lines 45 & 47 of build.bash. Save and run build task again. Then
       undo and run build task again
 
+For Schematics, you should grab [KiCad]
+
+[KiCad]: https://www.kicad-pcb.org/
+
 Hardware List
 --------------------------------------------------
 
