@@ -107,11 +107,13 @@ are <strike>striked out</strike>.
   - Candidate: [(DC12V) Failure Secure ANSI Standard Heavy Duty Electric Strike Lock][lock]
 - ☐ Power mosfet
   - Article: [Byte and Switch (Part 1)][bas]
+  - Candidate: [DMG2302UK][DMG2302UK]
 - ☐ Mains Power supply:
   - Canidate: [RS-25-12][rs25] (Probably is overkill?)
 - ☐ Internal 5v regulator:
   - StackExchange: [Powering a PI from 12v][se12v]
 
+[DMG2302UK]: https://www.diodes.com/assets/Datasheets/DMG2302UK.pdf
 [max232]: https://en.wikipedia.org/wiki/MAX232
 [lock]: https://www.amazon.com/dp/B01MXZ0EKQ
 [bas]: https://www.embeddedrelated.com/showarticle/77.php
