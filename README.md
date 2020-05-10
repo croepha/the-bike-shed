@@ -136,3 +136,28 @@ Temporary Protoyping parts list: ( Just some notes of parts im considering buyin
 --------------------------------------------------
 
 https://www.digikey.com/product-detail/en/MAX489CPD%2b/MAX489CPD%2b-ND/948035
+
+
+#### Interconnect link between interrior and exterior
+RJ45, designed to use a straight through 568B/568B Cable.  With some minimal
+effort not to blow out ethernet if there is some user error (no gaurentees)
+
+    GREEN           EXTERIOR+DATA   PIN6    |
+    GREEN-STRIPE    EXTERIOR-DATA   PIN3    |
+    ORANGE          INTERIOR+DATA   PIN2    |
+    ORANGE-STRIPE   INTERIOR-DATA   PIN1    |
+    BLUE            INTERIOR+12v    PIN4    |
+    BLUE-STRIPE     INTERIOR+12v    PIN5    |
+    BROWN           INTERIOR-GND    PIN8    |
+    BROWN-STRIPE    INTERIOR-GND    PIN7    |
+
+Same list sorted by pins
+
+    ORANGE-STRIPE   INTERIOR-DATA   PIN1    |
+    ORANGE          INTERIOR+DATA   PIN2    |
+    GREEN-STRIPE    EXTERIOR-DATA   PIN3    |
+    BLUE            INTERIOR+12v    PIN4    |
+    BLUE-STRIPE     INTERIOR+12v    PIN5    |
+    GREEN           EXTERIOR+DATA   PIN6    |
+    BROWN-STRIPE    INTERIOR-GND    PIN7    |
+    BROWN           INTERIOR-GND    PIN8    |
