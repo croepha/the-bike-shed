@@ -43,6 +43,10 @@ link_exec  shed
 
 export NINJA_STATUS="[%f/%t %e] "
 ninja -f ./build/build.ninja -t compdb > compile_commands.json
+if ! diff compile_commands.json build/old_compile_commands.json &> /dev/null; then {
+    pkill clangd # Force a restart of clangd when compile_commands.json changes
+    cp compile_commands.json build/old_compile_commands.json
+}; fi
 # ninja -f ./build/build.ninja -t clean
 ninja -f ./build/build.ninja | cat
 
