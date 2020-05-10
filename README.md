@@ -1,8 +1,16 @@
 the-bike-shed
 ================================================================================
 
-`@TODO` what are the high level goals of this project?
-
+An RFID based access control system for Noisebridge.  Some specific goals:
+- A community based educational project, try to expose people to embedded systems programming and design
+- Be mostly like the current system (EARL)
+- But more reliable, designed to run for 5 years without maintenance
+  - Limit run time dependancies
+  - Limit complexity
+  - Unit and Functional testing
+- More accessable management, the plan is that the master config will just be pulled from a URL, like a github hosted file for example...
+- support multiple semi-autonomous units
+- possibly be adaptable to other applications like appliance lockouts, or lockers
 
 Development
 --------------------------------------------------
