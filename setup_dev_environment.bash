@@ -16,9 +16,9 @@ EOF
   source /etc/profile
 }; fi
 
-
+# rm -f /etc/apt/sources.list.d/shed.list  # for debugging
 apt update
-apt install -y gnupg
+apt install -y gnupg ca-certificates
 apt-key add - << EOF
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.12 (GNU/Linux)
@@ -75,7 +75,7 @@ bXb5c6gCHESH5PXwPU4jQEE7Ib9J6sbk7ZT2Mw==
 EOF
 
 echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main" > /etc/apt/sources.list.d/shed.list
-apt update
+apt update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/shed.list -o APT::Get::List-Cleanup="0"
 apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10
