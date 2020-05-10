@@ -78,8 +78,8 @@ echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main" > /etc/apt/so
 apt update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/shed.list -o APT::Get::List-Cleanup="0"
 apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
-        ninja-build git clangd-10 clang-10 lld-10 lldb-10
-
+        ninja-build git clangd-10 clang-10 lld-10 lldb-10 \
+        libncurses5-dev bzr cvs mercurial subversion unzip bc
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
