@@ -39,9 +39,7 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
    environment" task. Command Pallette -> "Run Task"
 6. Re-open window (so that vscode will realize git is now installed)
 7. Run the default build task to build...
-    - To clean and rebuild: uncomment line 44 and then comment out
-      lines 45 & 47 of build.bash. Save and run build task again. Then
-      undo and run build task again
+    - To clean and rebuild: Run the "clean and build" task
 
 For Schematics, you should grab [KiCad]
 

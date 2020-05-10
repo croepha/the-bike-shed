@@ -1,5 +1,10 @@
 set -eEuo pipefail
 source /etc/profile
+
+if [ ! -v SHOULD_CLEAN ]; then {
+        SHOULD_CLEAN=0
+}; fi
+
 mkdir -p build/
 
 rm -f build/build.ninja
@@ -47,7 +52,11 @@ if ! diff compile_commands.json build/old_compile_commands.json &> /dev/null; th
     pkill clangd # Force a restart of clangd when compile_commands.json changes
     cp compile_commands.json build/old_compile_commands.json
 }; fi
-# ninja -f ./build/build.ninja -t clean
+
+if [ $SHOULD_CLEAN != 0 ]; then {
+    ninja -f ./build/build.ninja -t clean
+}; fi
+
 ninja -f ./build/build.ninja | cat
 
 ./build/helloworld.exec

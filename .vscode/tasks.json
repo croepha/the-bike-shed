@@ -14,6 +14,12 @@
             }
         },
         {
+            "label": "clean and build",
+            "type": "shell",
+            "command": "SHOULD_CLEAN=1 bash build.bash",
+            "problemMatcher": [],
+        },
+        {
             "label": "setup dev environment",
             "type": "shell",
             "command": "bash setup_dev_environment.bash",
