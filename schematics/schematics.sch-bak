@@ -342,4 +342,8 @@ Wire Notes Line
 	7100 3350 7200 3350
 Wire Notes Line
 	7100 3350 7100 3250
+Text Notes 9650 950  2    50   ~ 0
+TODO: Doublecheck application notes for MAX489
+Text Notes 4850 900  2    50   ~ 0
+TODO: Doublecheck application notes for MAX489
 $EndSCHEMATC

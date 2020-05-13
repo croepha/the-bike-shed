@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:schematics-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -116,17 +117,17 @@ Wire Wire Line
 Wire Wire Line
 	5450 2150 4700 2150
 Wire Wire Line
-	7900 1950 6950 1950
+	7800 1950 6950 1950
 Wire Wire Line
-	7900 1950 8200 1650
+	7800 1950 8100 1650
 Wire Wire Line
-	8200 1650 8500 1650
+	8100 1650 8500 1650
 Wire Wire Line
-	6950 1650 8100 1650
+	6950 1650 8000 1650
 Wire Wire Line
-	8100 1650 8200 1750
+	8000 1650 8100 1750
 Wire Wire Line
-	8200 1750 8500 1750
+	8100 1750 8500 1750
 Wire Wire Line
 	8100 1850 8500 1850
 Wire Wire Line
@@ -346,4 +347,44 @@ Text Notes 9650 950  2    50   ~ 0
 TODO: Doublecheck application notes for MAX489
 Text Notes 4850 900  2    50   ~ 0
 TODO: Doublecheck application notes for MAX489
+Text Notes 2400 3100 0    50   ~ 0
+ TODO: \nOPTIONAL\nKEYPAD
+Text Notes 1550 3100 0    50   ~ 0
+TODO:\nOPTIONAL\nCHAR DISP
+Wire Notes Line
+	1500 2800 1500 3200
+Wire Notes Line
+	1500 3200 2000 3200
+Wire Notes Line
+	2000 3200 2000 2800
+Wire Notes Line
+	2000 2800 1500 2800
+Wire Notes Line
+	2350 2800 2350 3150
+Wire Notes Line
+	2350 3150 2800 3150
+Wire Notes Line
+	2800 3150 2800 2800
+Wire Notes Line
+	2350 2800 2800 2800
+Text Notes 10250 4650 0    50   ~ 0
+ TODO: \nOPTIONAL\nKEYPAD
+Text Notes 9400 4650 0    50   ~ 0
+TODO:\nOPTIONAL\nCHAR DISP
+Wire Notes Line
+	9350 4350 9350 4750
+Wire Notes Line
+	9350 4750 9850 4750
+Wire Notes Line
+	9850 4750 9850 4350
+Wire Notes Line
+	9850 4350 9350 4350
+Wire Notes Line
+	10200 4350 10200 4700
+Wire Notes Line
+	10200 4700 10650 4700
+Wire Notes Line
+	10650 4700 10650 4350
+Wire Notes Line
+	10200 4350 10650 4350
 $EndSCHEMATC
