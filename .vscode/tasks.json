@@ -20,6 +20,12 @@
             "problemMatcher": [],
         },
         {
+            "label": "build (debug build script)",
+            "type": "shell",
+            "command": "bash -x build.bash",
+            "problemMatcher": [],
+        },
+        {
             "label": "setup dev environment",
             "type": "shell",
             "command": "bash setup_dev_environment.bash",
