@@ -59,7 +59,13 @@ This list is a work in progress.
  - Mains Power supply (See `TODO -> Hardware Research`)
  - Solenoid / electric strike (See `TODO -> Hardware Research`)
  - Internal 5v regulator (See `TODO -> Hardware Research`)
+ - RFID:
+  - Candidate: [PN7462]
+  - Candidate: [MFRC522]
 
+
+[MFRC522]: https://www.google.com/search?q=mfrc522
+[PN7462]: https://discuss.noisebridge.info/t/pn7462-nfc-deep-dive/1712
 [AMLC]: https://www.digikey.com/products/en/memory-cards-modules/memory-cards/501?k=AMLC
 [pi0w]: https://www.raspberrypi.org/products/raspberry-pi-zero-w/
 
