@@ -50,16 +50,16 @@ Hardware List
 
 This list is a work in progress.
 
- - [Raspberry PI Zero W][pi0w]
- - PI0 GPIO keypad (`@TODO` what type? link?)
- - PI0 GPIO LCD 2x16 Char display (`@TODO` what type? link?)
- - SD Card:
-  - Candidate: [AMLC]
- - Communication (See `TODO -> Hardware Research`)
- - Mains Power supply (See `TODO -> Hardware Research`)
- - Solenoid / electric strike (See `TODO -> Hardware Research`)
- - Internal 5v regulator (See `TODO -> Hardware Research`)
- - RFID:
+- [Raspberry PI Zero W][pi0w]
+- PI0 GPIO keypad (`@TODO` what type? link?)
+- PI0 GPIO LCD 2x16 Char display (`@TODO` what type? link?)
+- SD Card:
+- Candidate: [AMLC]
+- Communication (See `TODO -> Hardware Research`)
+- Mains Power supply (See `TODO -> Hardware Research`)
+- Solenoid / electric strike (See `TODO -> Hardware Research`)
+- Internal 5v regulator (See `TODO -> Hardware Research`)
+- RFID:
   - Candidate: [PN7462]
   - Candidate: [MFRC522]
 
