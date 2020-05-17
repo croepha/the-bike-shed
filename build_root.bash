@@ -41,7 +41,6 @@ make linux-update-defconfig
 make busybox-menuconfig
 make busybox-update-config
 
-
 make uclibc-menuconfig
 make uclibc-update-config
 
