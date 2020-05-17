@@ -20,5 +20,5 @@ make
 sudo -u notroot bash
 cd /build/root/buildroot-2020.05-rc1
 make menuconfig
-make savedefconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
+make -C /build/root/buildroot-2020.05-rc1 savedefconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
 
