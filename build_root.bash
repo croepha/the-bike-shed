@@ -32,7 +32,7 @@ BR2_PACKAGE_BUSYBOX_CONFIG
 sudo -u notroot bash
 cd /build/root
 make menuconfig
-make -C /build/root savedefconfig
+make savedefconfig
 
 BR2_LINUX_KERNEL_DEFCONFIG
 
