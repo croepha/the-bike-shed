@@ -1,6 +1,14 @@
 echo "Not ready for general consumption, enter at your own risk"
 exit
 
+# Notes
+# For a new buildroot project:
+#  dl, extract
+#  make defconfig <base>
+#  make menuconfig ... update all the def config options
+#  then do all the saveconfigs...
+
+
 apt install -y cpio rsync sudo ccache
 useradd notroot
 
@@ -18,6 +26,7 @@ make clean
 make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
 make
 
+BR2_PACKAGE_BUSYBOX_CONFIG
 
 
 sudo -u notroot bash
@@ -25,16 +34,21 @@ cd /build/root
 make menuconfig
 make -C /build/root savedefconfig
 
+BR2_LINUX_KERNEL_DEFCONFIG
 
 make linux-menuconfig
-make linux-update-defconfig -C /build/root BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE=/workspaces/the-bike-shed/linux.config
+make linux-update-defconfig
+
+ -C /build/root BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE=/workspaces/the-bike-shed/linux.config
 
 make linux-savedefconfig -C /build/root BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE=/workspaces/the-bike-shed/linux.config
 
 make busybox-menuconfig
-make busybox-update-config -C /build/root BR2_PACKAGE_BUSYBOX_CONFIG=/workspaces/the-bike-shed/busybox.config
+make busybox-update-config
+ -C /build/root BR2_PACKAGE_BUSYBOX_CONFIG=/workspaces/the-bike-shed/busybox.config
 
 make uclibc-menuconfig
-make uclibc-update-config -C /build/root BR2_UCLIBC_CONFIG=/workspaces/the-bike-shed/uclibc.config
+make uclibc-update-config
+ -C /build/root BR2_UCLIBC_CONFIG=/workspaces/the-bike-shed/uclibc.config
 
 
