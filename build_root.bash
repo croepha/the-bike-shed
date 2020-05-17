@@ -15,7 +15,6 @@ useradd notroot
 mkdir -p /build/root
 chown -R notroot /build
 cd /build/root
-sudo -u notroot bash
 
 wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-2020.05-rc1.tar.gz
 tar xvf buildroot.tar.gz
@@ -43,5 +42,7 @@ make busybox-update-config
 
 make uclibc-menuconfig
 make uclibc-update-config
+
+make O=/build/root1/ raspberrypi_defconfig
 
 

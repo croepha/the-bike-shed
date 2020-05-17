@@ -42,6 +42,12 @@ OBJ_FILES=""
 compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
+
+# OBJ_FILES=""
+# compile    mount_squash_root -target arm-unknown-linux-gnueabihf
+# link_exec  mount_squash_root -target arm-unknown-linux-gnueabihf -static
+
+
 OBJ_FILES=""
 compile    shed
 link_exec  shed
