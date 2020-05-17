@@ -40,6 +40,10 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 6. Re-open window (so that vscode will realize git is now installed)
 7. Run the default build task to build...
     - To clean and rebuild: Run the "clean and build" task
+8. Don't forget to setup git inside of your container:
+  `git config --global user.email "you@example.com"`
+  `git config --global user.name "Your Name"`
+  if you use an SSH Agent then your key forwarding should work, else you need to do `ssh-keygen` and then `ssh-add -L` and then add your SSH key to your github...
 
 For Schematics, you should grab [KiCad]
 
@@ -54,7 +58,7 @@ This list is a work in progress.
 - PI0 GPIO keypad (`@TODO` what type? link?)
 - PI0 GPIO LCD 2x16 Char display (`@TODO` what type? link?)
 - SD Card:
-- Candidate: [AMLC]
+  - Candidate: [AMLC]
 - Communication (See `TODO -> Hardware Research`)
 - Mains Power supply (See `TODO -> Hardware Research`)
 - Solenoid / electric strike (See `TODO -> Hardware Research`)
