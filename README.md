@@ -24,8 +24,8 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 0. Install and setup docker:
     - Windows & MAC install docker desktop
     - Ubuntu:
-        0. `sudo apt install docker.io; sudo usermod -aG docker $USER`
-        1. re-login
+        1. `sudo apt install docker.io; sudo usermod -aG docker $USER`
+        2. re-login
     - Linux follow directions for your distro...
 1. Install the "Remote - Containers"
    (`ms-vscode-remote.remote-containers`) exension
