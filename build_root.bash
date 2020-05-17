@@ -43,6 +43,7 @@ make busybox-update-config
 make uclibc-menuconfig
 make uclibc-update-config
 
+
+
 make O=/build/root1/ raspberrypi_defconfig
-
-
+make O=/build/root1/ savedefconfig
