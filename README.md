@@ -41,8 +41,8 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 7. Run the default build task to build...
     - To clean and rebuild: Run the "clean and build" task
 8. Don't forget to setup git inside of your container:
-  `git config --global user.email "you@example.com"`
-  `git config --global user.name "Your Name"`
+  `git config --local user.email "you@example.com"`
+  `git config --local user.name "Your Name"`
   if you use an SSH Agent then your key forwarding should work, else you need to do `ssh-keygen` and then `ssh-add -L` and then add your SSH key to your github...
 
 For Schematics, you should grab [KiCad]
