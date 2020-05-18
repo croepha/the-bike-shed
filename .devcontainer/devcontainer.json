@@ -17,6 +17,29 @@
 		"vadimcn.vscode-lldb"
 	],
 
+	"appPort": [
+		"9160:9160/tcp",
+		"9161:9161/tcp",
+		"9162:9162/tcp",
+		"9163:9163/tcp",
+		"9164:9164/tcp",
+		"9165:9165/tcp",
+		"9166:9166/tcp",
+		"9167:9167/tcp",
+		"9168:9168/tcp",
+		"9169:9169/tcp",
+		"9160:9160/udp",
+		"9161:9161/udp",
+		"9162:9162/udp",
+		"9163:9163/udp",
+		"9164:9164/udp",
+		"9165:9165/udp",
+		"9166:9166/udp",
+		"9167:9167/udp",
+		"9168:9168/udp",
+		"9169:9169/udp",
+	],
+
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 

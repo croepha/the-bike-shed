@@ -24,13 +24,13 @@ rmdir /build/root/buildroot-2020.05-rc1
 
 make clean
 make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
-make
+make all
 
 BR2_PACKAGE_BUSYBOX_CONFIG
 
 sudo -u notroot bash
 cd /build/root
-cd /build/root
+make menuconfig
 make savedefconfig
 
 BR2_LINUX_KERNEL_DEFCONFIG
@@ -45,8 +45,27 @@ make uclibc-menuconfig
 make uclibc-update-config
 
 
-
+chown -R notroot /build /workspaces
+sudo -u notroot bash
+cd /build/root
 make O=/build/root1/ raspberrypi_defconfig
+
+
+make O=/build/root1/ menuconfig
 make O=/build/root1/ savedefconfig
+
 make O=/build/root1/ defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root1.config
 make O=/build/root1/ make all
+
+make O=/build/root1/ linux-menuconfig
+make O=/build/root1/ linux-update-defconfig
+
+make O=/build/root1/ busybox-menuconfig
+make O=/build/root1/ busybox-update-config
+
+make O=/build/root1/ uclibc-menuconfig
+make O=/build/root1/ uclibc-update-config
+
+
+
+
