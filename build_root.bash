@@ -13,7 +13,8 @@ apt install -y cpio rsync sudo ccache
 useradd notroot
 
 mkdir -p /build/root
-chown -R notroot /build
+chown -R notroot /build /workspaces
+sudo -u notroot bash
 cd /build/root
 
 wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-2020.05-rc1.tar.gz
@@ -29,7 +30,7 @@ BR2_PACKAGE_BUSYBOX_CONFIG
 
 sudo -u notroot bash
 cd /build/root
-make menuconfig
+cd /build/root
 make savedefconfig
 
 BR2_LINUX_KERNEL_DEFCONFIG
@@ -47,3 +48,5 @@ make uclibc-update-config
 
 make O=/build/root1/ raspberrypi_defconfig
 make O=/build/root1/ savedefconfig
+make O=/build/root1/ defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root1.config
+make O=/build/root1/ make all
