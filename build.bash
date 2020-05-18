@@ -37,15 +37,16 @@ build /build/$1.exec: link_exec $OBJ_FILES
   extra = ${@:2}
 EOF
 }
+# -target arm-unknown-linux-gnueabihf
+# -static
 
 OBJ_FILES=""
 compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
-
-# OBJ_FILES=""
-# compile    mount_squash_root -target arm-unknown-linux-gnueabihf
-# link_exec  mount_squash_root -target arm-unknown-linux-gnueabihf -static
+OBJ_FILES=""
+compile    mount_squash_root
+link_exec  mount_squash_root
 
 
 OBJ_FILES=""

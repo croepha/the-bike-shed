@@ -67,5 +67,13 @@ make O=/build/root1/ uclibc-menuconfig
 make O=/build/root1/ uclibc-update-config
 
 
+make O=/build/root-dev/ defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root-dev.config
+make O=/build/root-dev/ menuconfig
+make O=/build/root-dev/ savedefconfig
 
+make O=/build/root-dev/ busybox-menuconfig
+make O=/build/root-dev/ busybox-update-config
+
+make O=/build/root-dev/ uclibc-menuconfig
+make O=/build/root-dev/ uclibc-update-config
 

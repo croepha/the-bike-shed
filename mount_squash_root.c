@@ -11,11 +11,14 @@ switchroot oldroot:/mnt newroot:/newroot /init
 switch_root newroot init [arg...]
 
 
-
-
 #endif
 
 
+// TODO: Credit Landley
+
+
+
 int main() {
+
 
 }
