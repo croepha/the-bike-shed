@@ -1,7 +1,5 @@
 set -eEuo pipefail
 
-LLVM_URL=https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-
 source /etc/profile
 if [ ! -v ENV_VER ]; then {
         ENV_VER=0
@@ -93,8 +91,10 @@ github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXY
 EOF
 
 
-
 # Extras:
-# unminimize
-# apt install apt-file
-# apt-file update
+if false; then {
+  yes | unminimize
+  apt install -y man apt-file
+  apt-file update
+}; fi
+

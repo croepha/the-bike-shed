@@ -259,11 +259,34 @@ done:
   return 0;
 }
 
+/*
+
+mkdir -p /build/dev-root-test2
+cd /build/dev-root-test2
+mkdir -p dev bin sbin usr lib lib64 newroot
+mount -o bind /lib lib
+mount -o bind /lib64 lib64
+mount -o bind /bin bin
+mount -o bind /sbin sbin
+mount -o bind /usr usr
+mount -t devtmpfs none dev
+chroot .
+
+=========================
+
+
+
+*/
 
 int main() {
 
-    // mount -o rw -t vfat /dev/mmcblk0p1 /fat
-    // mount -o loop -t squashfs /fat/root.squashfs /root
-    // switch_root  new_root:/root old_root:/mnt
+  char * asdfasdf = (char*)0x10000;
+  printf("ASDFASDF %s\n", asdfasdf);
+
+  //loopback_setup('')
+
+    // mount -o rw -t vfat /dev/mmcblk0p1 fat
+    // mount -o loop -t squashfs /fat/root.squashfs newroot
+    // switch_root  new_root:/newroot old_root:/mnt
     // exec /init
 }

@@ -77,3 +77,6 @@ make O=/build/root-dev/ busybox-update-config
 make O=/build/root-dev/ uclibc-menuconfig
 make O=/build/root-dev/ uclibc-update-config
 
+make O=/build/root-dev/ all
+
+
