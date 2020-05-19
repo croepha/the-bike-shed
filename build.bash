@@ -67,4 +67,5 @@ if [ $SHOULD_CLEAN != 0 ]; then {
 
 ninja -f /build/build.ninja | cat
 
-/build/helloworld.exec
+#/build/helloworld.exec
+bash mount_squash_root_test.bash

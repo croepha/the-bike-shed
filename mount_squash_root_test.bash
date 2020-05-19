@@ -2,7 +2,7 @@ set -eEuo pipefail
 
 cd /build/dev-root-test2/ || true
 umount proc/  || true
-rm -rvf /build/dev-root-test2/
+rm -rf /build/dev-root-test2/
 mkdir /build/dev-root-test2/
 cd /build/dev-root-test2/
 
