@@ -22,6 +22,14 @@
             "program": "${workspaceFolder}/build/shed.exec",
             "env": { "ASAN_OPTIONS": "detect_leaks=0", },
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "custom",
+            "name": "attach 5001",
+            "targetCreateCommands": ["target create /usr/sbin/chroot"],
+            "processCreateCommands": ["gdb-remote 127.0.0.1:5001"],
         }
+
     ]
 }

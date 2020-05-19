@@ -94,7 +94,7 @@ EOF
 # Extras:
 if false; then {
   yes | unminimize
-  apt install -y man apt-file
+  apt install -y man apt-file errno
   apt-file update
 }; fi
 

@@ -41,6 +41,7 @@ switch_root newroot init [arg...]
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mount.h>
+#include <assert.h>
 
 // TODO: Credit Landley
 
@@ -144,6 +145,11 @@ void perror_exit_raw(char *msg)
 
 #define FLAG(M) (FLAG_ ## M)
 
+
+int get_errno() {
+  return errno;
+}
+
 char toybuf[4096];
 // Perform requested operation on one device. Returns 1 if handled, 0 if error
 int loopback_setup(char *file, char *device_out, ssize_t device_out_size)
@@ -184,6 +190,9 @@ int loopback_setup(char *file, char *device_out, ssize_t device_out_size)
   if (!device) {
     int i;
     int cfd = open("/dev/loop-control", O_RDWR);
+    printf("FAIL?: %s\n", strerror(errno));
+    assert(cfd != -1);
+
 
     // We assume /dev is devtmpfs so device creation has no lag. Otherwise
     // just preallocate loop devices and stay within them.
@@ -197,7 +206,10 @@ int loopback_setup(char *file, char *device_out, ssize_t device_out_size)
     }
   }
 
+  assert(device);
+
   if (device) lfd = open(device, TT_openflags);
+
 
   // Stat the loop device to see if there's a current association.
   memset(loop, 0, sizeof(struct loop_info64));
@@ -231,12 +243,10 @@ int loopback_setup(char *file, char *device_out, ssize_t device_out_size)
 
     if (!f_path) perror_exit("file"); // already opened, but if deleted since...
     if (ioctl(lfd, LOOP_SET_FD, ffd)) {
-      free(f_path);
       if (racy && errno == EBUSY) return 1;
       perror_exit("%s=%s", device, file);
     }
     strncpy((char *)loop->lo_file_name, f_path, LO_NAME_SIZE);
-    free(f_path);
     loop->lo_offset = TT_o;
     loop->lo_sizelimit = TT_S;
     if (ioctl(lfd, LOOP_SET_STATUS64, loop)) perror_exit("%s=%s", device, file);
@@ -259,31 +269,13 @@ done:
   return 0;
 }
 
-/*
-
-mkdir -p /build/dev-root-test2
-cd /build/dev-root-test2
-mkdir -p dev bin sbin usr lib lib64 newroot
-mount -o bind /lib lib
-mount -o bind /lib64 lib64
-mount -o bind /bin bin
-mount -o bind /sbin sbin
-mount -o bind /usr usr
-mount -t devtmpfs none dev
-chroot .
-
-=========================
-
-
-
-*/
-
 int main() {
 
-  char * asdfasdf = (char*)0x10000;
-  printf("ASDFASDF %s\n", asdfasdf);
+  printf("ASDFASDF\n");
 
-  //loopback_setup('')
+  char loopback_dev[1024];
+  loopback_setup("/root-dev.squashfs", loopback_dev, sizeof loopback_dev);
+  printf("GOT LOOPBACK_DEV: %s\n", loopback_dev);
 
     // mount -o rw -t vfat /dev/mmcblk0p1 fat
     // mount -o loop -t squashfs /fat/root.squashfs newroot

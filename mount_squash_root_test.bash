@@ -1,14 +1,20 @@
 set -eEuo pipefail
+set -x
 
-cd /build/dev-root-test2/ || true
+losetup -D
+
+mkdir -p /build/dev-root-test2/
+cd /build/dev-root-test2/
 umount proc/  || true
-rm -rf /build/dev-root-test2/
-mkdir /build/dev-root-test2/
+umount dev/   || true
+rm -rf /build/dev-root-test2/*
 cd /build/dev-root-test2/
 
-mkdir -p lib64/ lib/ proc/ usr/bin
-cp /workspaces/the-bike-shed/build/root-dev.squashfs /build/mount_squash_root.exec .
+mkdir -p lib64/ lib/ proc/ usr/bin dev/
 mount -t proc none proc/
+mount -t devtmpfs dev2 dev/
+! findmnt dev/
+cp /workspaces/the-bike-shed/build/root-dev.squashfs /build/mount_squash_root.exec .
 
 cp /usr/bin/llvm-symbolizer-10 usr/bin
 
@@ -33,4 +39,11 @@ cp \
   lib64/
 
 #strace
-chroot . ./mount_squash_root.exec
+
+# lldb-server-10 g :5001 --  \
+exec \
+  /usr/sbin/chroot . ./mount_squash_root.exec
+
+
+#code --reuse-window --file-uri 'vscode://vadimcn.vscode-lldb/launch/config?{"type": "lldb","request": "custom","name": "attach 5001","targetCreateCommands": ["target create /usr/sbin/chroot"],"processCreateCommands": ["gdb-remote 127.0.0.1:5001"],}'
+
