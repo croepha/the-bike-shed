@@ -77,7 +77,8 @@ apt update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/shed.list -o APT::Get
 apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10 \
-        libncurses5-dev bzr cvs mercurial subversion unzip bc
+        libncurses5-dev bzr cvs mercurial subversion unzip bc \
+        dosfstools
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
