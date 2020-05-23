@@ -95,7 +95,8 @@ EOF
 # Extras:
 if false; then {
   yes | unminimize
-  apt install -y man apt-file errno
+  apt install -y man apt-file errno \
+    iproute2 iputils-ping telnet
   apt-file update
 }; fi
 
