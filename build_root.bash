@@ -8,6 +8,13 @@ exit
 #  make menuconfig ... update all the def config options
 #  then do all the saveconfigs...
 
+"
+TODO:
+ - Disable serial port in inittab
+ - Remove logging daemon?
+
+
+"
 
 apt install -y cpio rsync sudo ccache
 useradd notroot
