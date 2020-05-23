@@ -2,39 +2,35 @@ echo "Not ready for general consumption, enter at your own risk"
 exit
 
 apt install -y cpio rsync sudo ccache
-useradd notroot
+
+export FORCE_UNSAFE_CONFIGURE=1
 
 mkdir -p /build/root
-chown -R notroot /build /workspaces
-sudo -u notroot bash
 cd /build/root
 
-wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-2020.05-rc1.tar.gz
-tar xvf buildroot.tar.gz
-mv /build/root/buildroot-2020.05-rc1/{.,}* /build/root/
-rmdir /build/root/buildroot-2020.05-rc1
+BR_VERSION=2020.02.2
+wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
+tar xvf buildroot.tar.gz --strip-components=1
+
 
 make clean
 make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
 make all
 
-BR2_PACKAGE_BUSYBOX_CONFIG
-
-sudo -u notroot bash
-cd /build/root
 make menuconfig
-make savedefconfig
-
-BR2_LINUX_KERNEL_DEFCONFIG
-
 make linux-menuconfig
-make linux-update-defconfig
-
 make busybox-menuconfig
-make busybox-update-config
-
 make uclibc-menuconfig
-make uclibc-update-config
+
+(
+    set -eEuo pipefail
+    make savedefconfig
+    make linux-update-defconfig
+    make busybox-update-config
+    make uclibc-update-config
+)
+
+
 
 
 chown -R notroot /build /workspaces
@@ -86,6 +82,7 @@ exit
 
 "
 TODO:
+ - Add curl/libcurl
  - Maybe switch to using IWD?
  - busybox dns?
  - allow dhcp
@@ -96,12 +93,26 @@ TODO:
  - Remove logging daemon?
 "
 
+
+cat << EOF > physical/autoexec.sh
+#!/bin/sh
+
+ip link set dev eth0 up
+ip addr add 192.168.4.30/24 dev eth0
+ip route add default via 192.168.4.1
+
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+# TODO: wpa_cli -a ....
+
+
 while true; do {
     echo -e "\n\n\n\n\n"
     ip a
     sleep 5
 }; done
 
+EOF
+chmod +x physical/autoexec.sh
 
 
 ln -sf /mnt/physical/wpa_supplicant.conf  etc/wpa_supplicant.conf
@@ -118,38 +129,7 @@ network={
 }
 EOF
 
-ln -sf /mnt/physical/network_interfaces  etc/network/interfaces
-
-cat << EOF > physical/network_interfaces
-auto lo
-iface lo inet loopback
-
-auto eth0
-iface eth0 inet static
-    address 192.168.4.30/24
-    gateway 192.168.4.1
-EOF
-#     post-up echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
-
 cat << EOF > root/etc/inittab
-
-# /etc/inittab
-#
-# Copyright (C) 2001 Erik Andersen <andersen@codepoet.org>
-#
-# Note: BusyBox init doesn't support runlevels.  The runlevels field is
-# completely ignored by BusyBox init. If you want runlevels, use
-# sysvinit.
-#
-# Format for each entry: <id>:<runlevels>:<action>:<process>
-#
-# id        == tty to run on, or empty for /dev/console
-# runlevels == ignored
-# action    == one of sysinit, respawn, askfirst, wait, and once
-# process   == program to run
-
-# Startup the system
 ::sysinit:/bin/mount -t proc proc /proc
 ::sysinit:/bin/mount -o remount,rw /
 ::sysinit:/bin/mkdir -p /dev/pts /dev/shm
@@ -165,7 +145,8 @@ null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 
 # Put a getty on the serial port
 console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
-tty1::respawn:/sbin/getty -L  tty1 0 vt100 # HDMI console
+tty1::respawn:sh /mnt/physical/autoexec.sh
+tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 
 # Stuff to do for the 3-finger salute
 #::ctrlaltdel:/sbin/reboot
@@ -174,6 +155,6 @@ tty1::respawn:/sbin/getty -L  tty1 0 vt100 # HDMI console
 ::shutdown:/etc/init.d/rcK
 ::shutdown:/sbin/swapoff -a
 ::shutdown:/bin/umount -a -r
-
+EOF
 
 

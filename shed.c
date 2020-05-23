@@ -1,6 +1,5 @@
 
 
-#include <bits/types/struct_iovec.h>
 #define LOG(fmt, ...) printf("%s:%s:%d:" fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 #define DEBUG(fmt, ...) LOG("DEBUG:" fmt, ##__VA_ARGS__)
 #define ERROR(fmt, ...) LOG("ERROR:" fmt, ##__VA_ARGS__)
@@ -27,10 +26,11 @@ typedef   signed long  s64;
 #include <sys/types.h>
 #include <assert.h>
 #include <netdb.h>
+#include <stddef.h>
 
 
 
-const u16 PEER_PORT = 5423; // TODO: What port number should we use?
+const u16 PEER_PORT = 9162; // TODO: What port number should we use?
 
 u64 time_ms_fast() {
     struct timespec tp;
@@ -45,8 +45,18 @@ enum {
     EVENT_TYPE_PEER,
 };
 
+int peer_fd;
+
+void send_udp(struct sockaddr_in peer_address, u8*_buf, u32 _buf_size) { int r;
+    r = sendto(peer_fd, _buf, _buf_size, 0, (struct sockaddr*)&peer_address, sizeof peer_address);
+    assert(r == _buf_size);
+}
+
 int main() {
-    DEBUG("Started");
+    setbuf(stdout, 0);
+    setbuf(stderr, 0);
+
+    DEBUG("Starting");
 
     int ep_fd = epoll_create1(EPOLL_CLOEXEC);
     assert(ep_fd != -1);
@@ -56,7 +66,7 @@ int main() {
     u64 next_timer_ms = time_ms_fast() + 1000; // Set a timer to go off 1 second from now
 
     // Setup the peer-to-peer socket...
-    int peer_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    peer_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
     assert(peer_fd >= 0);
     struct sockaddr_in bind_addr = { .sin_family=AF_INET, .sin_port=htons(PEER_PORT), {.s_addr=INADDR_ANY}};
     int bind_ret = bind(peer_fd, (struct sockaddr*)&bind_addr, sizeof bind_addr);
@@ -64,6 +74,8 @@ int main() {
     struct epoll_event ep_ctle = { .events=EPOLLIN, {.u64=EVENT_TYPE_PEER } };
     int r1 = epoll_ctl(ep_fd, EPOLL_CTL_ADD, peer_fd, &ep_ctle);
     assert(r1 == 0);
+
+    DEBUG("Started");
 
     for(;;) {
         struct epoll_event ep_event = {};
@@ -95,6 +107,9 @@ int main() {
                 peer_address_str, sizeof peer_address_str, 0,0,0 );
             peer_address_str[sizeof peer_address-1] = 0;
             DEBUG("Got a UDP packet of size %zd from %s: %08lx", buffer_len, peer_address_str, *(u64*)buffer);
+
+            u8 _buf[1024] = "some response";
+            send_udp(peer_address, _buf, sizeof _buf);
 
         } else {// Timeout
             DEBUG("Timer fired...");

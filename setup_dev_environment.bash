@@ -78,7 +78,7 @@ apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10 \
         libncurses5-dev bzr cvs mercurial subversion unzip bc \
-        dosfstools
+        dosfstools nginx
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
@@ -91,12 +91,22 @@ cat << EOF >> ~/.ssh/known_hosts
 github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 EOF
 
+cat << EOF > /etc/nginx/sites-enabled/default
+server {
+      listen 9160;
+      root /;
+      autoindex on;
+}
+EOF
+#   dav_methods PUT DELETE MKCOL COPY MOVE;
+
+# in.tftpd -lca 0.0.0.0:9161 /
 
 # Extras:
 if false; then {
   yes | unminimize
   apt install -y man apt-file errno \
-    iproute2 iputils-ping telnet
+    iproute2 iputils-ping telnet socat
   apt-file update
 }; fi
 

@@ -58,7 +58,8 @@ int main(int argc, char**argv) { int r;
   printf("ASDFASDF\n");
 
   // mount -o rw -t argv[1] argv[2] /phsyical
-  r = mount(phsyical_dev, "/physical", phsyical_fstype, MS_LAZYTIME | MS_NOATIME, 0);
+  // TODO??: MS_LAZYTIME
+  r = mount(phsyical_dev, "/physical", phsyical_fstype, MS_NOATIME, 0);
   assert(!r);
 
   // TODO: Why not actually specify the loop device?
@@ -79,7 +80,8 @@ int main(int argc, char**argv) { int r;
   r = ioctl(loop0, LOOP_SET_FD, squash_fd);
   assert(!r);
 
-  r = mount("/dev/loop0", "/newroot", "squashfs", MS_LAZYTIME | MS_NOATIME | MS_RDONLY, 0);
+  // TODO??: MS_LAZYTIME
+  r = mount("/dev/loop0", "/newroot", "squashfs", MS_NOATIME | MS_RDONLY, 0);
   assert(!r);
 
   r = chdir("/newroot");
@@ -120,3 +122,4 @@ int main(int argc, char**argv) { int r;
     // switch_root  new_root:/newroot old_root:/mnt
     // exec /init
 }
+

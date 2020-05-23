@@ -46,8 +46,8 @@
 	// Uncomment the next line to run commands after the container is created - for example installing git.
 	// "postCreateCommand": "apt-get update && apt-get install -y git",
 
-	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
-	"runArgs": [ "--privileged", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust # , "--network=host"
+	"runArgs": [ "--privileged", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
 
 	// Uncomment to use the Docker CLI from inside the container. See https://aka.ms/vscode-remote/samples/docker-in-docker.
 	// "mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
