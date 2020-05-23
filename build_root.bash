@@ -86,7 +86,9 @@ exit
 
 "
 TODO:
+ - Maybe switch to using IWD?
  - busybox dns?
+ - allow dhcp
  - Add nano (from busybox???)
  - Set static IP
  - TODO output IP Address
@@ -126,8 +128,8 @@ auto eth0
 iface eth0 inet static
     address 192.168.4.30/24
     gateway 192.168.4.1
-    post-up echo "
 EOF
+#     post-up echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 
 cat << EOF > root/etc/inittab
