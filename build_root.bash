@@ -43,33 +43,49 @@ function build_remote() ($_F
     _w=/workspaces/the-bike-shed/
     _o=$_w/build/
 
-    ssh super1 'touch /build/$VARIANT-full_build.working'
+    ssh super1 'touch /build/'$VARIANT'-full_build.working'
 
     scp $_w/build_root.bash super1:/build/
     ssh super1 tmux new-window -d \
         'bash /build/build_root.bash VARIANT='$VARIANT' full_build'
 
-    while ssh super1 '[ -e /build/$VARIANT-full_build.working ]'; do {
+    while ssh super1 '[ -e /build/'$VARIANT'-full_build.working ]'; do {
         echo "waiting"
         sleep 20
     }; done
-    scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_o
+    scp super1:$_o/$VARIANT-rootfs.squashfs.xz $_o
     [[ ! "$VARIANT" =~ "host" ]] &&
-    scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_o
-    scp -v super1:$_o/$VARIANT-host.tar.xz        $_o
+    scp super1:$_o/$VARIANT-sdcard.img.xz      $_o
+    scp super1:$_o/$VARIANT-host.tar.xz        $_o
+
+    unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
+    [[ ! "$VARIANT" =~ "host" ]] &&
+    unxz -fv $_o/$VARIANT-sdcard.img.xz
 
     _h=/build/$VARIANT-host/
     rm -rvf    $_h
     mkdir -p   $_h
-    tar xJv -C $_h -f $VARIANT-host.tar.xz
-    cp -v $_h/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
-          $_h/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
+    tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
+
+    if [[ "$VARIANT" =~ "host" ]]; then
+        _target=x86_64-buildroot-linux-uclibc
+    else
+        _target=arm-buildroot-linux-uclibcgnueabihf
+    fi
+    cp -v $_h/lib/gcc/$_target/8.4.0/{crtbeginT.o,crtend.o} \
+        $_h/$_target/sysroot/usr/lib/
 
 )
 
 eval "$@"
 
-read
+while true; do {
+    read
+    echo "pausing"
+    sleep 2
+}; done
+
+
 echo "Not ready for general consumption, enter at your own risk"
 exit -1
 
