@@ -3,8 +3,6 @@ exit
 
 apt install -y cpio rsync sudo ccache
 
-export FORCE_UNSAFE_CONFIGURE=1
-
 mkdir -p /build/root
 cd /build/root
 
@@ -13,24 +11,70 @@ wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.t
 tar xvf buildroot.tar.gz --strip-components=1
 
 
-make clean
-make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/root.config
+export FORCE_UNSAFE_CONFIGURE=1
+export GIT_DIR=/workspaces/the-bike-shed/.git
+
+function make() {
+    /usr/bin/make -C /build/root O=/build/root$VARIANT "$@"
+}
+
+function full_build() {
+    make clean
+    make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
+    make all
+}
+
+function save_configs() {
+    make savedefconfig
+    make linux-update-defconfig
+    make busybox-update-config
+    make uclibc-update-config
+}
+
+function compress_release() {
+    _i=/build/root$VARIANT/images/
+    _o=/workspaces/the-bike-shed/build/
+    mkdir -p $_o
+    cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
+    cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
+    xz --best --extreme -v $_o/$VARIANT-rootfs.squashfs
+    xz --best --extreme -v $_o/$VARIANT-sdcard.img
+}
+
+VARIANT="pi0w-dev"
+make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
+make linux-configure
+make busybox-configure
+make uclibc-configure
+
+VARIANT="pi1-dev"
+make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
+make linux-configure &&
+make busybox-configure &&
+make uclibc-configure
+
+VARIANT="host-dev"
+make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
+make linux-configure
+make busybox-configure
+make uclibc-configure
+
+save_configs
+
 make all
+
+
+
+VARIANT="pi1-dev"
+VARIANT="host-dev"
+VARIANT="pi0w-dev"
 
 make menuconfig
 make linux-menuconfig
 make busybox-menuconfig
 make uclibc-menuconfig
-
-(
-    set -eEuo pipefail
-    make savedefconfig
-    make linux-update-defconfig
-    make busybox-update-config
-    make uclibc-update-config
-)
-
-
+save_configs
+full_build
 
 
 chown -R notroot /build /workspaces
