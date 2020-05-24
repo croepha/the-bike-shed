@@ -60,8 +60,22 @@ make busybox-configure
 make uclibc-configure
 
 save_configs
-
 make all
+
+
+_o=/workspaces/the-bike-shed/build/
+_b=~/the-bike-shed/build/
+VARIANT="pi0w-dev"
+scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+
+VARIANT="pi1-dev"
+scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+
+VARIANT="host-dev"
+scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
 
 
 
