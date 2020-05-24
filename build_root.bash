@@ -1,16 +1,3 @@
-echo "Not ready for general consumption, enter at your own risk"
-exit
-
-apt install -y cpio rsync sudo ccache
-
-mkdir -p /build/root
-cd /build/root
-
-BR_VERSION=2020.02.2
-wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
-tar xvf buildroot.tar.gz --strip-components=1
-
-
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_DIR=/workspaces/the-bike-shed/.git
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
@@ -37,8 +24,10 @@ function full_build() ($_F
     mkdir -p                  $_o
     cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
     xz                        $_o/$VARIANT-rootfs.squashfs
-    cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
-    xz                        $_o/$VARIANT-sdcard.img
+    [[ ! "$VARIANT" =~ "host" ]] && {
+        cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
+        xz                        $_o/$VARIANT-sdcard.img
+    }
     tar cJv -C $_b/host . -f  $_o/$VARIANT-host.tar.xz
     rm -f /build/$VARIANT-full_build.working
 )
@@ -50,36 +39,63 @@ function save_configs() ($_F
     make uclibc-update-config
 )
 
+function build_remote() ($_F
+    _w=/workspaces/the-bike-shed/
+    _o=$_w/build/
+
+    ssh super1 'touch /build/$VARIANT-full_build.working'
+
+    scp $_w/build_root.bash super1:/build/
+    ssh super1 tmux new-window -d \
+        'bash /build/build_root.bash VARIANT='$VARIANT' full_build'
+
+    while ssh super1 '[ -e /build/$VARIANT-full_build.working ]'; do {
+        echo "waiting"
+        sleep 20
+    }; done
+    scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_o
+    [[ ! "$VARIANT" =~ "host" ]] &&
+    scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_o
+    scp -v super1:$_o/$VARIANT-host.tar.xz        $_o
+
+    _h=/build/$VARIANT-host/
+    rm -rvf    $_h
+    mkdir -p   $_h
+    tar xJv -C $_h -f $VARIANT-host.tar.xz
+    cp -v $_h/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
+          $_h/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
+
+)
+
+eval "$@"
+
+read
+echo "Not ready for general consumption, enter at your own risk"
+exit -1
+
+function setup() ($_F
+    echo "Not ready for general consumption, enter at your own risk"
+    exit -1
+
+    apt install -y cpio rsync sudo ccache
+
+    mkdir -p /build/root
+    cd /build/root
+
+    BR_VERSION=2020.02.2
+    wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
+    tar xvf buildroot.tar.gz --strip-components=1
+
+)
+
+
 
 VARIANT="pi0w-dev"
 VARIANT="pi1-dev"
-VARIANT="pi1-dev"
-
-# on mac
 VARIANT="pi0w-dev"
 _w=/workspaces/the-bike-shed/
 _o=$_w/build/
-_b=~/the-bike-shed/build/
 
-
-# scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-# scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
-scp -v super1:$_o/$VARIANT-host.tar.xz      $_b
-# inside container:
-rm -rvf /build/pi0w-dev-host/
-mkdir -p /build/pi0w-dev-host/
-tar xJvf pi0w-dev-host.tar.xz -C /build/pi0w-dev-host/
-cp -v /build/pi0w-dev-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
-  /build/pi0w-dev-host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
-
-
-VARIANT="pi1-dev"
-scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
-
-VARIANT="host-dev"
-scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
 
 
 
