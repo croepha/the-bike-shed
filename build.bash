@@ -1,9 +1,6 @@
 set -eEuo pipefail
 source /etc/profile
 
-# cp -v /build/pi0w-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
-#   /build/pi0w-host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
-
 if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0
 }; fi
@@ -54,13 +51,17 @@ link_exec  mount_squash_root
 #  --sysroot=/build/root/pi0_usr_include/output/staging/
 
 # PI0W Debug version
-# cat << EOF >> /build/build.ninja
-# build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
-#   extra = --sysroot=/build/pi0w-host/arm-buildroot-linux-uclibcgnueabihf/sysroot -target arm-linux-gnueabihf -O0 -gfull
+host_dir="/build/pi0w-dev-host/"
+host_lib="$host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
+sysroot="$host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
+common="--sysroot=$sysroot -target arm-linux-gnueabihf"
+cat << EOF >> /build/build.ninja
+build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
+  extra = $common -O0 -gfull
 
-# build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_root.pi0devstatic.c.o
-#   extra = --sysroot=/build/pi0w-host/arm-buildroot-linux-uclibcgnueabihf/sysroot -L /build/pi0w-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/ -target arm-linux-gnueabihf -fuse-ld=lld -static
-# EOF
+build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_root.pi0devstatic.c.o
+  extra = $common -L $host_lib -fuse-ld=lld -static
+EOF
 
 # output/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
 
@@ -84,5 +85,4 @@ ninja -f /build/build.ninja | cat
 
 #/build/helloworld.exec
 # bash mount_squash_root_test.bash
-
-bash shed_test_udp.bash
+# bash shed_test_udp.bash

@@ -13,6 +13,7 @@ tar xvf buildroot.tar.gz --strip-components=1
 
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_DIR=/workspaces/the-bike-shed/.git
+export GIT_WORK_TREE=/workspaces/the-bike-shed/
 
 function make() {
     /usr/bin/make -C /build/root O=/build/root$VARIANT "$@"
@@ -62,12 +63,25 @@ make uclibc-configure
 save_configs
 make all
 
+VARIANT="pi0w-dev"
+VARIANT="pi1-dev"
+XZ_OPT="-9e --threads=0 -v" tar cJvf $_o/$VARIANT-host.tar.xz -C /build/root$VARIANT/host .
 
+
+# on mac
 _o=/workspaces/the-bike-shed/build/
 _b=~/the-bike-shed/build/
 VARIANT="pi0w-dev"
-scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+# scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+# scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+scp -v super1:$_o/$VARIANT-host.tar.xz      $_b
+# inside container:
+rm -rvf /build/pi0w-dev-host/
+mkdir -p /build/pi0w-dev-host/
+tar xJvf pi0w-dev-host.tar.xz -C /build/pi0w-dev-host/
+cp -v /build/pi0w-dev-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
+  /build/pi0w-dev-host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
+
 
 VARIANT="pi1-dev"
 scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
@@ -198,7 +212,7 @@ null::sysinit:/bin/ln -sf /proc/self/fd/0 /dev/stdin
 null::sysinit:/bin/ln -sf /proc/self/fd/1 /dev/stdout
 null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 ::sysinit:/bin/hostname -F /etc/hostname
-# now run any rc scripts
+# now run any rc s$commonipts
 ::sysinit:/etc/init.d/rcS
 
 # Put a getty on the serial port

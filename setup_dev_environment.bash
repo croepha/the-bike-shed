@@ -96,6 +96,7 @@ server {
       listen 9160;
       root /;
       autoindex on;
+      dav_methods PUT DELETE MKCOL COPY MOVE;
 }
 EOF
 #   dav_methods PUT DELETE MKCOL COPY MOVE;
