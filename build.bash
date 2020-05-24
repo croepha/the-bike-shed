@@ -1,6 +1,15 @@
 set -eEuo pipefail
 source /etc/profile
 
+# function _default() {_varname=$1; _default_value=$2;
+#     eval '
+#     if [ ! -v '$_varname' ]; then {
+#         '$_varname'="'$_default_value'"
+#     }; fi
+#     '
+# }
+
+
 if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0
 }; fi
@@ -54,7 +63,8 @@ link_exec  mount_squash_root
 host_dir="/build/pi0w-dev-host/"
 host_lib="$host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
 sysroot="$host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
-common="--sysroot=$sysroot -target arm-linux-gnueabihf"
+common="--sysroot=$sysroot -target arm-linux-gnueabihf -mfloat-abi=hard -mcpu=arm1176jzf-s -mfpu=vfpv2"
+
 cat << EOF >> /build/build.ninja
 build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
   extra = $common -O0 -gfull

@@ -14,33 +14,76 @@ tar xvf buildroot.tar.gz --strip-components=1
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_DIR=/workspaces/the-bike-shed/.git
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
+export XZ_OPT="-9e --threads=0 -v"
+export _F="set -eEuo pipefail"
 
-function make() {
+function make() ($_F
     /usr/bin/make -C /build/root O=/build/root$VARIANT "$@"
-}
+)
 
-function full_build() {
-    make clean
-    make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
+function full_build() ($_F
+    _b=/build/root$VARIANT/
+    _w=/workspaces/the-bike-shed/
+    _i=$_b/images/
+    _o=$_w/build/
+
+    if [[ "( "$@" )" =~ " clean " ]]; then
+        make clean
+        make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
+    fi
+
     make all
-}
+    rm -vf                    $_o/$VARIANT-*
+    mkdir -p                  $_o
+    cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
+    xz                        $_o/$VARIANT-rootfs.squashfs
+    cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
+    xz                        $_o/$VARIANT-sdcard.img
+    tar cJv -C $_b/host . -f  $_o/$VARIANT-host.tar.xz
+    rm -f /build/$VARIANT-full_build.working
+)
 
-function save_configs() {
+function save_configs() ($_F
     make savedefconfig
     make linux-update-defconfig
     make busybox-update-config
     make uclibc-update-config
-}
+)
 
-function compress_release() {
-    _i=/build/root$VARIANT/images/
-    _o=/workspaces/the-bike-shed/build/
-    mkdir -p $_o
-    cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
-    cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
-    xz --best --extreme -v $_o/$VARIANT-rootfs.squashfs
-    xz --best --extreme -v $_o/$VARIANT-sdcard.img
-}
+
+VARIANT="pi0w-dev"
+VARIANT="pi1-dev"
+VARIANT="pi1-dev"
+
+# on mac
+VARIANT="pi0w-dev"
+_w=/workspaces/the-bike-shed/
+_o=$_w/build/
+_b=~/the-bike-shed/build/
+
+
+# scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+# scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+scp -v super1:$_o/$VARIANT-host.tar.xz      $_b
+# inside container:
+rm -rvf /build/pi0w-dev-host/
+mkdir -p /build/pi0w-dev-host/
+tar xJvf pi0w-dev-host.tar.xz -C /build/pi0w-dev-host/
+cp -v /build/pi0w-dev-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
+  /build/pi0w-dev-host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
+
+
+VARIANT="pi1-dev"
+scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+
+VARIANT="host-dev"
+scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
+scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
+
+
+
+
 
 VARIANT="pi0w-dev"
 make defconfig BR2_DEFCONFIG=/workspaces/the-bike-shed/$VARIANT-root.config
@@ -63,33 +106,6 @@ make uclibc-configure
 save_configs
 make all
 
-VARIANT="pi0w-dev"
-VARIANT="pi1-dev"
-XZ_OPT="-9e --threads=0 -v" tar cJvf $_o/$VARIANT-host.tar.xz -C /build/root$VARIANT/host .
-
-
-# on mac
-_o=/workspaces/the-bike-shed/build/
-_b=~/the-bike-shed/build/
-VARIANT="pi0w-dev"
-# scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-# scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
-scp -v super1:$_o/$VARIANT-host.tar.xz      $_b
-# inside container:
-rm -rvf /build/pi0w-dev-host/
-mkdir -p /build/pi0w-dev-host/
-tar xJvf pi0w-dev-host.tar.xz -C /build/pi0w-dev-host/
-cp -v /build/pi0w-dev-host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/{crtbeginT.o,crtend.o} \
-  /build/pi0w-dev-host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/lib/
-
-
-VARIANT="pi1-dev"
-scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
-
-VARIANT="host-dev"
-scp -v super1:$_o/$VARIANT-rootfs.squashfs.xz $_b
-scp -v super1:$_o/$VARIANT-sdcard.img.xz      $_b
 
 
 
