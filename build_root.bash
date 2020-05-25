@@ -105,10 +105,19 @@ function setup() ($_F
 )
 
 
+VARIANT="pi0w-dev" bash build_root.bash build_remote clean
+VARIANT="pi1-dev" bash build_root.bash build_remote clean
+VARIANT="host-dev" bash build_root.bash build_remote clean
+
 
 VARIANT="pi0w-dev"
+save_configs  &
 VARIANT="pi1-dev"
+save_configs &
 VARIANT="pi0w-dev"
+save_configs &
+
+
 _w=/workspaces/the-bike-shed/
 _o=$_w/build/
 
@@ -139,6 +148,9 @@ save_configs
 make all
 
 
+VARIANT="pi0w-dev"
+make linux-menuconfig
+make menuconfig
 
 
 VARIANT="pi1-dev"
@@ -234,10 +246,37 @@ while true; do {
 EOF
 chmod +x physical/autoexec.sh
 
-
 ln -sf /mnt/physical/wpa_supplicant.conf  etc/wpa_supplicant.conf
 
-cat << EOF > physical/wpa_supplicant.conf
+
+
+losetup -D
+losetup -f --show -P /workspaces/the-bike-shed/build/pi0w-dev-sdcard.img
+mount /dev/loop0p2 /mnt
+cd /mnt
+
+cat << EOF > autoexec.sh
+#!/bin/sh
+
+dd if=/dev/hwrng of=/dev/random bs=2048 count=16 &
+ip link set dev wlan0 up
+ip addr add 192.168.4.31/24 dev wlan0
+ip route add default via 192.168.4.1
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+wpa_supplicant -B  -i wlan0 -c /etc/wpa_supplicant.conf
+
+# # TODO: wpa_cli -a ....
+
+while true; do {
+    echo -e "\n\n\n\n\n"
+    ip link
+    echo
+    ip addr
+    sleep 5
+}; done
+EOF
+
+cat << EOF > etc/wpa_supplicant.conf
 update_config=1
 ctrl_interface=/var/run/wpa_supplicant
 ap_scan=1
@@ -249,7 +288,7 @@ network={
 }
 EOF
 
-cat << EOF > root/etc/inittab
+cat << EOF > etc/inittab
 ::sysinit:/bin/mount -t proc proc /proc
 ::sysinit:/bin/mount -o remount,rw /
 ::sysinit:/bin/mkdir -p /dev/pts /dev/shm
@@ -259,13 +298,14 @@ null::sysinit:/bin/ln -sf /proc/self/fd /dev/fd
 null::sysinit:/bin/ln -sf /proc/self/fd/0 /dev/stdin
 null::sysinit:/bin/ln -sf /proc/self/fd/1 /dev/stdout
 null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
+::sysinit:/sbin/modprobe brcmfmac
 ::sysinit:/bin/hostname -F /etc/hostname
 # now run any rc s$commonipts
 ::sysinit:/etc/init.d/rcS
 
 # Put a getty on the serial port
 console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
-tty1::respawn:sh /mnt/physical/autoexec.sh
+tty1::respawn:sh /autoexec.sh
 tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 
 # Stuff to do for the 3-finger salute
@@ -277,4 +317,10 @@ tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 ::shutdown:/bin/umount -a -r
 EOF
 
+cd
+umount /mnt
+losetup -D
 
+# From mac:
+sudo dd if=/Users/streaming/the-bike-shed/build/pi0w-dev-sdcard.img \
+  of=/dev/disk2 bs=4098
