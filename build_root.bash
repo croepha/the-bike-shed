@@ -28,7 +28,8 @@ function full_build() ($_F
         cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
         xz                        $_o/$VARIANT-sdcard.img
     }
-    tar cJv -C $_b/host . -f  $_o/$VARIANT-host.tar.xz
+    tar cJv -C $_b/host    . -f  $_o/$VARIANT-host.tar.xz
+    tar cJv -C $_b/staging . -f  $_o/$VARIANT-staging.tar.xz
     rm -f /build/$VARIANT-full_build.working
 )
 
@@ -57,6 +58,7 @@ function build_remote() ($_F
     [[ ! "$VARIANT" =~ "host" ]] &&
     scp super1:$_o/$VARIANT-sdcard.img.xz      $_o
     scp super1:$_o/$VARIANT-host.tar.xz        $_o
+    scp super1:$_o/$VARIANT-staging.tar.xz     $_o
 
     unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
     [[ ! "$VARIANT" =~ "host" ]] &&
@@ -66,6 +68,11 @@ function build_remote() ($_F
     rm -rvf    $_h
     mkdir -p   $_h
     tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
+
+    _h=/build/$VARIANT-staging/
+    rm -rvf    $_h
+    mkdir -p   $_h
+    tar xJv -C $_h -f $_o/$VARIANT-staging.tar.xz
 
     if [[ "$VARIANT" =~ "host" ]]; then
         _target=x86_64-buildroot-linux-uclibc
