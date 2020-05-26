@@ -96,11 +96,21 @@ rule link_br_exec
 
 EOF
 cat << EOF >> /build/build.ninja
-build /build/hello_led.pi0dev.c.o: cc_br hello_led.c
-  extra = -O0 -g
+build /build/hello_led.pi0dev.c.o: cc hello_led.c
+  extra =  $common -O0 -gfull
 
 build /build/hello_led.pi0dev.exec: link_br_exec /build/hello_led.pi0dev.c.o
   extra =
+
+build /build/hello_lcd.pi0dev.c.o: cc hello_lcd.c
+  extra =  $common -O0 -gfull
+
+#build /build/hello_lcd.pi0dev.c.o: cc_br hello_lcd.c
+#  extra = -O0 -g
+
+build /build/hello_lcd.pi0dev.exec: link_br_exec /build/hello_lcd.pi0dev.c.o
+  extra =
+
 EOF
 
 
