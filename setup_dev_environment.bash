@@ -103,6 +103,107 @@ EOF
 
 # in.tftpd -lca 0.0.0.0:9161 /
 
+
+  # 757  ./install.sh
+  # 758  man git-fetch
+  # 759  git log
+  # 760  git show 'v3.3.2'
+  # 761  man git-fetch
+  # 762  ./install.sh
+  # 763  . ./export.
+  # 764  . ./export.sh
+  # 765  idf.py build
+  # 766  cd /tmp/
+  # 767  cp -r $IDF_PATH/examples/get-started/hello_world .
+  # 768  ls hello_world/
+  # 769  cd hello_world/
+  # 770  idf.py set-target esp32
+  # 771  ls
+  # 772  make menuconfig
+  # 773  make flash
+  # 774  make monitor
+  # 775  cat /build/esp-idf/tools/idf_monitor.py
+  # 776  less /build/esp-idf/tools/idf_monitor.py
+  # 777  ls
+  # 778  cd /build/esp-idf/
+  # 779  ls
+
+{
+make -n flash     | grep '^python /build/esp-idf/components/esptool_py/esptool/esptool.py'
+make -n app-flash | grep '^python /build/esp-idf/components/esptool_py/esptool/esptool.py'
+} | sort | uniq
+
+
+~/the-bike-shed/build/esp_venv/bin/esptool.py \
+  --chip esp32 --port "/dev/cu.SLAB_USBtoUART" \
+  --baud 115200 --before "default_reset" --after "hard_reset" \
+   write_flash -z --flash_mode "dio" --flash_freq "40m" --flash_size detect \
+     0x1000 $BUILD/bootloader.bin \
+     0x8000 $BUILD/partitions_singleapp.bin \
+    0x10000 $BUILD/hello-world.bin
+
+source ~/the-bike-shed/build/esp_venv/bin/activate
+function _esptool() {
+  ~/the-bike-shed/build/esp_venv/bin/esptool.py $1 \
+    --chip esp32 --flash_mode "dio" --flash_freq "40m" "${@:2}"
+}
+
+function _elf2image() {
+  _esptool elf2image --flash_size "2MB" \
+    --min-rev 0 "${@:2}"
+}
+
+function _write_flash() {
+  _esptool write_flash --port "/dev/cu.SLAB_USBtoUART" --baud 115200 --before "default_reset" \
+    --after "hard_reset" -z \
+    --flash_size detect "${@:2}" -o "$1" "$(echo $A | sed 's/\.bin$/\.elf/')"
+}
+
+BUILD=~/the-bike-shed/build
+_write_flash \
+     0x1000 $BUILD/bootloader.bin \
+     0x8000 $BUILD/partitions_singleapp.bin \
+    0x10000 $BUILD/hello-world.bin
+
+
+
+_elf2image $BUILD/hello-world.bin --elf-sha256-offset 0xb0
+_elf2image $BUILD/bootloader/bootloader.bin
+
+_write_flash \
+     0x1000 $BUILD/bootloader/bootloader.bin \
+     0x8000 $BUILD/partitions_singleapp.bin
+    0x10000 $BUILD/hello-world.bin
+
+_write_flash \
+    0x10000 $BUILD/hello-world.bin
+
+
+# ESP32 IDF:
+if false; then {
+  apt install -y git wget flex bison gperf python-is-python3 python3-pip python3-setuptools cmake \
+      ninja-build ccache libffi-dev libssl-dev dfu-util
+
+  export GIT_WORK_TREE=/build/esp-idf
+  export GIT_DIR=$GIT_WORK_TREE/.git
+  mkdir -p $GIT_WORK_TREE
+  git init
+  git config -f .gitmodules submodule.<name>.shallow true
+  git remote add origin https://github.com/espressif/esp-idf.git
+  git fetch --depth=1 --tags origin 'v3.3.2'
+  git checkout --recurse-submodules FETCH_HEAD
+  cd  $GIT_WORK_TREE
+  git submodule update --init --recursive --depth=1
+  ./install.sh
+
+  git clone --depth=1 --no-tags https://github.com/espressif/esp-idf.git
+
+}; fi
+
+
+
+
+
 # Extras:
 if false; then {
   yes | unminimize

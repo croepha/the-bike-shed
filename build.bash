@@ -111,6 +111,13 @@ build /build/hello_lcd.pi0dev.c.o: cc hello_lcd.c
 build /build/hello_lcd.pi0dev.exec: link_br_exec /build/hello_lcd.pi0dev.c.o
   extra =
 
+build /build/hello_lcd.pi0perf.c.o: cc hello_lcd.c
+  extra = -Ofast $common -O0 -gfull
+
+build /build/hello_lcd.pi0perf.exec: link_br_exec /build/hello_lcd.pi0perf.c.o
+  extra = -Ofast
+
+
 EOF
 
 

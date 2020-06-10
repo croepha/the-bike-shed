@@ -1,6 +1,6 @@
 export FORCE_UNSAFE_CONFIGURE=1
-export GIT_DIR=/workspaces/the-bike-shed/.git
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
+export GIT_DIR=$GIT_WORK_TREE/.git
 export XZ_OPT="-9e --threads=0 -v"
 export _F="set -eEuo pipefail"
 

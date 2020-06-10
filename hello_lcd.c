@@ -49,18 +49,14 @@ static const int LCD_LINE_1 = 0x80;
 static const int LCD_LINE_2 = 0xC0;
 static const int LCD_LINE_3 = 0x94;
 static const int LCD_LINE_4 = 0xD4;
-static const float E_PULSE = 0.0005;
-static const float E_DELAY = 0.0005;
+static const long E_PULSEus = 500;
+static const long E_DELAYus = 500;
 
 static const int True = 1;
 static const int False = 0;
 static const int GPIO_out = 123;
 
-void time_sleep(float s) {
-    usleep(s * 1000000);
-}
-
-
+void time_sleep_us(long us) { usleep(us); }
 
 void GPIO_output(int pin, int value) {
     if (value) {
@@ -110,11 +106,11 @@ void GPIO_setup(int pin, int mode) {
 
 void lcd_toggle_enable() {
   // Toggle enable
-  time_sleep(E_DELAY);
+  time_sleep_us(E_DELAYus);
   GPIO_output(LCD_E, True);
-  time_sleep(E_PULSE);
+  time_sleep_us(E_PULSEus);
   GPIO_output(LCD_E, False);
-  time_sleep(E_DELAY);
+  time_sleep_us(E_DELAYus);
 }
 
 static int const data_pins[] = {
@@ -126,29 +122,19 @@ int abit(int bits2, int n) {
   return v01 << data_pins[n];
 }
 
-// void __t(int bits2, int n) {
-//   int bit_mask = 1<<data_pins[n];
-//   GPIO_CLR = bit_mask & 0xffffffff;
-//   GPIO_SET = bit_mask & abit(bits2, n);
-// }
-
-// void send4bits(int bits) {
-//   #define _t(n) __t(bits, n)
-//   _t(0); _t(1); _t(2); _t(3);
-// }
 
 const int bits_mask =
-  1 << LCD_D4 &
-  1 << LCD_D5 &
-  1 << LCD_D6 &
+  1 << LCD_D4 |
+  1 << LCD_D5 |
+  1 << LCD_D6 |
   1 << LCD_D7;
 
 void send4bits(int bits) {
   #define _t(n) bits_values = bits_values | abit(bits, n)
   int bits_values = 0;
   _t(0); _t(1); _t(2); _t(3);
-   GPIO_CLR = bits_mask& 0xFFFFFFFF;
-   GPIO_SET = bits_mask& bits_values;
+  GPIO_CLR = bits_mask& 0xFFFFFFFF;
+  GPIO_SET = bits_mask& bits_values;
 }
 
 
@@ -239,7 +225,7 @@ void lcd_init() {
   lcd_byte(0x0C,LCD_CMD); // 0000 1100 Display On,Cursor Off, Blink Off
   lcd_byte(0x28,LCD_CMD); // 0010 1000 Data length, number of lines, font size
   lcd_byte(0x01,LCD_CMD); // 0000 0001 Clear display
-  time_sleep(E_DELAY);
+  time_sleep_us(E_DELAYus);
 }
 
 void lcd_string(char*message, int line) {
@@ -268,25 +254,28 @@ int main() {
 
   while(1) {
 
+    // Blank display
+    lcd_byte(0x01, LCD_CMD);
+
     // Send some centred test
     lcd_string("--------------------",LCD_LINE_1);
     lcd_string("Rasbperry Pi",LCD_LINE_2);
     lcd_string("Model B",LCD_LINE_3);
     lcd_string("--------------------",LCD_LINE_4);
 
-    time_sleep(3); // 3 second delay
+    time_sleep_us(1000000); // 3 second delay
+
+    // Blank display
+    lcd_byte(0x01, LCD_CMD);
 
     lcd_string("Raspberrypi-spy",LCD_LINE_1);
     lcd_string(".co.uk",LCD_LINE_2);
     lcd_string("",LCD_LINE_3);
     lcd_string("20x4 LCD Module Test",LCD_LINE_4);
 
-    time_sleep(3); // 20 second delay
+    time_sleep_us(1000000); // 20 second delay
 
-    // Blank display
-    lcd_byte(0x01, LCD_CMD);
 
-    time_sleep(3); // 3 second delay
   }
 }
 
