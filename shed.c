@@ -29,7 +29,6 @@ typedef   signed long  s64;
 #include <stddef.h>
 
 
-
 const u16 PEER_PORT = 9162; // TODO: What port number should we use?
 
 u64 time_ms_fast() {

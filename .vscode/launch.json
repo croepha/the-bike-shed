@@ -25,6 +25,14 @@
         },
         {
             "type": "lldb",
+            "request": "launch",
+            "name": "hello_serial",
+            "program": "/build/hello_serial.exec",
+            "env": { "ASAN_OPTIONS": "detect_leaks=0", },
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
             "request": "custom",
             "name": "attach 5001",
             "targetCreateCommands": ["target create /usr/sbin/chroot"],
