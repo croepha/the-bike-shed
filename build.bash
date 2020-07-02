@@ -30,6 +30,10 @@ rule link_exec
  command = clang $in -o $out $extra
  description = LINK $out
 
+rule re
+ command = re2c -W --tags $in -o $out
+ description = RE $out
+
 EOF
 
 function compile() {
@@ -46,6 +50,16 @@ build /build/$1.exec: link_exec $OBJ_FILES
   extra = -fuse-ld=lld -fsanitize=address  ${@:2}
 EOF
 }
+
+function re() {
+  c="/build/$1.re.c"
+cat << EOF >> /build/build.ninja
+build $c: re $1.re
+# build $c.o: cc $c
+#   extra = -O0 -gfull -fPIC -fsanitize=address ${@:2}
+EOF
+}
+
 # -target arm-unknown-linux-gnueabihf
 # -static
 
@@ -56,6 +70,16 @@ link_exec  helloworld
 OBJ_FILES=""
 compile    mount_squash_root
 link_exec  mount_squash_root
+
+OBJ_FILES=""
+compile    url_downloading
+link_exec  url_downloading -l curl -l crypto
+
+OBJ_FILES=""
+compile    log_testing
+link_exec  log_testing
+
+re string_parsing
 
 #  --sysroot=/build/root/pi0_usr_include/output/staging/
 
@@ -160,6 +184,8 @@ if [ $SHOULD_CLEAN != 0 ]; then {
 
 
 ninja -f /build/build.ninja | cat
+clang-check-10 -fixit --fix-what-you-can *.c
+
 
 #/build/helloworld.exec
 # bash mount_squash_root_test.bash

@@ -76,9 +76,9 @@ echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main" > /etc/apt/so
 apt update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/shed.list -o APT::Get::List-Cleanup="0"
 apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
-        ninja-build git clangd-10 clang-10 lld-10 lldb-10 \
+        ninja-build git clangd-10 clang-10 lld-10 lldb-10 clang-tools-10 \
         libncurses5-dev bzr cvs mercurial subversion unzip bc \
-        dosfstools nginx
+        dosfstools nginx libcurl4-openssl-dev
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
@@ -109,7 +109,6 @@ EOF
   --baud 115200 --before "default_reset" --after "hard_reset" \
    write_flash -z --flash_mode "dio" --flash_freq "40m" --flash_size detect \
     0x10000 $BUILD/hello-world.bin
-
      0x1000 $BUILD/bootloader.bin \
      0x8000 $BUILD/partitions_singleapp.bin \
 

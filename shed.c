@@ -1,5 +1,4 @@
 
-
 #define LOG(fmt, ...) printf("%s:%s:%d:" fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
 #define DEBUG(fmt, ...) LOG("DEBUG:" fmt, ##__VA_ARGS__)
 #define ERROR(fmt, ...) LOG("ERROR:" fmt, ##__VA_ARGS__)

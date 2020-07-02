@@ -34,8 +34,9 @@
         {
             "type": "lldb",
             "request": "custom",
+
             "name": "attach 5001",
-            "targetCreateCommands": ["target create /usr/sbin/chroot"],
+            "targetCreateCommands": ["target create /usr/bin/bash"],
             "processCreateCommands": ["gdb-remote 127.0.0.1:5001"],
         }
 
