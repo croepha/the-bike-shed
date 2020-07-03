@@ -73,13 +73,14 @@ link_exec  mount_squash_root
 
 OBJ_FILES=""
 compile    url_downloading
+compile    logging
 link_exec  url_downloading -l curl -l crypto
 
 OBJ_FILES=""
 compile    log_testing
 link_exec  log_testing
 
-re string_parsing
+re parse_headers
 
 #  --sysroot=/build/root/pi0_usr_include/output/staging/
 
@@ -190,3 +191,5 @@ clang-check-10 -fixit --fix-what-you-can *.c
 #/build/helloworld.exec
 # bash mount_squash_root_test.bash
 # bash shed_test_udp.bash
+
+
