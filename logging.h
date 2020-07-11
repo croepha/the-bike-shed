@@ -1,3 +1,4 @@
+#pragma once
 
 int  _log_context_push(char* fmt, ...) __attribute__((__format__ (__printf__, 1, 2)));
 void _log_context_pop(int*original_len);
@@ -11,7 +12,11 @@ void _log(const char* severity, const char*file, const char*func, int line, char
 #define LOG(severity, fmt, ...) _log(severity, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define INFO( fmt, ...) LOG("INFO ", fmt, ##__VA_ARGS__)
 #define DEBUG(fmt, ...) LOG("DEBUG", fmt, ##__VA_ARGS__)
+#ifdef ABORT_ON_ERROR
+#include <stdlib.h>
+#define ERROR(fmt, ...) { LOG("ERROR", fmt, ##__VA_ARGS__); abort(); }
+#define FATAL(fmt, ...) { LOG("FATAL", fmt, ##__VA_ARGS__); abort(); }
+#else
 #define ERROR(fmt, ...) LOG("ERROR", fmt, ##__VA_ARGS__)
 #define FATAL(fmt, ...) LOG("FATAL", fmt, ##__VA_ARGS__)
-
-
+#endif

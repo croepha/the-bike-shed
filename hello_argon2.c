@@ -1,108 +1,47 @@
 
 #include "argon2.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define HASHLEN 32
 #define PWD "password"
 
 
-#define UNUSED_PARAMETER(x) (void)(x)
-#define clear_internal_memory(a,b)
+// The point of all this is to try to make argon2 not use any dynamic memory
+static const uint32_t m_cost = (1<<17);
+uint8_t static_memory_buf[m_cost << 10];
+uint8_t static_memory_buf_in_use_debug;
 
-static void fatal(const char *error) {
-    fprintf(stderr, "Error: %s\n", error);
-    exit(1);
+static int allocate_memory(uint8_t **memory, size_t bytes_to_allocate) {
+    if (bytes_to_allocate == sizeof static_memory_buf && !static_memory_buf_in_use_debug) {
+        static_memory_buf_in_use_debug = 1;
+        *memory = static_memory_buf;
+    } else {
+        printf("ERROR: Could not use static memory, falling back to malloc bytes:%ld in_use:%c",
+            bytes_to_allocate, static_memory_buf_in_use_debug
+        );
+        assert(0);
+        *memory = malloc(bytes_to_allocate);
+    }
+    printf("allocate_memory: %p bytes:%ld\n", *memory, bytes_to_allocate);
+    return 0;
+}
+static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
+    if (memory == static_memory_buf) {
+        static_memory_buf_in_use_debug = 0;
+    } else {
+        free(memory);
+    }
+    printf("deallocate_memory: %p bytes:%ld\n", memory, bytes_to_allocate);
 }
 
-static void print_hex(uint8_t *bytes, size_t bytes_len) {
-    size_t i;
-    for (i = 0; i < bytes_len; ++i) {
-        printf("%02x", bytes[i]);
-    }
-    printf("\n");
-}
-
-/*
-Runs Argon2 with certain inputs and parameters, inputs not cleared. Prints the
-Base64-encoded hash string
-@out output array with at least 32 bytes allocated
-@pwd NULL-terminated string, presumably from argv[]
-@salt salt array
-@t_cost number of iterations
-@m_cost amount of requested memory in KB
-@lanes amount of requested parallelism
-@threads actual parallelism
-@type Argon2 type we want to run
-@encoded_only display only the encoded hash
-@raw_only display only the hexadecimal of the hash
-@version Argon2 version
-*/
-static void run(uint32_t outlen, char *pwd, size_t pwdlen, char *salt, uint32_t t_cost,
-                uint32_t m_cost, uint32_t lanes, uint32_t threads,
-                argon2_type type, int encoded_only, int raw_only, uint32_t version) {
-    size_t saltlen, encodedlen;
-    int result;
-    unsigned char * out = NULL;
-    char * encoded = NULL;
-
-
-    if (!pwd) {
-        fatal("password missing");
-    }
-
-    if (!salt) {
-        clear_internal_memory(pwd, pwdlen);
-        fatal("salt missing");
-    }
-
-    saltlen = strlen(salt);
-    if(UINT32_MAX < saltlen) {
-        fatal("salt is too long");
-    }
-
-    UNUSED_PARAMETER(lanes);
-
-    out = malloc(outlen + 1);
-    if (!out) {
-        clear_internal_memory(pwd, pwdlen);
-        fatal("could not allocate memory for output");
-    }
-
-    result = argon2_hash(t_cost, m_cost, threads, pwd, pwdlen, salt, saltlen,
-                         out, outlen, 0, 0, type,
-                         version);
-    if (result != ARGON2_OK)
-        fatal(argon2_error_message(result));
-
-    if (encoded_only)
-        puts(encoded);
-
-    if (raw_only)
-        print_hex(out, outlen);
-
-    if (encoded_only || raw_only) {
-        free(out);
-        free(encoded);
-        return;
-    }
-
-    printf("Hash:\t\t");
-    print_hex(out, outlen);
-    free(out);
-
-    result = argon2_verify(encoded, pwd, pwdlen, type);
-    if (result != ARGON2_OK)
-        fatal(argon2_error_message(result));
-    printf("Verification ok\n");
-    free(encoded);
-}
-
+char system_secret[32];
 
 int main2(void)
 {
-    uint8_t hash1[HASHLEN];
     uint8_t hash2[HASHLEN];
 
     uint8_t* salt = (uint8_t*)"somesalt";
@@ -112,11 +51,7 @@ int main2(void)
     uint32_t pwdlen = strlen((char *)pwd);
 
     uint32_t t_cost = 4;
-    uint32_t m_cost = (1<<17);
     uint32_t parallelism = 1;
-
-    // high-level API
-    argon2d_hash_raw(t_cost, m_cost, parallelism, pwd, pwdlen, salt, SALTLEN, hash1, HASHLEN);
 
     // low-level API
     argon2_context context = {
@@ -130,7 +65,7 @@ int main2(void)
         NULL, 0, /* optional associated data */
         t_cost, m_cost, parallelism, parallelism,
         ARGON2_VERSION_13, /* algorithm version */
-        NULL, NULL, /* custom memory allocation / deallocation functions */
+        allocate_memory, deallocate_memory, /* custom memory allocation / deallocation functions */
         /* by default only internal memory is cleared (pwd is not wiped) */
         ARGON2_DEFAULT_FLAGS
     };
@@ -142,19 +77,13 @@ int main2(void)
     }
     free(pwd);
 
-    for( int i=0; i<HASHLEN; ++i ) printf( "%02x", hash1[i] ); printf( "\n" );
-    if (memcmp(hash1, hash2, HASHLEN)) {
-        for( int i=0; i<HASHLEN; ++i ) {
-            printf( "%02x", hash2[i] );
-        }
-        printf("\nfail\n");
-    }
-    else printf("ok\n");
+    for( int i=0; i<HASHLEN; ++i ) printf( "%02x", hash2[i] ); printf( "\n" );
     return 0;
 }
 
 
 int main () {
+    setbuf(stdout, 0);
 #if 1
     return main2();
 #else

@@ -37,17 +37,34 @@ rule re
 EOF
 
 function compile() {
+O="/build/$1.c.dbg.o"
 cat << EOF >> /build/build.ninja
-build /build/$1.c.o: cc $1.c
-  extra = -O0 -gfull -fPIC -fsanitize=address ${@:2}
+build $O: cc $1.c
+  extra = -gfull -fPIC -O0 -fsanitize=address -D ABORT_ON_ERROR ${@:2}
 EOF
-OBJ_FILES="$OBJ_FILES /build/$1.c.o"
+DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
+
+O="/build/$1.c.fast.o"
+cat << EOF >> /build/build.ninja
+build $O: cc $1.c
+  extra = -gfull -fPIC -Ofast -flto=thin -march=native  ${@:2}
+EOF
+FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
+}
+
+function depends_on() {
+O="/build/$1.c.dbg.o"
+DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
+O="/build/$1.c.fast.o"
+FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
 }
 
 function link_exec() {
 cat << EOF >> /build/build.ninja
-build /build/$1.exec: link_exec $OBJ_FILES
-  extra = -fuse-ld=lld -fsanitize=address  ${@:2}
+build /build/$1.dbg.exec: link_exec $DBG_OBJ_FILES
+  extra = -gfull -fuse-ld=lld -fsanitize=address  ${@:2}
+build /build/$1.fast.exec: link_exec $FAST_OBJ_FILES
+  extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
 EOF
 }
 
@@ -63,22 +80,46 @@ EOF
 # -target arm-unknown-linux-gnueabihf
 # -static
 
-OBJ_FILES=""
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
-OBJ_FILES=""
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile    mount_squash_root
 link_exec  mount_squash_root
 
-OBJ_FILES=""
-compile    url_downloading
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile    logging
+LOGGING_DBG_OBJ=$DBG_OBJ_FILES
+LOGGING_FAST_OBJ=$FAST_OBJ_FILES
+compile    url_downloading
 link_exec  url_downloading -l curl -l crypto
 
-OBJ_FILES=""
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile    log_testing
 link_exec  log_testing
+
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
+compile argon2/opt       -Iargon2
+compile argon2/encoding  -Iargon2
+compile argon2/thread    -Iargon2
+compile argon2/blake2b   -Iargon2
+compile argon2/core      -Iargon2
+compile argon2/argon2    -Iargon2
+compile hello_argon2     -Iargon2
+link_exec hello_argon2 -l pthread
+
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
+depends_on logging
+compile   hello_email
+
+link_exec hello_email -l curl
 
 re parse_headers
 
@@ -100,7 +141,8 @@ build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_
   extra = $common -L $host_lib -fuse-ld=lld -static
 EOF
 
-OBJ_FILES=""
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile hello_serial
 link_exec hello_serial
 
@@ -168,7 +210,8 @@ EOF
 
 # output/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
 
-OBJ_FILES=""
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
 compile    shed
 link_exec  shed
 

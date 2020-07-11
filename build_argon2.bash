@@ -1,27 +1,26 @@
 set -eEuo pipefail
 
 
-# git clone --depth=1 https://github.com/P-H-C/phc-winner-argon2.git -b 20190702
+
 
 cd /tmp/phc-winner-argon2
 
-mkdir -p  /tmp/phc-winner-argon2/src2
 
 cp \
-  /tmp/phc-winner-argon2/LICENSE \
-  /tmp/phc-winner-argon2/include/argon2.h \
-  /tmp/phc-winner-argon2/src/opt.c\
-  /tmp/phc-winner-argon2/src/encoding.c\
-  /tmp/phc-winner-argon2/src/thread.c\
-  /tmp/phc-winner-argon2/src/blake2/blake2b.c\
-  /tmp/phc-winner-argon2/src/core.c\
-  /tmp/phc-winner-argon2/src/argon2.c\
-  /tmp/phc-winner-argon2/src/core.h\
-  /tmp/phc-winner-argon2/src/blake2/blake2.h \
-  /tmp/phc-winner-argon2/src/blake2/blamka-round-opt.h \
-  /tmp/phc-winner-argon2/src/blake2/blake2-impl.h \
-  /tmp/phc-winner-argon2/src/encoding.h \
-  /tmp/phc-winner-argon2/src/thread.h \
+  LICENSE
+  include/argon2.h
+  src/encoding.h
+  src/thread.h
+  src/core.h
+  src/opt.c
+  src/encoding.c
+  src/thread.c
+  src/core.c
+  src/argon2.c
+  src/blake2/blake2b.c
+  src/blake2/blake2.h
+  src/blake2/blamka-round-opt.h
+  src/blake2/blake2-impl.h
   /workspaces/the-bike-shed/hello_argon2.c \
   /tmp/phc-winner-argon2/src2/
 

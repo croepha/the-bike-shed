@@ -6,7 +6,7 @@ static __thread char _log_ctx_buffer[1024];
 static __thread int _log_ctx_len;
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
-  fprintf(stderr, "%s: ", severity);
+  fprintf(stderr, "%s:%s ", severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
   vfprintf(stderr, fmt, va);
   va_end(va);
