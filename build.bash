@@ -117,6 +117,7 @@ link_exec hello_argon2 -l pthread
 DBG_OBJ_FILES=""
 FAST_OBJ_FILES=""
 depends_on logging
+compile   email
 compile   hello_email
 
 link_exec hello_email -l curl
@@ -228,7 +229,7 @@ if [ $SHOULD_CLEAN != 0 ]; then {
 
 
 ninja -f /build/build.ninja | cat
-clang-check-10 -fixit --fix-what-you-can *.c
+# clang-check-10 -fixit --fix-what-you-can *.c
 
 
 #/build/helloworld.exec

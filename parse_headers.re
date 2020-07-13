@@ -12,6 +12,7 @@ struct ParsedHeader {
   char * value;
 };
 
+
 static struct ParsedHeader parse_header(char *YYCURSOR) {
   char * YYMARKER, * start = 0, * end;
   struct ParsedHeader ret = {HEADER_TYPE_INVALID, 0};
