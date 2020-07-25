@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 typedef void CURL;
 
 struct email_Send {

@@ -1,34 +1,23 @@
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "logging.h"
-#include "_curl.h"
 #include "email.h"
+#include "io_curl.h"
 
 #define MIN(a,b) (a < b ? a : b)
-
-
-#define CURLCHECK(_m_curl_code) ({ \
-  if (_m_curl_code != CURLE_OK) { \
-    ERROR("CURLCODE:%s", curl_easy_strerror(_m_curl_code)); } \
-})
-
-#define CURLESET(m_key, ...) ({ \
-  CURLcode _m_curl_code = curl_easy_setopt( \
-    easy, CURLOPT_ ## m_key, ##__VA_ARGS__); \
-  if (_m_curl_code != CURLE_OK) { \
-    ERROR("curl_easy_setopt(CURLOPT_" #m_key ", " #__VA_ARGS__"): %s", \
-    curl_easy_strerror(_m_curl_code)); } \
-})
 
 char *email_from_addr = "to@longlonglonglonglonglonglonglonghost.com";
 char *email_server = "smtp://127.0.0.1:8025";
 char *email_user_pass = "username:password";
 
+// This could really be generalized out, like it would be nice to have a read_callback that can take
+//   io_vec[]
 static size_t email_read_callback(void *ptr, size_t size, size_t nmemb,
                            void *userdata) {
   struct email_Send *ctx = userdata;
-  DEBUG("");
+  DEBUG();
 
   if (ctx->state == EMAIL_STATE_SENDING_HEADER) {
     assert(ctx->header_len > ctx->bytes_sent);

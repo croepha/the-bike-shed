@@ -40,14 +40,14 @@ function compile() {
 O="/build/$1.c.dbg.o"
 cat << EOF >> /build/build.ninja
 build $O: cc $1.c
-  extra = -gfull -fPIC -O0 -fsanitize=address -D ABORT_ON_ERROR ${@:2}
+  extra = -gfull -fPIC -O0 -fsanitize=address -D ABORT_ON_ERROR=1 ${@:2}
 EOF
 DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
 
 O="/build/$1.c.fast.o"
 cat << EOF >> /build/build.ninja
 build $O: cc $1.c
-  extra = -gfull -fPIC -Ofast -flto=thin -march=native  ${@:2}
+  extra = -gfull -fPIC -Ofast -flto=thin -march=native -D ABORT_ON_ERROR=0 ${@:2}
 EOF
 FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
 }
@@ -93,8 +93,9 @@ link_exec  mount_squash_root
 DBG_OBJ_FILES=""
 FAST_OBJ_FILES=""
 compile    logging
-LOGGING_DBG_OBJ=$DBG_OBJ_FILES
-LOGGING_FAST_OBJ=$FAST_OBJ_FILES
+compile    misc
+compile    io_core
+compile    io_curl
 compile    url_downloading
 link_exec  url_downloading -l curl -l crypto
 

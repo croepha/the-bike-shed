@@ -7,7 +7,7 @@
 
 #include "logging.h"
 
-#include "_curl.h"
+#include "io_curl.h"
 #include "email.h"
 
 
