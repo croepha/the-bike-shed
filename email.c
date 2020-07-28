@@ -8,9 +8,17 @@
 
 #define MIN(a,b) (a < b ? a : b)
 
-char *email_from_addr = "to@longlonglonglonglonglonglonglonghost.com";
-char *email_server = "smtp://127.0.0.1:8025";
-char *email_user_pass = "username:password";
+static char *from_addr;
+static char *smtp_server;
+static char *user_pass;
+
+
+void email_setup(char* from_addr_, char* smtp_server_, char* user_pass_) {
+  from_addr = from_addr_;
+  smtp_server = smtp_server_;
+  user_pass = user_pass_;
+}
+
 
 // This could really be generalized out, like it would be nice to have a read_callback that can take
 //   io_vec[]
@@ -47,10 +55,9 @@ static size_t email_read_callback(void *ptr, size_t size, size_t nmemb,
 
 void email_init(struct email_Send *ctx, CURL *easy, char *to_addr, char *body_,
                 size_t body_len_, char *subject) {
-  // if (state != EMAIL_STATE_IDLE) {
-  //   ERROR("An email is already in flight");
-  //   return 1;
-  // }
+  assert(from_addr && strlen(from_addr));
+  assert(smtp_server && strlen(smtp_server));
+  assert(user_pass && strlen(user_pass));
 
   memset(ctx, 0, sizeof(struct email_Send));
 
@@ -62,7 +69,7 @@ void email_init(struct email_Send *ctx, CURL *easy, char *to_addr, char *body_,
                    "To: <%s>\n"
                    "Subject: %s\n"
                    "\n",
-                   email_from_addr, to_addr, subject);
+                   from_addr, to_addr, subject);
   DEBUG("r:%d", r);
   assert(r>=0);
   assert(r<sizeof ctx->header);
@@ -81,21 +88,21 @@ void email_init(struct email_Send *ctx, CURL *easy, char *to_addr, char *body_,
   CURLESET(READDATA, ctx);
 
   CURLESET(BUFFERSIZE, 102400L);
-  CURLESET(URL, email_server);
+  CURLESET(URL, smtp_server);
   CURLESET(UPLOAD, 1L);
-  CURLESET(USERPWD, email_user_pass);
+  CURLESET(USERPWD, user_pass);
   CURLESET(USERAGENT, "curl/7.68.0");
   CURLESET(MAXREDIRS, 50L);
   CURLESET(HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
   CURLESET(SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
   CURLESET(VERBOSE, 1L);
   CURLESET(TCP_KEEPALIVE, 1L);
-  CURLESET(MAIL_FROM, email_from_addr);
+  CURLESET(MAIL_FROM, from_addr);
   CURLESET(MAIL_RCPT, ctx->rcpt_list);
   CURLESET(INFILESIZE_LARGE, (curl_off_t)(ctx->body_len+ctx->header_len));
 }
 
-void email_free_all(struct email_Send *ctx) {
+void email_free(struct email_Send *ctx) {
   curl_slist_free_all(ctx->rcpt_list);
   curl_easy_cleanup(ctx->easy);
 }

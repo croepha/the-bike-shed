@@ -20,4 +20,5 @@ struct email_Send {
 };
 void email_init(struct email_Send *ctx, CURL *easy, char *to_addr, char *body_,
                 size_t body_len_, char *subject);
-void email_free_all(struct email_Send *ctx);
+void email_free(struct email_Send *ctx);
+void email_setup(char* from_address, char* smtp_server, char* user_pass);

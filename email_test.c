@@ -10,8 +10,11 @@
 #include "io_curl.h"
 #include "email.h"
 
-
 int main() {
+  email_setup(
+    "from@longlonglonglonglonglonglonglonghost.com",
+    "smtp://127.0.0.1:8025",
+    "username:password");
 
   char* body_ =
     "this is a long body\n"
@@ -19,9 +22,8 @@ int main() {
     ;
 
   for (int i=0; i<1;i++) {
-    struct email_Send email_ctx;
-
     CURL *hnd = curl_easy_init();
+    struct email_Send email_ctx;
     email_init(
         &email_ctx, hnd, "to@longlonglonglonglonglonglonglonghost.com", body_,
         strlen(body_),
@@ -30,11 +32,10 @@ int main() {
 
     CURLcode ret = curl_easy_perform(hnd);
     CURLCHECK(ret);
-    email_free_all(&email_ctx);
+    email_free(&email_ctx);
 
     curl_global_cleanup();
     DEBUG("end?");
 
   }
-
 }

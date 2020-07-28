@@ -9,6 +9,11 @@ source /etc/profile
 #     '
 # }
 
+# Start up services used for testing
+# pkill email_mock
+./email_test_server.py
+# nginx -s stop
+pgrep nginx > /dev/null || nginx
 
 if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0
@@ -35,6 +40,7 @@ rule re
  description = RE $out
 
 EOF
+
 
 function compile() {
 O="/build/$1.c.dbg.o"
@@ -76,6 +82,7 @@ build $c: re $1.re
 #   extra = -O0 -gfull -fPIC -fsanitize=address ${@:2}
 EOF
 }
+
 
 # -target arm-unknown-linux-gnueabihf
 # -static
@@ -119,9 +126,24 @@ DBG_OBJ_FILES=""
 FAST_OBJ_FILES=""
 depends_on logging
 compile   email
-compile   hello_email
+compile   email_test
+link_exec email_test -l curl
 
-link_exec hello_email -l curl
+cat << 'EOF' >> /build/build.ninja
+rule test
+ command = $in $out
+ description = TEST $out
+EOF
+
+cat << EOF >> /build/build.ninja
+build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
+EOF
+
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
+depends_on logging
+compile config_download
+link_exec config_download
 
 re parse_headers
 
@@ -177,7 +199,6 @@ build /build/hello_pwm.pi0dev.c.o: cc hello_pwm.c
 
 build /build/hello_pwm.pi0dev.exec: link_br_exec /build/hello_pwm.pi0dev.c.o
   extra =
-
 
 build /build/hello_serial.pi0dev.c.o: cc hello_serial.c
   extra =  $common -O0 -gfull

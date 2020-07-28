@@ -21,7 +21,8 @@ static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
   return 0;
 }
 
-static CURLM* multi;
+static CURLM * multi;
+static CURLSH * share;
 
 void download_timeout() {
   int running_handles;
@@ -93,16 +94,24 @@ void io_curl_initialize() {
   assert(data.features & CURL_VERSION_ASYNCHDNS);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  multi = curl_multi_init();
 
+  multi = curl_multi_init();
   curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, socket_callback);
   curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION , timer_callback);
+
+  share = curl_share_init();
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 }
+
+//  curl_share_cleanup(share);
+
 
 CURL* io_curl_create_handle() {
   CURL* ret = curl_easy_init();
   assert(ret);
   curl_multi_add_handle(multi, ret);
+  curl_easy_setopt(ret, CURLOPT_SHARE, share);
   return ret;
 }
 

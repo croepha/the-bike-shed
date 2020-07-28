@@ -1,4 +1,12 @@
+#!/bin/bash
 set -eEuo pipefail
+
+EXEC=$1
+CHECK_FILE=$2
+OUT_FILE=$3
+
+exec > $OUT_FILE
+exec 2>&1
 
 function cleanup() {
     set +eEu
@@ -20,21 +28,12 @@ script_pid=$$
     kill -INT $script_pid
  ) &
 
-rm -f /build/email_test.smtp.out*
-python -u -m smtpd --nosetuid --class DebuggingServer --debug &> /build/email_test.smtp.out1 &
-EMAIL_PID=$!
+EMAIL_PATH='/build/email_mock_to@longlonglonglonglonglonglonglonghost.com'
+rm -f "$EMAIL_PATH"
+$EXEC
 sleep .1
-/build/hello_email.dbg.exec
-sleep .1
-kill $EMAIL_PID || true
-wait $EMAIL_PID || true
 
-cat /build/email_test.smtp.out1 |
-    grep -v '^DebuggingServer started at' |
-    grep -v '^Incoming connection from' |
-    grep -v '^Peer:' > /build/email_test.smtp.out || true
-
-diff /build/email_test.smtp.out email_test.expected_output
+diff "$EMAIL_PATH" "$CHECK_FILE"
 
 cleanup
 echo "TEST_IS_SUCCESS"

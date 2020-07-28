@@ -1,16 +1,8 @@
-	Local addr: ('localhost', 8025)
-	Remote addr:('localhost', 25)
-Data: b'EHLO 3a57d9551e93'
-Data: b'MAIL FROM:<to@longlonglonglonglonglonglonglonghost.com>'
-===> MAIL FROM:<to@longlonglonglonglonglonglonglonghost.com>
-sender: to@longlonglonglonglonglonglonglonghost.com
-Data: b'RCPT TO:<to@longlonglonglonglonglonglonglonghost.com>'
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<to@longlonglonglonglonglonglonglonghost.com>
-recips: ['to@longlonglonglonglonglonglonglonghost.com']
-Data: b'DATA'
-Data: b'From: <to@longlonglonglonglonglonglonglonghost.com>\nTo: <to@longlonglonglonglonglonglonglonghost.com>\nSubject:  asdk fja;lksf;lasjdklfa;klsdfj;akdsjf;ajd;kljadk fa;dk f;akd  asdlfaskl;djfa;klsf;kajsd;klf askdf a;kldf ;lasd f;a subject!! 6\n\nthis is a long body\nmore more lines\n'
 ---------- MESSAGE FOLLOWS ----------
-b'From: <to@longlonglonglonglonglonglonglonghost.com>'
+mail options: ['SIZE=278']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <to@longlonglonglonglonglonglonglonghost.com>'
 b'Subject:  asdk fja;lksf;lasjdklfa;klsdfj;akdsjf;ajd;kljadk fa;dk f;akd  asdlfaskl;djfa;klsf;kajsd;klf askdf a;kldf ;lasd f;a subject!! 6'
 b'X-Peer: 127.0.0.1'
@@ -18,4 +10,3 @@ b''
 b'this is a long body'
 b'more more lines'
 ------------ END MESSAGE ------------
-Data: b'QUIT'

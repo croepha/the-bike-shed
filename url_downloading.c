@@ -1,6 +1,4 @@
 
-
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,7 +19,6 @@
 #include "downloading.h"
 
 void  io_curl_initialize();
-
 
 #include <openssl/sha.h>
 
@@ -54,7 +51,6 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
 }
 
 int epoll_fd = -1;
-CURLSH *share;
 
 
 #include "/build/parse_headers.re.c"
@@ -101,7 +97,6 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   curl_easy_setopt(c->curl, CURLOPT_HTTPHEADER, c->headers_list);
   curl_easy_setopt(c->curl, CURLOPT_HEADERFUNCTION, _header_callback);
   curl_easy_setopt(c->curl, CURLOPT_WRITEFUNCTION, _write_function);
-  curl_easy_setopt(c->curl, CURLOPT_SHARE, share);
   if (previous_mod_time) {
     curl_easy_setopt(c->curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
     curl_easy_setopt(c->curl, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)previous_mod_time);
@@ -114,7 +109,6 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   curl_easy_setopt(c->curl, CURLOPT_WRITEDATA, c);
   curl_easy_setopt(c->curl, CURLOPT_HEADERDATA, c);
   curl_easy_setopt(c->curl, CURLOPT_URL, url);
-  curl_easy_setopt(c->curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
 }
 
@@ -147,6 +141,8 @@ u8 download_is_successful(CURLcode result, CURL* easy) {
     return 0;
   }
 }
+
+
 void _perform_all() {
   int running = 3;
   while (running > 0) {
@@ -172,20 +168,17 @@ void _perform_all() {
       _dl_free(c);
     }
   }
-
-
 }
+
+
 
 void download_test() {
 
   setbuf(stdout, 0);
   setbuf(stderr, 0);
 
-  epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 
-  share = curl_share_init();
-  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 
   io_curl_initialize();
 
@@ -213,10 +206,6 @@ void download_test() {
 
   _perform_all();
 
-
-
-
-  curl_share_cleanup(share);
 }
 
 int main() {
