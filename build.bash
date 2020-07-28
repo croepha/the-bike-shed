@@ -143,7 +143,16 @@ DBG_OBJ_FILES=""
 FAST_OBJ_FILES=""
 depends_on logging
 compile config_download
-link_exec config_download
+compile config_download_test
+link_exec config_download_test
+
+
+DBG_OBJ_FILES=""
+FAST_OBJ_FILES=""
+depends_on logging
+compile local_config
+link_exec local_config_test
+
 
 re parse_headers
 
