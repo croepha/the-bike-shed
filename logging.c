@@ -1,14 +1,45 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "common.h"
 
 static __thread char _log_ctx_buffer[1024];
-static __thread int  _log_ctx_len;
+static __thread  s32 _log_ctx_len;
 
-__thread int log_allowed_fails;
+__thread s32 log_allowed_fails;
 
+
+#if LOGGING_USE_EMAIL
+// TODO: setup gmail to delete old emails
+// static const s32 buf_SIZE = 1<20;
+// static        char buf[buf_SIZE];
+// static       s32 buf_used;
+// static       u8  recursing_error;
+
+// void buf_add(char const * fmt, va_list va) {
+//   s32 starting_used = buf_used;
+//   s32 r = vsnprintf(buf + buf_used, buf_SIZE - buf_used, fmt, va);
+//   if (r < 0) {
+//     if (recursing)
+//     return;
+//   }
+//   buf_used +=
+
+
+
+
+
+// }
+
+#define LOGF(fmt, va) dprintf(2, fmt, va)
+//#define LOGF(fmt, va) buf_add(fmt, va)
+
+#else // LOGGING_USE_EMAIL
+#define LOGF(fmt, va) dprintf(2, fmt, va)
+#endif // LOGGING_USE_EMAIL
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
+
   fprintf(stderr, "%s:%s ", severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
   vfprintf(stderr, fmt, va);

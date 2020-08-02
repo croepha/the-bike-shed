@@ -1,8 +1,7 @@
 #!/bin/python3
-import smtpd, builtins, asyncore, os, ctypes
+import smtpd, builtins, asyncore, os, ctypes, sys
 
 PID_FILE='/build/email_mock.pid'
-
 def _():
   # Check pid, if its still running, then we just exit
   try:
@@ -59,9 +58,26 @@ class Server(smtpd.SMTPServer):
 
 proxy = Server(('0.0.0.0', 8025), None, 1<<20, enable_SMTPUTF8=True)
 
+sys.stdout.flush()
+sys.stderr.flush()
+os.setsid()
 pid = os.fork()
+
 if pid:
   with open(PID_FILE, 'w') as pid_file:
     pid_file.write(str(pid))
+  print("exiting...")
+  os.close(0)
+  os.close(1)
+  os.close(2)
+  exit();
 else:
+  os.close(0)
+  os.close(1)
+  os.close(2)
+  sys.stderr = sys.stdout = open('/build/email_mock.log', 'a');
+  print('running')
+  sys.stderr.write('running2\n')
+  sys.stderr.flush()
   asyncore.loop()
+

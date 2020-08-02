@@ -16,7 +16,6 @@ void local_config_init() { int r;
   config_file = fopen(local_config_path, "r+");
   assert(config_file);
 
-
   u8 handling_error = 0;
   for (;;) {
     char _[12];
@@ -32,8 +31,6 @@ void local_config_init() { int r;
       ERROR("continued throwing out");
       continue;
     }
-
-
 
     printf("READ_LINE: %s\n", _);
   }

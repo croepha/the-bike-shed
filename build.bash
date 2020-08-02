@@ -43,14 +43,14 @@ EOF
 
 
 function compile() {
-O="/build/$1.c.dbg.o"
+O="/build/$1.c.${FLAVOR}dbg.o"
 cat << EOF >> /build/build.ninja
 build $O: cc $1.c
   extra = -gfull -fPIC -O0 -fsanitize=address -D ABORT_ON_ERROR=1 ${@:2}
 EOF
 DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
 
-O="/build/$1.c.fast.o"
+O="/build/$1.c.${FLAVOR}fast.o"
 cat << EOF >> /build/build.ninja
 build $O: cc $1.c
   extra = -gfull -fPIC -Ofast -flto=thin -march=native -D ABORT_ON_ERROR=0 ${@:2}
@@ -59,17 +59,17 @@ FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
 }
 
 function depends_on() {
-O="/build/$1.c.dbg.o"
+O="/build/$1.c.${FLAVOR}dbg.o"
 DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
-O="/build/$1.c.fast.o"
+O="/build/$1.c.${FLAVOR}fast.o"
 FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
 }
 
 function link_exec() {
 cat << EOF >> /build/build.ninja
-build /build/$1.dbg.exec: link_exec $DBG_OBJ_FILES
+build /build/$1.${FLAVOR}dbg.exec: link_exec $DBG_OBJ_FILES
   extra = -gfull -fuse-ld=lld -fsanitize=address  ${@:2}
-build /build/$1.fast.exec: link_exec $FAST_OBJ_FILES
+build /build/$1.${FLAVOR}fast.exec: link_exec $FAST_OBJ_FILES
   extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
 EOF
 }
@@ -78,27 +78,29 @@ function re() {
   c="/build/$1.re.c"
 cat << EOF >> /build/build.ninja
 build $c: re $1.re
-# build $c.o: cc $c
+# build $c${FLAVOR}.o: cc $c
 #   extra = -O0 -gfull -fPIC -fsanitize=address ${@:2}
 EOF
 }
 
+function reset() {
+  DBG_OBJ_FILES=""
+  FAST_OBJ_FILES=""
+  FLAVOR=""
+}
 
 # -target arm-unknown-linux-gnueabihf
 # -static
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile    mount_squash_root
 link_exec  mount_squash_root
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile    logging
 compile    misc
 compile    io_core
@@ -106,13 +108,11 @@ compile    io_curl
 compile    url_downloading
 link_exec  url_downloading -l curl -l crypto
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile    log_testing
 link_exec  log_testing
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile argon2/opt       -Iargon2
 compile argon2/encoding  -Iargon2
 compile argon2/thread    -Iargon2
@@ -122,8 +122,7 @@ compile argon2/argon2    -Iargon2
 compile hello_argon2     -Iargon2
 link_exec hello_argon2 -l pthread
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 depends_on logging
 compile   email
 compile   email_test
@@ -139,16 +138,14 @@ cat << EOF >> /build/build.ninja
 build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
 EOF
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 depends_on logging
 compile config_download
 compile config_download_test
 link_exec config_download_test
 
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 depends_on logging
 compile local_config
 link_exec local_config_test
@@ -174,8 +171,7 @@ build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_
   extra = $common -L $host_lib -fuse-ld=lld -static
 EOF
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile hello_serial
 link_exec hello_serial
 
@@ -242,8 +238,7 @@ EOF
 
 # output/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
 
-DBG_OBJ_FILES=""
-FAST_OBJ_FILES=""
+reset
 compile    shed
 link_exec  shed
 
