@@ -70,12 +70,12 @@ if pid:
   os.close(0)
   os.close(1)
   os.close(2)
-  exit();
+  exit()
 else:
   os.close(0)
   os.close(1)
   os.close(2)
-  sys.stderr = sys.stdout = open('/build/email_mock.log', 'a');
+  sys.stderr = sys.stdout = open('/build/email_mock.log', 'a')
   print('running')
   sys.stderr.write('running2\n')
   sys.stderr.flush()

@@ -101,7 +101,7 @@ compile    mount_squash_root
 link_exec  mount_squash_root
 
 reset
-compile    logging
+compile    logging -D 'LOGGING_USE_EMAIL=1'
 compile    misc
 compile    io_core
 compile    io_curl
@@ -121,6 +121,9 @@ compile argon2/core      -Iargon2
 compile argon2/argon2    -Iargon2
 compile hello_argon2     -Iargon2
 link_exec hello_argon2 -l pthread
+
+reset
+FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
 
 reset
 depends_on logging
