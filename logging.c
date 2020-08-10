@@ -2,7 +2,10 @@
 #include <time.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 #include "common.h"
+#include "io.h"
+#include "io_curl.h"
 #include "logging.h"
 
 static __thread char _log_ctx_buffer[1024];
@@ -11,36 +14,46 @@ static __thread  s32 _log_ctx_len;
 __thread s32 log_allowed_fails;
 
 #if LOGGING_USE_EMAIL
+#include "email.h"
 // TODO: setup gmail to delete old emails
 static  s32 const buf_SIZE = 1<20;
+static  s32 const EMAIL_COOLDOWN_SECONDS = 60 * 10; // 10 minutes
 static char buf[buf_SIZE];
 static  s32 buf_used;
 static   u8 recursing_error;
-//static  u64 last_email_send_utc_sec;
+static  u64 last_sent_epoch_sec;
 static   u8 internal_error;
+static  s32 sent_size;
+static char const * const logging_email_rcpt = "logging@test.test";
+struct email_Send email_ctx;
 
 static void poke_state_machine() {
+  u64 now_epoch_sec = time(0);
   if (!buf_used) {
     // do nothing, no logs
-  } else if (email_sent_size) {
+  } else if (sent_size) {
     // Do nothing... waiting for email to send or timeout
-  } else if (last_email_send_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_seconds() ) {
+  } else if (last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_sec ) {
     // do nothing, cooling down...
   } else {
-    email_send(buf, buf_used);
-    email_sent_size = buf_used;
-    last_email_send_epoch_sec = now_epoch_seconds();
+    email_init(&email_ctx, io_curl_create_handle(), logging_email_rcpt, buf, buf_used, "Logs");
+    sent_size = buf_used;
+    last_sent_epoch_sec = now_epoch_sec;
   }
-  io_loggging_timer = last_email_send_epoch_sec + EMAIL_COOLDOWN_SECONDS;
+  IO_TIMER(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
 }
 
-static void email_done(u8 success) {
+void email_done(u8 success) {
   if (success) {
-    memmove(buf, buf+email_sent_size, email_sent_size);
-    buf_used -= email_sent_size;
+    memmove(buf, buf + sent_size, sent_size);
+    buf_used -= sent_size;
   }
-  email_sent_size = 0;
+  sent_size = 0;
   poke_state_machine();
+}
+
+void logging_send_timeout() {
+
 }
 
 

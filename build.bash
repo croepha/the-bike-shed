@@ -102,6 +102,7 @@ link_exec  mount_squash_root
 
 reset
 compile    logging -D 'LOGGING_USE_EMAIL=1'
+depends_on email
 compile    misc
 compile    io_core
 compile    io_curl
@@ -126,7 +127,7 @@ reset
 FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
 
 reset
-depends_on logging
+FLAVOR=test depends_on logging
 compile   email
 compile   email_test
 link_exec email_test -l curl
@@ -142,14 +143,14 @@ build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.
 EOF
 
 reset
-depends_on logging
+FLAVOR=test depends_on logging
 compile config_download
 compile config_download_test
 link_exec config_download_test
 
 
 reset
-depends_on logging
+FLAVOR=test depends_on logging
 compile local_config
 link_exec local_config_test
 

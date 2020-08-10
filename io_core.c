@@ -11,21 +11,19 @@
 // Measured in miliseconds since  00:00:00 UTC on 1 January 1970.
 void download_io_event(struct epoll_event epe); // Call when we get an epoll event where (epe.data.u64 & ((1ull<<32)-1) == EVENT_TYPE_DOWNLOAD
 void download_timeout(); // Call on timeout, see download_timer_epoch_ms
-extern u64 download_timer_epoch_ms;
 
-
+#define _(name) [ _io_timer_ ## name ] = -1,
+u64 io_global_timers[] = { _GLOBAL_TIMERS };
+#undef  _
 
 void io_process_events() {
-  enum {
-    EP_TIMER_none,
-    EP_TIMER_download,
-  } running_timer;
-
+  enum _io_global_timers running_timer = _io_timer_INVALID;
   u64 next_timer_epoch_ms = -1;
-
-  if (next_timer_epoch_ms > download_timer_epoch_ms) {
-    next_timer_epoch_ms = download_timer_epoch_ms;
-    running_timer = EP_TIMER_download;
+  for (int i=0; i < _io_timer_COUNT; i++) {
+    if (next_timer_epoch_ms > io_global_timers[i]) {
+      next_timer_epoch_ms = io_global_timers[i];
+      running_timer = i;
+    }
   }
 
   s32 timeout_ms = -1;
@@ -42,7 +40,21 @@ void io_process_events() {
   int r1 = epoll_wait(epoll_fd, epes, COUNT(epes), timeout_ms);
   assert(r1 != -1 || errno == EINTR);
 
+  #define _(name) void name ## _timeout();
+  _GLOBAL_TIMERS
+  #undef  _
+
   if (!r1) {
+    switch (running_timer) {
+      #define _(name) case _io_timer_ ## name: name ## _timeout(); break;
+      _GLOBAL_TIMERS
+      #undef  _
+      case _io_timer_COUNT:
+      case _io_timer_INVALID:
+      default: {
+        ERROR("Got wierd value for enum");
+      }
+    }
     download_timeout();
   } else {
     for (int i = 0; i < r1; i++) {
@@ -53,6 +65,7 @@ void io_process_events() {
       }
     }
   }
+
 }
 
 

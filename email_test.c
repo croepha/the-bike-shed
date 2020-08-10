@@ -10,9 +10,10 @@
 #include "io_curl.h"
 #include "email.h"
 
+
 int main() {
   email_setup(
-    "from@longlonglonglonglonglonglonglonghost.com",
+    "from@longlonglonglonglonglonglonglonFLAVOR=testghost.com",
     "smtp://127.0.0.1:8025",
     "username:password");
 
