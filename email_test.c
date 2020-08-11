@@ -13,7 +13,7 @@
 
 int main() {
   email_setup(
-    "from@longlonglonglonglonglonglonglonFLAVOR=testghost.com",
+    "from@longlonglonglonglonglonglonglonghost.com",
     "smtp://127.0.0.1:8025",
     "username:password");
 
