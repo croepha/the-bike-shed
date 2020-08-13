@@ -1,4 +1,3 @@
-
 #include <time.h>
 #include <stdio.h>
 #include <assert.h>
@@ -57,10 +56,10 @@ void logging_send_timeout() {
 }
 
 
-#define VLOGF(fmt, ...) vbuf_add(fmt, #__VA_ARGS__)
-#define  LOGF(fmt, va)   buf_add(fmt, va)
+#define VLOGF(fmt, va)  vbuf_add(fmt, va)
+#define  LOGF(fmt, ...)  buf_add(fmt, ##__VA_ARGS__)
 
-static void vbuf_add(char const * fmt, va_list va) {
+static void  vbuf_add(char const * fmt, va_list va) {
   recursing_error = 1;
   s32 r = vsnprintf(buf + buf_used, buf_SIZE - buf_used, fmt, va);
   if (r < 0) { // Pretty rare error, but want to handle this case since we need to be super robust
@@ -96,17 +95,17 @@ static void  buf_add(char const * fmt, ...) {
 }
 
 #else // LOGGING_USE_EMAIL
-#define  LOGF(fmt, ...)  dprintf(2, fmt, #__VA_ARGS__)
 #define VLOGF(fmt, va)  vdprintf(2, fmt, va)
+#define  LOGF(fmt, ...)  dprintf(2, fmt, ##__VA_ARGS__)
 #endif // LOGGING_USE_EMAIL
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
-  LOGCTX("logging");
-  fprintf(stderr, "%s:%s ", severity, _log_ctx_buffer);
+//  void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
+  LOGF("%s:%s ", severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
-  LOGF(fmt, va);
+  VLOGF(fmt, va);
   va_end(va);
-  fprintf(stderr, "\t(%s:%s:%d)\n", file, func, line);
+  LOGF("\t(%s:%s:%d)\n", file, func, line);
 }
 
 int _log_context_push(char* fmt, ...) {

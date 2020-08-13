@@ -22,6 +22,8 @@ void  io_curl_initialize();
 
 #include <openssl/sha.h>
 
+
+
 typedef struct {
     SHA256_CTX sha256;
     CURL* curl;
@@ -171,6 +173,8 @@ void _perform_all() {
 }
 
 
+
+void logging_send_timeout() { }
 
 void download_test() {
 

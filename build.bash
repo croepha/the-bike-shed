@@ -100,8 +100,9 @@ reset
 compile    mount_squash_root
 link_exec  mount_squash_root
 
+# compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
-compile    logging -D 'LOGGING_USE_EMAIL=1'
+FLAVOR=test depends_on logging
 depends_on email
 compile    misc
 compile    io_core
@@ -125,6 +126,13 @@ link_exec hello_argon2 -l pthread
 
 reset
 FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
+
+reset
+FLAVOR=test depends_on logging
+depends_on io_core
+depends_on misc
+compile    io_core_test
+link_exec  io_core_test
 
 reset
 FLAVOR=test depends_on logging
@@ -266,4 +274,4 @@ ninja -f /build/build.ninja | cat
 # bash mount_squash_root_test.bash
 # bash shed_test_udp.bash
 
-
+/build/io_core_test.dbg.exec

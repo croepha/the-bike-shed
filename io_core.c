@@ -13,15 +13,17 @@ void download_io_event(struct epoll_event epe); // Call when we get an epoll eve
 void download_timeout(); // Call on timeout, see download_timer_epoch_ms
 
 #define _(name) [ _io_timer_ ## name ] = -1,
-u64 io_global_timers[] = { _GLOBAL_TIMERS };
+u64 io_timers[] = { _IO_TIMERS };
 #undef  _
 
+int io_epoll_fd;
+
 void io_process_events() {
-  enum _io_global_timers running_timer = _io_timer_INVALID;
+  enum _io_timers running_timer = _io_timer_INVALID;
   u64 next_timer_epoch_ms = -1;
   for (int i=0; i < _io_timer_COUNT; i++) {
-    if (next_timer_epoch_ms > io_global_timers[i]) {
-      next_timer_epoch_ms = io_global_timers[i];
+    if (next_timer_epoch_ms > io_timers[i]) {
+      next_timer_epoch_ms = io_timers[i];
       running_timer = i;
     }
   }
@@ -37,17 +39,13 @@ void io_process_events() {
   }
 
   struct epoll_event epes[16];
-  int r1 = epoll_wait(epoll_fd, epes, COUNT(epes), timeout_ms);
+  int r1 = epoll_wait(io_epoll_fd, epes, COUNT(epes), timeout_ms);
   assert(r1 != -1 || errno == EINTR);
-
-  #define _(name) void name ## _timeout();
-  _GLOBAL_TIMERS
-  #undef  _
 
   if (!r1) {
     switch (running_timer) {
       #define _(name) case _io_timer_ ## name: name ## _timeout(); break;
-      _GLOBAL_TIMERS
+      _IO_TIMERS
       #undef  _
       case _io_timer_COUNT:
       case _io_timer_INVALID:
@@ -55,13 +53,15 @@ void io_process_events() {
         ERROR("Got wierd value for enum");
       }
     }
-    download_timeout();
   } else {
     for (int i = 0; i < r1; i++) {
       struct epoll_event epe = epes[i];
       io_EPData data = {.data = epe.data};
-      if (data.my_data.event_type == EVENT_TYPE_DOWNLOAD) {
-        download_io_event(epe);
+      switch (data.my_data.event_type) {
+        #define _(name) case _io_socket_type_ ## name: name ## _io_event(epe); break;
+        _IO_SOCKET_TYPES
+        #undef  _
+        default: ERROR("Unandled switch case");
       }
     }
   }

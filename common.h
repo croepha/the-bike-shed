@@ -7,11 +7,6 @@
 #define COUNT(array) (sizeof(array)/sizeof((array)[0]))
 #define MIN(a,b) (a < b ? a : b)
 
-
-enum {
-  EVENT_TYPE_DOWNLOAD
-};
-
 #include <stdlib.h>
 
 typedef u_int8_t   u8;
@@ -26,5 +21,4 @@ typedef  ssize_t  ssz;
 typedef   size_t  usz;
 
 long long utc_ms_since_epoch();
-extern int epoll_fd;
 

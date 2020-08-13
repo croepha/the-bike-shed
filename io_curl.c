@@ -29,7 +29,7 @@ void download_timeout() {
   curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
 }
 
-void download_io_event(struct epoll_event epe) {
+void io_curl_io_event(struct epoll_event epe) {
   int curl_ev = 0;
   if (epe.events & EPOLLERR)
     curl_ev |= CURL_CSELECT_ERR;
@@ -44,7 +44,7 @@ void download_io_event(struct epoll_event epe) {
 
 static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, void* s) {
 
-    io_EPData data = {.my_data = {.id = fd, .event_type = EVENT_TYPE_DOWNLOAD}};
+    io_EPData data = {.my_data = {.id = fd, .event_type = _io_socket_type_io_curl}};
     struct epoll_event epe = {.data = data.data};
 
     switch (action) {
@@ -56,15 +56,15 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
     };
 
     if (action == CURL_POLL_REMOVE) {
-        int r1 = epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, &epe);
+        int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_DEL, fd, &epe);
         assert(r1==0);
     } else if(!s) {
       CURLMcode ret = curl_multi_assign(multi, fd, (void*)1);
       assert(ret == CURLM_OK);
-      int r1 = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &epe);
+      int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, fd, &epe);
       assert(r1==0);
     } else {
-      int r1 = epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd, &epe);
+      int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_MOD, fd, &epe);
       assert(r1==0);
     }
     return 0;

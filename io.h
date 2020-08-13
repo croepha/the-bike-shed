@@ -3,20 +3,41 @@
 #include <sys/epoll.h>
 #include "common.h"
 
+extern int io_epoll_fd;
+
+
+#define _IO_TIMERS \
+ _(logging_send)
+
+#define _IO_SOCKET_TYPES \
+ _(io_curl)
+
+
+#define _(name) _io_timer_ ## name,
+enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) };
+#undef _
+
+#define _(name) _io_socket_type_ ## name,
+enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
+#undef _
+
+
 typedef union {
   epoll_data_t data;
   struct {
     s32 id;
-    u8 event_type;
+    enum _io_socket_types event_type;
   } my_data;
 } io_EPData;
 
-#define _GLOBAL_TIMERS \
- _(logging_send)
-
-#define _(name) _io_timer_ ## name,
-enum _io_global_timers { _(INVALID) _GLOBAL_TIMERS _(COUNT) };
+#define _(name) void name ## _timeout();
+_IO_TIMERS
 #undef _
+
+#define _(name) void name ## _io_event(struct epoll_event);
+_IO_SOCKET_TYPES
+#undef  _
+
 
 extern u64 io_global_timers[];
 #define IO_TIMER(name) io_global_timers[_io_timer_ ## name]
