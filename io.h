@@ -14,7 +14,7 @@ extern int io_epoll_fd;
 
 
 #define _(name) _io_timer_ ## name,
-enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) };
+enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) _(NO_TIMER) };
 #undef _
 
 #define _(name) _io_socket_type_ ## name,
@@ -42,6 +42,7 @@ _IO_SOCKET_TYPES
 extern u64 io_global_timers[];
 #define IO_TIMER(name) io_global_timers[_io_timer_ ## name]
 
+void io_initialize();
 void io_process_events();
 
 

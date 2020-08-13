@@ -52,8 +52,6 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
     return realsize;
 }
 
-int epoll_fd = -1;
-
 
 #include "/build/parse_headers.re.c"
 
@@ -181,9 +179,7 @@ void download_test() {
   setbuf(stdout, 0);
   setbuf(stderr, 0);
 
-
-  epoll_fd = epoll_create1(EPOLL_CLOEXEC);
-
+  io_initialize();
   io_curl_initialize();
 
   _WriteCtx c1 = {.id = 1};

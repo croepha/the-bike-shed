@@ -23,10 +23,13 @@ extern __thread int log_allowed_fails;
 #define DEBUG(...) LOG("DEBUG", "" __VA_ARGS__)
 #if ABORT_ON_ERROR
 #include <stdlib.h>
+#define  WARN(...) { LOG(" WARN", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
 #define ERROR(...) { LOG("ERROR", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
 #define FATAL(...) { LOG("FATAL", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
 #else
+#define  WARN(...) LOG(" WARN", "" __VA_ARGS__)
 #define ERROR(...) LOG("ERROR", "" __VA_ARGS__)
 #define FATAL(...) LOG("FATAL", "" __VA_ARGS__)
 #endif
+
 

@@ -30,8 +30,10 @@ static void poke_state_machine() {
   u64 now_epoch_sec = time(0);
   if (!buf_used) {
     // do nothing, no logs
+    IO_TIMER(logging_send) = -1;
   } else if (sent_size) {
     // Do nothing... waiting for email to send or timeout
+    IO_TIMER(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
   } else if (last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_sec ) {
     // do nothing, cooling down...
   } else {
@@ -39,7 +41,6 @@ static void poke_state_machine() {
     sent_size = buf_used;
     last_sent_epoch_sec = now_epoch_sec;
   }
-  IO_TIMER(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
 }
 
 void email_done(u8 success) {
@@ -101,6 +102,7 @@ static void  buf_add(char const * fmt, ...) {
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
 //  void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
+//  line = 0; // We dont want output to change for tests when lines move
   LOGF("%s:%s ", severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
   VLOGF(fmt, va);

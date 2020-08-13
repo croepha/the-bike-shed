@@ -27,10 +27,15 @@ _IO_SOCKET_TYPES
 
 int main() {
 
+  io_initialize();
+
   INFO("We have these timers:");
 # define _(name)  INFO(#name);
   _IO_TIMERS
 # undef  _
+
+  io_process_events();
+
 
 
 }
