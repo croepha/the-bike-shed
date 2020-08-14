@@ -1,7 +1,9 @@
+
 #include <time.h>
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include "common.h"
 #include "io.h"
 #include "io_curl.h"
@@ -13,6 +15,9 @@ static __thread  s32 _log_ctx_len;
 __thread s32 log_allowed_fails;
 
 #if LOGGING_USE_EMAIL
+// TODO, for robustness, we should install some exception handlers for segfaults and aborts, attempt to send final log buffers, and if that fails
+//       dump to disk
+
 #include "email.h"
 // TODO: setup gmail to delete old emails
 static  s32 const buf_SIZE = 1<20;
@@ -101,13 +106,13 @@ static void  buf_add(char const * fmt, ...) {
 #endif // LOGGING_USE_EMAIL
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
-//  void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
-//  line = 0; // We dont want output to change for tests when lines move
+  void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
+  //line = 0; // We dont want output to change for tests when lines move
   LOGF("%s:%s ", severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
   VLOGF(fmt, va);
   va_end(va);
-  LOGF("\t(%s:%s:%d)\n", file, func, line);
+  LOGF("\t(%s:%s:%d:%p)\n", file, func, line, return_address);
 }
 
 int _log_context_push(char* fmt, ...) {

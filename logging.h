@@ -19,13 +19,13 @@ extern __thread int log_allowed_fails;
 
 #define LOG(severity, fmt, ...) \
   _log(severity, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define INFO(fmt, ...)  LOG("INFO ", fmt, ##__VA_ARGS__)
+#define  INFO(fmt, ...)  LOG(" INFO", fmt, ##__VA_ARGS__)
 #define DEBUG(...) LOG("DEBUG", "" __VA_ARGS__)
 #if ABORT_ON_ERROR
 #include <stdlib.h>
 #define  WARN(...) { LOG(" WARN", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
 #define ERROR(...) { LOG("ERROR", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
-#define FATAL(...) { LOG("FATAL", "" __VA_ARGS__); if(log_allowed_fails-- <0) { abort(); } }
+#define FATAL(...) { LOG("FATAL", "" __VA_ARGS__); abort(); }
 #else
 #define  WARN(...) LOG(" WARN", "" __VA_ARGS__)
 #define ERROR(...) LOG("ERROR", "" __VA_ARGS__)

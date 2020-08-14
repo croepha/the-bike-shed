@@ -274,4 +274,4 @@ ninja -f /build/build.ninja | cat
 # bash mount_squash_root_test.bash
 # bash shed_test_udp.bash
 
-/build/io_core_test.dbg.exec
+bash ./io_core_test.bash /build/io_core_test.dbg.exec /dev/null /dev/stdout

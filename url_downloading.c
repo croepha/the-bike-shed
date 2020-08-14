@@ -22,8 +22,6 @@ void  io_curl_initialize();
 
 #include <openssl/sha.h>
 
-
-
 typedef struct {
     SHA256_CTX sha256;
     CURL* curl;

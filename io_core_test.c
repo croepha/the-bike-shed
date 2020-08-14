@@ -24,15 +24,20 @@ _IO_TIMERS
 _IO_SOCKET_TYPES
 #undef  _
 
+# define _(name) [_io_timer_ ## name ] = #name,
+char const * const _io_timer_names[] = { _IO_TIMERS };
+# undef  _
+
 
 int main() {
 
   io_initialize();
-
+  
   INFO("We have these timers:");
-# define _(name)  INFO(#name);
-  _IO_TIMERS
-# undef  _
+  for (int i=_io_timers_FIRST; i < _io_timer_COUNT; i++) {
+    INFO("%s", _io_timer_names[i]);
+  }
+
 
   io_process_events();
 
