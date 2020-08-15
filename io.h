@@ -5,11 +5,12 @@
 
 extern int io_epoll_fd;
 
-#define _io_timers_FIRST _io_timer_logging_send
+//#define _io_timers_FIRST _io_timer_logging_send
 #define _IO_TIMERS \
  _(logging_send) \
+ _(io_curl) \
 
-#define _io_socket_type_FIRST _io_socket_type_io_curl
+//#define _io_socket_type_FIRST _io_socket_type_io_curl
 #define _IO_SOCKET_TYPES \
  _(io_curl) \
 
@@ -40,8 +41,8 @@ _IO_SOCKET_TYPES
 #undef  _
 
 
-extern u64 io_global_timers[];
-#define IO_TIMER(name) io_global_timers[_io_timer_ ## name]
+extern u64 io_timers_epoch_ms[];
+#define IO_TIMER(name) io_timers_epoch_ms[_io_timer_ ## name]
 
 void io_initialize();
 void io_process_events();

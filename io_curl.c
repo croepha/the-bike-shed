@@ -7,24 +7,23 @@
 #include "io.h"
 #include "io_curl.h"
 
-u64 download_timer_epoch_ms;
 
 static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
   if (timeout_ms_ < 0) {
-    download_timer_epoch_ms = 0;
+    IO_TIMER(io_curl) = 0;
   } else {
-    download_timer_epoch_ms = utc_ms_since_epoch() + timeout_ms_;
+    IO_TIMER(io_curl) = utc_ms_since_epoch() + timeout_ms_;
   }
 
   DEBUG("timeout: %ld ms, new timer: %"PRId64"\n",
-      timeout_ms_, download_timer_epoch_ms);
+      timeout_ms_, IO_TIMER(io_curl));
   return 0;
 }
 
 static CURLM * multi;
 static CURLSH * share;
 
-void download_timeout() {
+void io_curl_timeout() {
   int running_handles;
   curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
 }
