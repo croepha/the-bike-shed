@@ -32,7 +32,7 @@ rm -f "$OUT_FILE"
     (
       sleep .001
       ( tail -n0 -f "$OUT_FILE" & ) | grep -q 'All test sockets created' > /dev/null
-      ( echo "SEND11" | socat stdio unix-sendto:/tmp/test_11 & ) | grep --line-buffered -m1 "REPLY11"
+      ( echo "SEND11" | socat stdio unix-connect:/tmp/test_11 & ) | grep --line-buffered -m1 "REPLY11"
     ) &
     /build/io_core_test.dbg.exec
   ) 2>&1 | tee "$OUT_FILE" |
