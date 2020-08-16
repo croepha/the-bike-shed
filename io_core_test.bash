@@ -22,19 +22,26 @@ function fail() {
 trap fail ERR
 trap fail INT
 
-tabs 8
-
 EXEC=$1
 CHECK_FILE=$2
 OUT_FILE=$3
+rm -f "$OUT_FILE"
+
 (
   (
+    (
+      sleep .001
+      ( tail -n0 -f "$OUT_FILE" & ) | grep -q 'All test sockets created' > /dev/null
+      ( echo "SEND11" | socat stdio unix-sendto:/tmp/test_11 & ) | grep --line-buffered -m1 "REPLY11"
+    ) &
     /build/io_core_test.dbg.exec
   ) 2>&1 | tee "$OUT_FILE" |
-    sed -E $'s/^((DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3/'
+    sed -E $'s/^([0-9a-f]+[.][0-9]{3}:(DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3/'  # Right justify location info
 
-  # remove line number and addresses, if they shift around, we dont want the test to fail...
-  sed -E $'s/^((DEBUG| INFO| WARN|ERROR|FATAL): .*\t\(.*:.*):.*:.*\)$/\\1)/p' < "$OUT_FILE" > "$OUT_FILE.cleaned"
+  # remove timestamp, and also line number and addresses, if they shift around, we dont want the test to fail...
+  sed -E $'s/^[0-9a-f]+[.][0-9]{3}:((DEBUG| INFO| WARN|ERROR|FATAL):.*\t)\((.*):.* .*:(.*)\)$/\\1(\\3 \\4)/' < "$OUT_FILE" > "$OUT_FILE.cleaned"
+
+  cat "$OUT_FILE.cleaned"
 
   diff "$OUT_FILE.cleaned" "$CHECK_FILE"
 

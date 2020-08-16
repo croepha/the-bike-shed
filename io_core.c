@@ -1,12 +1,10 @@
 #include <sys/epoll.h>
-
 #include <errno.h>
 #include <limits.h>
 #include <assert.h>
 #include "common.h"
 #include "logging.h"
 #include "io.h"
-
 
 #define _(name) [ _io_timer_ ## name ] = -1,
 u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
@@ -21,10 +19,12 @@ void io_initialize() {
 void io_process_events() {
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
-  for (int i=0; i < _io_timer_COUNT; i++) {
+  for (int i=1; i < _io_timer_COUNT; i++) {
+    DEBUG("timer:%d next:%ld timers[i]:%ld", i, next_timer_epoch_ms, io_timers_epoch_ms[i]);
     if (next_timer_epoch_ms > io_timers_epoch_ms[i]) {
       next_timer_epoch_ms = io_timers_epoch_ms[i];
       running_timer = i;
+      DEBUG("running_timer: %d", running_timer);
     }
   }
   if (next_timer_epoch_ms == -1) {
@@ -69,7 +69,7 @@ void io_process_events() {
         #define _(name) case _io_socket_type_ ## name: name ## _io_event(epe); break;
         _IO_SOCKET_TYPES
         #undef  _
-        default: ERROR("Unandled switch case");
+        default: ERROR("Unandled switch case: %d", data.my_data.event_type);
       }
     }
   }

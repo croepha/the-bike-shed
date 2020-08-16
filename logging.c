@@ -106,13 +106,21 @@ static void  buf_add(char const * fmt, ...) {
 #endif // LOGGING_USE_EMAIL
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
+  struct timespec tp;
+  int r = clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
+  if (r != 0) {
+    tp.tv_sec  = 0;
+    tp.tv_nsec = 0;
+    assert(0);
+  }
+
   void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
   //line = 0; // We dont want output to change for tests when lines move
-  LOGF("%s:%s ", severity, _log_ctx_buffer);
+  LOGF("%06lx.%03ld:%s:%s ", tp.tv_sec, tp.tv_nsec / 1000000, severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt);
   VLOGF(fmt, va);
   va_end(va);
-  LOGF("\t(%s:%s:%d:%p)\n", file, func, line, return_address);
+  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
 }
 
 int _log_context_push(char* fmt, ...) {

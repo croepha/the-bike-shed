@@ -33,3 +33,7 @@ extern __thread int log_allowed_fails;
 #endif
 
 
+#ifndef LOG_DEBUG
+#undef DEBUG
+#define DEBUG(...)
+#endif

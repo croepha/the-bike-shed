@@ -13,6 +13,7 @@ extern int io_epoll_fd;
 //#define _io_socket_type_FIRST _io_socket_type_io_curl
 #define _IO_SOCKET_TYPES \
  _(io_curl) \
+ _(test1) \
 
 
 #define _(name) _io_timer_ ## name,
