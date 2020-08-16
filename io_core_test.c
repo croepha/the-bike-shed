@@ -15,7 +15,7 @@ EP_TYPES
 #undef _
 }
 
-#define _(name) void name ## _timeout() { INFO(#name " Timeout"); }
+#define _(name) void name ## _timeout() { INFO(#name " Timeout"); io_timers_epoch_ms[_io_timer_  ## name] = -1; }
 _IO_TIMERS
 #undef  _
 
@@ -36,15 +36,19 @@ int main() {
 
   io_initialize();
 
-  INFO("Setting timers in acending order:");
-  for (int i=0; i < COUNT(timers); i++) {
-    u64 v = 1000 + i;
-    INFO("%s = %ld", timer_names[i], v);
-    *timers[i] = v;
+  INFO("Setting timers in acending order:"); { LOGCTX("\t");
+    for (int i=0; i < COUNT(timers); i++) {
+      u64 v = 1000 + i;
+      INFO("%s = %ld", timer_names[i], v);
+      *timers[i] = v;
+    }
   }
 
-  io_process_events();
-
+  INFO("Running all timers:"); { LOGCTX("\t");
+    for (int i=0; i < COUNT(timers); i++) {
+      io_process_events();
+    }
+  }
 
 
 }

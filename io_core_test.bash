@@ -22,13 +22,17 @@ function fail() {
 trap fail ERR
 trap fail INT
 
+tabs 8
+
 EXEC=$1
 CHECK_FILE=$2
 OUT_FILE=$3
 (
   (
     /build/io_core_test.dbg.exec
-  ) 2>&1 | tee "$OUT_FILE"
+  ) 2>&1 | tee "$OUT_FILE" |
+    sed -E $'s/^((DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3'
+    
 
   # remove line number and addresses, if they shift around, we dont want the test to fail...
   sed -E $'s/^((DEBUG| INFO| WARN|ERROR|FATAL): .*\t\(.*:.*):.*:.*\)$/\\1)/p' < "$OUT_FILE" > "$OUT_FILE.cleaned"
