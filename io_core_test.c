@@ -3,11 +3,12 @@
 #include <sys/epoll.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <errno.h>
+#include <fcntl.h>
 #include "logging.h"
 #include "io.h"
 
@@ -24,7 +25,15 @@ EP_TYPES
   INFO("%s", buf);
 }
 
-#define _(name) void name ## _timeout() { INFO(#name " Timeout"); io_timers_epoch_ms[_io_timer_  ## name] = -1; }
+int events_pending;
+
+void timeout_cb(char* name, enum _io_timers timer) {
+  io_timers_epoch_ms[timer] = -1;
+  events_pending --;
+  INFO("%s Timeout", name);
+}
+
+#define _(name) void name ## _timeout() { timeout_cb(#name, _io_timer_  ## name); }
 _IO_TIMERS
 #undef  _
 
@@ -50,111 +59,101 @@ char const * const socket_type_names[] = { _IO_SOCKET_TYPES };
 enum _io_socket_types const socket_types[] = { _IO_SOCKET_TYPES };
 # undef  _
 
-int sockets_server[20];
-int sockets_connected[20];
+const int socket_COUNT = 20;
+int sockets[socket_COUNT];
 
-void io_event_cb(char* name, struct epoll_event epe) {
+void sock_read_line(int fd, char * buf, size_t buf_size) {
+  ssize_t r = read(fd, buf, buf_size);
+  assert(r > 0);
+  assert(r != -1);
+  assert(buf[r-1] == '\n');
+  buf[r-1] = 0;
+}
+
+void io_event_cb(char* name, struct epoll_event epe) { int r;
   io_EPData data = { .data = epe.data };
   int i = data.my_data.id;
-  if (sockets_server[data.my_data.id] != -2) {
-    sockets_connected[data.my_data.id] = accept4(sockets_server[data.my_data.id], 0, 0, SOCK_NONBLOCK | SOCK_CLOEXEC);
-    assert(sockets_connected[data.my_data.id] != -1);
-    io_EPData data2;
-    data2.my_data.id = i;
-    data2.my_data.event_type = socket_types[data.my_data.event_type];
-    int r;
-    struct epoll_event epe2 = { .events = EPOLLIN, .data = data2.data};
-    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets_server[i], &epe2);
-    assert(r != -1);
-    r = close(sockets_server[data.my_data.id]);
-    assert(r != -1);
-    INFO("(server) IO Event %s id:%d type:%d", name, data.my_data.id, data.my_data.event_type);
-    log_ep_event(epe);
-  } else {
-    char buf[256];
-    ssize_t r = read(sockets_connected[data.my_data.id], buf, sizeof buf);
-    assert(r != -1);
-    buf[r] = 0;
-    char* nl = strchr(buf, '\n');
-    if (nl) {
-      *nl = 0;
-    }
-    INFO("(connected) IO Event %s id:%d type:%d buf:'%s'", name, data.my_data.id, data.my_data.event_type, buf);
-    log_ep_event(epe);
-    r = dprintf(sockets_connected[data.my_data.id], "REPLY%d", data.my_data.id);
-    assert(r != -1);
-    r = close(sockets_connected[data.my_data.id]);
-    assert(r != -1);
-  }
+  char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
+
+  INFO("(connected) IO Event %stype:%d buf:'%s'", name, data.my_data.event_type, buf);
+  log_ep_event(epe);
+  r = dprintf(sockets[data.my_data.id], "REPLY%02d", data.my_data.id);
+  assert(r != -1);
+  r = close(sockets[data.my_data.id]);
+  assert(r != -1);
+  events_pending--;
 }
 
 
-
 int main() {
+  setlinebuf(stderr);
 
   io_initialize();
 
   INFO("Setting timers in acending order:"); { LOGCTX("\t");
     for (int i=0; i < COUNT(timers); i++) {
       *timers[i] = 1000 + i;
+      events_pending ++;
       INFO("timer:%ld, %s = %ld", timers[i] - io_timers_epoch_ms, timer_names[i], *timers[i]);
     }
   }
 
   INFO("Running all timers:"); { LOGCTX("\t");
-    for (int i=0; i < COUNT(timers); i++) {
-      io_process_events();
-    }
+    while (events_pending > 0) { io_process_events(); }
   }
 
   INFO("Setting timers in decending order:"); { LOGCTX("\t");
     for (int i=0; i < COUNT(timers); i++) {
       *timers[i] = 1000 - i;
+      events_pending ++;
       INFO("timer:%ld, %s = %ld", timers[i] - io_timers_epoch_ms, timer_names[i], *timers[i]);
     }
   }
 
   INFO("Running all timers:"); { LOGCTX("\t");
-    for (int i=0; i < COUNT(timers); i++) {
-      io_process_events();
-    }
+    while (events_pending > 0) { io_process_events(); }
   }
 
-  for (int i = 0; i < COUNT(sockets_server); i++) {
+  for (int i = 0; i < socket_COUNT; i++) {     int r;
     int type_i = i % COUNT(socket_types);
 
-    int r;
-    struct sockaddr_un addr = { .sun_family = AF_UNIX };
-    r = snprintf(addr.sun_path, sizeof addr.sun_path - 1, "/tmp/test_%d", i);
-    assert(r > 0);
-    assert(r < sizeof addr.sun_path - 1);
-    unlink(addr.sun_path);
+    int sv[2];
+    r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv);
+    assert(r!=-1);
+    sockets[i] = sv[0];
 
-    sockets_server[i] =
-        socket(AF_UNIX, SOCK_SEQPACKET | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    assert(sockets_server[i] != -1);
-    r = bind(sockets_server[i], (struct sockaddr const *)&addr, sizeof addr);
-    assert(r != -1);
-    r = listen(sockets_server[i], 1);
+    pid_t fork_pid = fork();
+    assert(fork_pid != -1);
+    if (!fork_pid) { LOGCTX("forked:%02d", i);
+      int sock = sv[1];
+      fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //unset nonblock
+
+      r = dprintf(sock, "SEND%02d", i);
+      assert(r != -1);
+      char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
+      exit(0);
+    }
+
+    r = close(sv[1]);
     assert(r != -1);
 
     io_EPData data;
     data.my_data.id = i;
     data.my_data.event_type = socket_types[type_i];
     struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
-    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets_server[i], &epe);
+    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe);
     assert(r != -1);
 
     INFO("socket:%d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
-  }
-  INFO("All test sockets created");
-
-  for (;;) {
-    io_process_events();
+    events_pending++;
   }
 
+  INFO("Setting timers in decending order:"); { LOGCTX("\t");
+    for (int i=0; i < COUNT(timers); i++) {
+      *timers[i] = utc_ms_since_epoch() + 100 - i * 20;
+      events_pending ++;
+    }
+  }
 
-
-
-
+  while (events_pending > 0) { io_process_events(); }
 }

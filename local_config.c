@@ -4,7 +4,6 @@
 extern char* local_config_path;
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 
 #include "common.h"

@@ -1,7 +1,6 @@
 
 
 
-#include <assert.h>
 #include <string.h>
 
 #include "common.h"

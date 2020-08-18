@@ -148,6 +148,8 @@ EOF
 
 cat << EOF >> /build/build.ninja
 build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
+build /build/io_core_test.test_results: test /workspaces/the-bike-shed/io_core_test.bash /build/io_core_test.dbg.exec io_core_test.expected_output
+
 EOF
 
 reset
@@ -274,4 +276,3 @@ ninja -f /build/build.ninja | cat
 # bash mount_squash_root_test.bash
 # bash shed_test_udp.bash
 
-bash ./io_core_test.bash /build/io_core_test.dbg.exec io_core_test.check /build/io_core_test.output

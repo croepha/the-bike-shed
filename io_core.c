@@ -1,7 +1,6 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <limits.h>
-#include <assert.h>
 #include "common.h"
 #include "logging.h"
 #include "io.h"

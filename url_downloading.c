@@ -3,7 +3,6 @@
 #include <string.h>
 
 // internal:
-#include <assert.h>
 #include <errno.h>
 #include <sys/epoll.h>
 #include <unistd.h>

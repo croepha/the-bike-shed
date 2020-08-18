@@ -4,7 +4,6 @@
 #include <assert.h>
 
 
-
 int  _log_context_push(char* fmt, ...) __attribute__((__format__ (__printf__, 1, 2)));
 void _log_context_pop(int*old_len);
 

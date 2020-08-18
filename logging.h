@@ -37,3 +37,6 @@ extern __thread int log_allowed_fails;
 #undef DEBUG
 #define DEBUG(...)
 #endif
+
+#define assert(expr)      ({if (!(expr))    { ERROR("Assert failed: %s -> %ld", #expr, (u64)(expr)); } })
+#define error_check(err)  ({if (err == -1)) { ERROR("Posix like error err:%s->%d errno:%d:%s", #err, (u64)(err), errno, strerror(errno)); } })

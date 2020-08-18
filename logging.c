@@ -1,7 +1,6 @@
 
 #include <time.h>
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include "common.h"
@@ -101,8 +100,8 @@ static void  buf_add(char const * fmt, ...) {
 }
 
 #else // LOGGING_USE_EMAIL
-#define VLOGF(fmt, va)  vdprintf(2, fmt, va)
-#define  LOGF(fmt, ...)  dprintf(2, fmt, ##__VA_ARGS__)
+#define VLOGF(fmt, va)  vfprintf(stderr, fmt, va)
+#define  LOGF(fmt, ...)  fprintf(stderr, fmt, ##__VA_ARGS__)
 #endif // LOGGING_USE_EMAIL
 
 void _log(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
@@ -116,10 +115,8 @@ void _log(const char* severity, const char*file, const char*func, int line, char
 
   void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
   //line = 0; // We dont want output to change for tests when lines move
-  LOGF("%06lx.%03ld:%s:%s ", tp.tv_sec, tp.tv_nsec / 1000000, severity, _log_ctx_buffer);
-  va_list va; va_start(va, fmt);
-  VLOGF(fmt, va);
-  va_end(va);
+  LOGF("%06lx.%03ld: %s:%s ", tp.tv_sec, tp.tv_nsec / 1000000, severity, _log_ctx_buffer);
+  va_list va; va_start(va, fmt); VLOGF(fmt, va); va_end(va);
   LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
 }
 
