@@ -119,7 +119,7 @@ int main() {
   for (int i = 0; i < socket_COUNT; i++) {     int r;
     int type_i = i % COUNT(socket_types);
 
-    int sv[2];
+    int sv[2] = {-1,-1};
     r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv);
     assert(r!=-1);
     sockets[i] = sv[0];
@@ -127,12 +127,13 @@ int main() {
     pid_t fork_pid = fork();
     assert(fork_pid != -1);
     if (!fork_pid) { LOGCTX("forked:%02d", i);
+      close(sv[0]);
       int sock = sv[1];
-      fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //unset nonblock
+      fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //set nonblock
 
       r = dprintf(sock, "SEND%02d\n", i);
       assert(r != -1);
-      char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
+      char buf[256]; sock_read_line(sock, buf, sizeof buf);
       exit(0);
     }
 
@@ -171,7 +172,12 @@ int main() {
     error_check(child);
     char path_buf[256]; snprintf(path_buf, sizeof path_buf, "/proc/%d/cmdline", child);
     int fd = open(path_buf, O_RDONLY);
-    char cmdline_buf[256]; read(fd, cmdline_buf, sizeof cmdline_buf);
+    DEBUG("path_buf:%s", path_buf);
+    error_check(fd);
+    char cmdline_buf[256];
+    ssize_t cmdline_buf_len = read(fd, cmdline_buf, sizeof cmdline_buf - 1);
+    error_check(cmdline_buf_len);
+    cmdline_buf[cmdline_buf_len] = 0;
     for (char* p=cmdline_buf; p<cmdline_buf + sizeof cmdline_buf; p++) { if (!*p) {*p=' ';} }
     INFO("Child exit:%d cmdline:`%s`",
       WEXITSTATUS(wstatus), cmdline_buf);
