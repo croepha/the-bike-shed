@@ -1,10 +1,11 @@
 #define _GNU_SOURCE
-
+#define LOG_DEBUG
 #include <sys/epoll.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <errno.h>
@@ -64,8 +65,9 @@ int sockets[socket_COUNT];
 
 void sock_read_line(int fd, char * buf, size_t buf_size) {
   ssize_t r = read(fd, buf, buf_size);
+  error_check(r);
+  DEBUG("fd:%d buf_size:`%.*s`", fd, (int)buf_size, buf);
   assert(r > 0);
-  assert(r != -1);
   assert(buf[r-1] == '\n');
   buf[r-1] = 0;
 }
@@ -77,7 +79,7 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
 
   INFO("(connected) IO Event %stype:%d buf:'%s'", name, data.my_data.event_type, buf);
   log_ep_event(epe);
-  r = dprintf(sockets[data.my_data.id], "REPLY%02d", data.my_data.id);
+  r = dprintf(sockets[data.my_data.id], "REPLY%02d\n", data.my_data.id);
   assert(r != -1);
   r = close(sockets[data.my_data.id]);
   assert(r != -1);
@@ -128,7 +130,7 @@ int main() {
       int sock = sv[1];
       fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //unset nonblock
 
-      r = dprintf(sock, "SEND%02d", i);
+      r = dprintf(sock, "SEND%02d\n", i);
       assert(r != -1);
       char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
       exit(0);
@@ -156,4 +158,28 @@ int main() {
   }
 
   while (events_pending > 0) { io_process_events(); }
+
+  INFO("Reaping child procs");
+  u8 had_error = 0;
+  for (;;) {
+    int wstatus;
+    DEBUG("Waiting for child");
+    pid_t child = wait(&wstatus);
+    if (child == -1 && errno == ECHILD) {
+      break;
+    }
+    error_check(child);
+    char path_buf[256]; snprintf(path_buf, sizeof path_buf, "/proc/%d/cmdline", child);
+    int fd = open(path_buf, O_RDONLY);
+    char cmdline_buf[256]; read(fd, cmdline_buf, sizeof cmdline_buf);
+    for (char* p=cmdline_buf; p<cmdline_buf + sizeof cmdline_buf; p++) { if (!*p) {*p=' ';} }
+    INFO("Child exit:%d cmdline:`%s`",
+      WEXITSTATUS(wstatus), cmdline_buf);
+    if (WEXITSTATUS(wstatus) != 0) {
+      had_error = 1;
+    }
+  }
+  if (had_error) {
+    ERROR("Atleast one child process had an error");
+  }
 }
