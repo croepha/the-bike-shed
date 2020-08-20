@@ -53,8 +53,7 @@ exec 2>&1
     sed -En 's/^(.*(test_sort:[^ ]*) .*)$/\2 \1/p' < "$OUT_FILE.cleaned1" | sort --stable --key=1,1 | sed -E 's/^(test_sort:[^ ]* )//'
   } >  "$OUT_FILE.cleaned"
 
-  #echo "CLEANED: $OUT_FILE.cleaned"; cat "$OUT_FILE.cleaned"
-
+  echo "CLEANED: $OUT_FILE.cleaned"
   diff "$OUT_FILE.cleaned" "$CHECK_FILE"
   jobs
 

@@ -10,6 +10,9 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <time.h>
+
 #include "logging.h"
 #include "io.h"
 
@@ -77,8 +80,8 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
   int i = data.my_data.id;
   char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
 
-  INFO("(connected) IO Event %stype:%d buf:'%s'", name, data.my_data.event_type, buf);
-  log_ep_event(epe);
+  INFO("IO Event %s type:%d buf:'%s'", name, data.my_data.event_type, buf);
+  { LOGCTX("\t"); log_ep_event(epe); }
   r = dprintf(sockets[data.my_data.id], "REPLY%02d\n", data.my_data.id);
   assert(r != -1);
   r = close(sockets[data.my_data.id]);
@@ -87,9 +90,9 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
 }
 
 
-int main() {
+int main() { int r;
   setlinebuf(stderr);
-
+  r = alarm(1); error_check(r);
   io_initialize();
 
   INFO("Setting timers in acending order:"); { LOGCTX("\t");
@@ -118,42 +121,41 @@ int main() {
 
   u64 start_time = utc_ms_since_epoch() + 50;
 
-  for (int i = 0; i < socket_COUNT; i++) {     int r;
+  for (int i = 0; i < socket_COUNT; i++) {
     int type_i = i % COUNT(socket_types);
 
     int sv[2] = {-1,-1};
-    r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv);
-    assert(r!=-1);
+    r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv); error_check(r);
     sockets[i] = sv[0];
 
     pid_t fork_pid = fork();
     assert(fork_pid != -1);
     if (!fork_pid) { LOGCTX("forked:%02d", i);
-      close(sv[0]);
+      r = close(sv[0]); error_check(r);
 
       u64 now = utc_ms_since_epoch();
       if (start_time > now) {
-        usleep((start_time - now) * 1000);
+        r = usleep((start_time - now) * 1000); error_check(r);
       }
 
       int sock = sv[1];
-      fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //set nonblock
+      long initial_flags = fcntl(sock, F_GETFL, 0); error_check(initial_flags);
+      r = fcntl(sock, F_SETFL, initial_flags & ~O_NONBLOCK); //set nonblock
+      error_check(r);
 
-      r = dprintf(sock, "SEND%02d\n", i);
+      r = dprintf(sock, "SEND%02d\n", i); error_check(r);
       assert(r != -1);
       char buf[256]; sock_read_line(sock, buf, sizeof buf);
       exit(0);
     }
 
-    r = close(sv[1]);
-    assert(r != -1);
+    r = close(sv[1]); error_check(r);
 
     io_EPData data;
     data.my_data.id = i;
     data.my_data.event_type = socket_types[type_i];
     struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
-    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe);
-    assert(r != -1);
+    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe); error_check(r);
 
     INFO("socket:%d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
     events_pending++;
@@ -166,7 +168,9 @@ int main() {
     }
   }
 
-  while (events_pending > 0) { io_process_events(); }
+  INFO("Running all events:"); { LOGCTX("\t");
+    while (events_pending > 0) { io_process_events(); }
+  }
 
   INFO("Reaping child procs");
   u8 had_error = 0;
@@ -179,7 +183,7 @@ int main() {
     }
     error_check(child);
     //INFO("Child exit:%d", WEXITSTATUS(wstatus));
-    if (WEXITSTATUS(wstatus) != 0) {
+    if (! WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0) {
       had_error = 1;
     }
   }
