@@ -78,6 +78,7 @@ void sock_read_line(int fd, char * buf, size_t buf_size) {
 void io_event_cb(char* name, struct epoll_event epe) { int r;
   io_EPData data = { .data = epe.data };
   int i = data.my_data.id;
+  LOGCTX("test_sort:id:%02d", i);
   char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
 
   INFO("IO Event %s type:%d buf:'%s'", name, data.my_data.event_type, buf);
@@ -157,7 +158,7 @@ int main() { int r;
     struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
     r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe); error_check(r);
 
-    INFO("socket:%d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
+    INFO("socket id:%d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
     events_pending++;
   }
 
