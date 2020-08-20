@@ -66,7 +66,7 @@ int sockets[socket_COUNT];
 void sock_read_line(int fd, char * buf, size_t buf_size) {
   ssize_t r = read(fd, buf, buf_size);
   error_check(r);
-  DEBUG("fd:%d buf_size:`%.*s`", fd, (int)buf_size, buf);
+  //DEBUG("fd:%d buf_size:`%.*s`", fd, (int)r, buf);
   assert(r > 0);
   assert(buf[r-1] == '\n');
   buf[r-1] = 0;
@@ -116,6 +116,8 @@ int main() {
     while (events_pending > 0) { io_process_events(); }
   }
 
+  u64 start_time = utc_ms_since_epoch() + 50;
+
   for (int i = 0; i < socket_COUNT; i++) {     int r;
     int type_i = i % COUNT(socket_types);
 
@@ -128,6 +130,12 @@ int main() {
     assert(fork_pid != -1);
     if (!fork_pid) { LOGCTX("forked:%02d", i);
       close(sv[0]);
+
+      u64 now = utc_ms_since_epoch();
+      if (start_time > now) {
+        usleep((start_time - now) * 1000);
+      }
+
       int sock = sv[1];
       fcntl(sock, F_SETFL, fcntl(sock, F_GETFL, 0) & ~O_NONBLOCK); //set nonblock
 
@@ -153,7 +161,7 @@ int main() {
 
   INFO("Setting timers in decending order:"); { LOGCTX("\t");
     for (int i=0; i < COUNT(timers); i++) {
-      *timers[i] = utc_ms_since_epoch() + 100 - i * 20;
+      *timers[i] = start_time - i;
       events_pending ++;
     }
   }
@@ -164,23 +172,13 @@ int main() {
   u8 had_error = 0;
   for (;;) {
     int wstatus;
-    DEBUG("Waiting for child");
+    //DEBUG("Waiting for child");
     pid_t child = wait(&wstatus);
     if (child == -1 && errno == ECHILD) {
       break;
     }
     error_check(child);
-    char path_buf[256]; snprintf(path_buf, sizeof path_buf, "/proc/%d/cmdline", child);
-    int fd = open(path_buf, O_RDONLY);
-    DEBUG("path_buf:%s", path_buf);
-    error_check(fd);
-    char cmdline_buf[256];
-    ssize_t cmdline_buf_len = read(fd, cmdline_buf, sizeof cmdline_buf - 1);
-    error_check(cmdline_buf_len);
-    cmdline_buf[cmdline_buf_len] = 0;
-    for (char* p=cmdline_buf; p<cmdline_buf + sizeof cmdline_buf; p++) { if (!*p) {*p=' ';} }
-    INFO("Child exit:%d cmdline:`%s`",
-      WEXITSTATUS(wstatus), cmdline_buf);
+    //INFO("Child exit:%d", WEXITSTATUS(wstatus));
     if (WEXITSTATUS(wstatus) != 0) {
       had_error = 1;
     }
