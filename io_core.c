@@ -13,7 +13,7 @@ u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 int io_epoll_fd = -1;
 
 void io_initialize() {
-  //io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 }
 
 void io_process_events() {
