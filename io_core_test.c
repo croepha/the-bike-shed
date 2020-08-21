@@ -158,7 +158,7 @@ int main() { int r;
     struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
     r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe); error_check(r);
 
-    INFO("socket id:%d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
+    INFO("socket id:%02d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
     events_pending++;
   }
 
