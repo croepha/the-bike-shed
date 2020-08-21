@@ -10,7 +10,7 @@ rm -f $OUT_FILE*
 function fail() {
     trap - ERR
     echo "FAILED" >> "$OUT_FILE"
-    cat "$OUT_FILE"
+    cat "$OUT_FILE.raw"
     exit -1
 }
 trap fail ERR
@@ -25,6 +25,12 @@ grep -v "test_sort:" < "$OUT_FILE.cleaned1" >>  "$OUT_FILE.cleaned"
 sed -En 's/^(.*(test_sort:[^ ]*) .*)$/\2 \1/p' < "$OUT_FILE.cleaned1" |
   sort --stable --key=1,1 | sed -E 's/^(test_sort:[^ ]* )//' >>  "$OUT_FILE.cleaned"
 
+function fail() {
+    trap - ERR
+    echo "FAILED" >> "$OUT_FILE"
+    cat "$OUT_FILE"
+    exit -1
+}
 
 echo "to overwrite check: cp $OUT_FILE.cleaned $CHECK_FILE" >> "$OUT_FILE"
 diff "$OUT_FILE.cleaned" "$CHECK_FILE" >> "$OUT_FILE"

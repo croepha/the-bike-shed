@@ -1,6 +1,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <limits.h>
+#include <string.h>
 #include "common.h"
 #include "logging.h"
 #include "io.h"
@@ -12,7 +13,7 @@ u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 int io_epoll_fd = -1;
 
 void io_initialize() {
-  io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  //io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 }
 
 void io_process_events() {
@@ -48,7 +49,8 @@ void io_process_events() {
 
   struct epoll_event epes[16];
   int r1 = epoll_wait(io_epoll_fd, epes, COUNT(epes), timeout_interval_ms);
-  assert(r1 != -1 || errno == EINTR);
+  error_check(r1);
+  //assert(r1 != -1 || errno == EINTR);
 
   if (!r1) {
     switch (running_timer) {

@@ -84,9 +84,9 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
   INFO("IO Event %s type:%d buf:'%s'", name, data.my_data.event_type, buf);
   { LOGCTX("\t"); log_ep_event(epe); }
   r = dprintf(sockets[data.my_data.id], "REPLY%02d\n", data.my_data.id);
-  assert(r != -1);
+  error_check(r);
   r = close(sockets[data.my_data.id]);
-  assert(r != -1);
+  error_check(r);
   events_pending--;
 }
 
@@ -130,7 +130,8 @@ int main() { int r;
     sockets[i] = sv[0];
 
     pid_t fork_pid = fork();
-    assert(fork_pid != -1);
+    error_check(fork_pid);
+
     if (!fork_pid) { LOGCTX("forked:%02d", i);
       r = close(sv[0]); error_check(r);
 
@@ -145,7 +146,7 @@ int main() { int r;
       error_check(r);
 
       r = dprintf(sock, "SEND%02d\n", i); error_check(r);
-      assert(r != -1);
+      error_check(r);
       char buf[256]; sock_read_line(sock, buf, sizeof buf);
       exit(0);
     }
