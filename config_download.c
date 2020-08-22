@@ -3,7 +3,6 @@
 #include "common.h"
 #include "logging.h"
 
-
 void handle_line(char* line);
 
 
