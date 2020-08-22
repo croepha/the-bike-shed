@@ -12,53 +12,31 @@ usz  leftover_used;
 
 // It is likely that size is large, containing many lines
 void handle_data(char* data, usz size) {
-  if (leftover_used) { // Rare case, resuming with some leftover data
-    char* endp = memchr(data, '\n', size);
-    usz next = -1;
-    if (endp) {
-      *endp = 0;
-      next = (endp-data)+1;
-    }
-
-    if (leftover_used + next > leftover_SIZE) {
-      ERROR("Line too long, throwing it out");
-      if (endp) {
+  for (;;) {
+    char* nl = memchr(data, '\n', size);
+    if (nl) {
+      nl++;
+      if (nl - data > leftover_SIZE - leftover_used) {
+        ERROR("Line too long, throwing it out");
+        size -= leftover_SIZE - leftover_used;
+        data = nl;
         leftover_used = 0;
-        data += next;
-        size -= next;
       } else {
-        leftover_used = leftover_SIZE;
+        memcpy(leftover + leftover_used, data, nl - data);
+        handle_line(leftover);
+        size -= nl - data;
+        data += nl - data;
+        leftover_used = 0;
+      }
+    } else {
+      if (leftover_used + size < leftover_SIZE) {
+        memcpy(leftover + leftover_used, data, size);
+        leftover_used += size;
+      } else {
         ERROR("Couldn't find end of line, and out of space, throw out continued first line in next data set");
-        return;
-      }
-    } else {
-      memcpy(leftover + leftover_used, data, next);
-      handle_line(leftover);
-      data += next;
-      size -= next;
-    }
-  }
-
-  for(;;) {
-    char* endp = memchr(data, '\n', size);
-    usz next = -1;
-    if (endp) {
-      *endp = 0;
-      next = (endp-data)+1;
-      handle_line(data);
-      data += next;
-      size -= next;
-    } else {
-      if (size >= leftover_SIZE) {
         leftover_used = leftover_SIZE;
-        ERROR("Leftover data would oveflow, size:%ld, throwing out the data", size);
-        return;
-      } else {
-        memcpy(leftover, data, size);
-        leftover_used = size;
-        DEBUG("leftover size:%ld\n", size);
-        return;
       }
+      break;
     }
   }
 }

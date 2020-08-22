@@ -21,7 +21,7 @@ $EXEC 2>&1 | tee "$OUT_FILE.raw" |
 # remove timestamp, and also line number and addresses, if they shift around, we dont want the test to fail...
 sed -E $'s/^[0-9a-f]+[.][0-9]{3}: ((DEBUG| INFO| WARN|ERROR|FATAL):.*\t)\((.*):.* .*:(.*)\)$/\\1(\\3 \\4)/' < "$OUT_FILE.raw" > "$OUT_FILE.cleaned1"
 
-grep -v "test_sort:" < "$OUT_FILE.cleaned1" >>  "$OUT_FILE.cleaned"
+grep -av "test_sort:" < "$OUT_FILE.cleaned1" >>  "$OUT_FILE.cleaned"
 sed -En 's/^(.*(test_sort:[^ ]*) .*)$/\2 \1/p' < "$OUT_FILE.cleaned1" |
   sort --stable --key=1,1 | sed -E 's/^(test_sort:[^ ]* )//' >>  "$OUT_FILE.cleaned"
 

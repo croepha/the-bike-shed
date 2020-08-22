@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "common.h"
 #include "io.h"
 #include "io_curl.h"
@@ -119,6 +120,32 @@ void _log(const char* severity, const char*file, const char*func, int line, char
   va_list va; va_start(va, fmt); VLOGF(fmt, va); va_end(va);
   LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
 }
+
+void _log_buffer(const char* severity, const char*file, const char*func, int line, char* buf, usz buf_size,  char* fmt, ...) {
+  struct timespec tp;
+  int r = clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
+  if (r != 0) {
+    tp.tv_sec  = 0;
+    tp.tv_nsec = 0;
+    assert(0);
+  }
+
+  void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
+  //line = 0; // We dont want output to change for tests when lines move
+  LOGF("%06lx.%03ld: %s:%s ", tp.tv_sec, tp.tv_nsec / 1000000, severity, _log_ctx_buffer);
+  va_list va; va_start(va, fmt); VLOGF(fmt, va); va_end(va);
+  LOGF(" `");
+  for (usz i = 0; i < buf_size; i++) {
+    if (isprint(buf[i])) {
+      LOGF("%c", buf[i]);
+    } else {
+      LOGF("\\x%02d", buf[i]);
+    }
+  }
+  LOGF("`");
+  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
+}
+
 
 int _log_context_push(char* fmt, ...) {
   va_list args;

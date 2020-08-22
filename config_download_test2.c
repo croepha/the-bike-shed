@@ -1,4 +1,5 @@
 
+#include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
 #include "config_download.c"
@@ -7,7 +8,8 @@
 void handle_data(char* data, usz size);
 
 void handle_line(char* line) {
-  INFO("line: %s", line);
+  usz len = strlen(line);
+  INFO_BUFFER("line: len:%ld data:", line, len, len);
 }
 
 usz  const  data_LEN = leftover_SIZE * 50;
@@ -15,13 +17,15 @@ char  data[data_LEN];
 usz   data_consumed;
 
 void data_send(usz len) {
-  INFO("Handling data len:%ld", len);
   assert(data_consumed + len < data_LEN);
-  handle_data(data, len);
+  INFO_BUFFER("len:%ld data:", data, len, len);
+  handle_data(data + data_consumed, len);
   data_consumed += len;
 }
 
 int main() { int r;
+  setlinebuf(stderr);
+  r = alarm(1); error_check(r);
 
   {
     usz data_filled = 0;
