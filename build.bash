@@ -160,15 +160,7 @@ EOF
 
 do_test io_core_test /build/io_core_test.dbg.exec
 do_test io_curl_test /build/io_curl_test.dbg.exec
-do_test config_download_test /build/config_download_test.dbg.exec
 do_test config_download_test2 /build/config_download_test2.dbg.exec
-
-
-
-reset
-FLAVOR=test depends_on logging
-compile config_download_test
-link_exec config_download_test
 
 reset
 FLAVOR=test depends_on logging
