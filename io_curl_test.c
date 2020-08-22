@@ -93,21 +93,25 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
     }
   }
 
-  curl_easy_setopt(c->curl, CURLOPT_HTTPHEADER, c->headers_list);
-  curl_easy_setopt(c->curl, CURLOPT_HEADERFUNCTION, _header_callback);
-  curl_easy_setopt(c->curl, CURLOPT_WRITEFUNCTION, _write_function);
-  if (previous_mod_time) {
-    curl_easy_setopt(c->curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
-    curl_easy_setopt(c->curl, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)previous_mod_time);
+  {
+    CURL* easy = c->curl;
+    CURLESET(HTTPHEADER, c->headers_list);
+    CURLESET(HEADERFUNCTION, _header_callback);
+    CURLESET(WRITEFUNCTION, _write_function);
+    if (previous_mod_time) {
+      CURLESET(TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
+      CURLESET(TIMEVALUE_LARGE, (curl_off_t)previous_mod_time);
+    }
+    //CURLESET(COOKIEFILE, "");
+    CURLESET(USERAGENT, "the-bike-shed/0");
+    //CURLESET(VERBOSE, 1);
+    CURLESET(MAXREDIRS, 50L);
+    CURLESET(PRIVATE, c);
+    CURLESET(WRITEDATA, c);
+    CURLESET(HEADERDATA, c);
+    CURLESET(URL, url);
+
   }
-  //curl_easy_setopt(c->curl, CURLOPT_COOKIEFILE, "");
-  curl_easy_setopt(c->curl, CURLOPT_USERAGENT, "the-bike-shed/0");
-  //curl_easy_setopt(c->curl, CURLOPT_VERBOSE, 1);
-  curl_easy_setopt(c->curl, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(c->curl, CURLOPT_PRIVATE, c);
-  curl_easy_setopt(c->curl, CURLOPT_WRITEDATA, c);
-  curl_easy_setopt(c->curl, CURLOPT_HEADERDATA, c);
-  curl_easy_setopt(c->curl, CURLOPT_URL, url);
 
 }
 
@@ -157,12 +161,7 @@ void _perform_all() {
       if (is_success == 1) {
         unsigned char hash[SHA256_DIGEST_LENGTH];
         SHA256_Final(hash, &c->sha256);
-
-        printf("%d ", c->id);
-        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-          printf("%02x", hash[i]);
-        }
-        printf("\n");
+        INFO_HEXBUFFER("", hash, SHA256_DIGEST_LENGTH);
       }
       _dl_free(c);
     }

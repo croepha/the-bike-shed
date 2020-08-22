@@ -41,6 +41,10 @@ void handle_data(char* data, usz size) {
   }
 }
 
+char percon_config_etag[32];
+u64  percon_config_modtime_sec;
+
+
 
 
 // #include <inttypes.h>
