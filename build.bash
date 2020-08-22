@@ -146,19 +146,32 @@ rule test
  description = TEST $out
 EOF
 
+function do_test() {
+  NAME=$1
+  EXEC=$2
+cat << EOF >> /build/build.ninja
+build /build/$NAME.test_results: test /workspaces/the-bike-shed/io_core_test.bash $EXEC $NAME.expected_output
+EOF
+
+}
+
 cat << EOF >> /build/build.ninja
 build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
 build /build/io_core_test.test_results: test /workspaces/the-bike-shed/io_core_test.bash /build/io_core_test.dbg.exec io_core_test.expected_output
 build /build/io_curl_test.test_results: test /workspaces/the-bike-shed/io_curl_test.bash /build/io_curl_test.dbg.exec io_curl_test.expected_output
+build /build/config_download_test.test_results: test /workspaces/the-bike-shed/io_curl_test.bash /build/io_curl_test.dbg.exec io_curl_test.expected_output
 
 EOF
 
 reset
 FLAVOR=test depends_on logging
-compile config_download
 compile config_download_test
 link_exec config_download_test
 
+reset
+FLAVOR=test depends_on logging
+compile config_download_test2
+link_exec config_download_test2
 
 reset
 FLAVOR=test depends_on logging

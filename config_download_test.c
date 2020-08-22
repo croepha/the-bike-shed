@@ -6,40 +6,41 @@
 
 void handle_data(char* data, usz size);
 
+char test_buf[2048];
+usz  test_buf_used;
+char line_chars[128];
+usz  line_lens[128];
+usz  line_count;
+usz  lines_done;
+
 void handle_line(char* line) {
-  INFO("line: %s", line);
-}
-
-usz  const  data_LEN = leftover_SIZE * 50;
-char  data[data_LEN];
-usz   data_consumed;
-
-void data_send(usz len) {
-  INFO("Handling data len:%ld", len);
-  assert(data_consumed + len < data_LEN);
-  handle_data(data, len);
-  data_consumed += len;
-}
-
-
-int main() { int r;
-
-  {
-    usz data_filled = 0;
-    for (int i = 0; ; i++) {
-      usz size_left = data_LEN - data_filled;
-      r = snprintf(data + data_filled, size_left, "Some Line %d\n", i);
-      error_check(r);
-      if (r >= size_left) { break; }
-      data_filled +=  r;
-    }
+  usz len = strlen(line);
+  INFO("%c, %ld", *line, len);
+  if (len) {
+    assert(line_chars[0] == *line);
   }
+  assert(line_lens[0] == len);
+  memmove(line_chars, line_chars + 1, line_count - 1);
+  memmove(line_lens, line_lens + 1, line_count - 1);
+  line_count--;
+  lines_done++;
+}
 
-  data_send(0);
-  data_send(1);
+void add_test_line(usz len) {
+  static char c = 'a';
+  memset(test_buf + test_buf_used, c, len);
+  test_buf[test_buf_used + len] = '\n';
+  line_chars[line_count] = c;
+  line_lens [line_count] = len;
+  test_buf_used += len + 1;
+  line_count++;
+  c++;
+  if (c > 'z') {
+    c = 'a';
+  }
+}
 
-
-
+int main() {
   add_test_line(10);
   handle_data(test_buf, 11);
   assert(lines_done == 1);
