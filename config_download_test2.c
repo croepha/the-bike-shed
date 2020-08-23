@@ -9,7 +9,7 @@ void handle_data(char* data, usz size);
 
 void handle_line(char* line) {
   usz len = strlen(line);
-  INFO_BUFFER("line: len:%ld data:", line, len, len);
+  INFO_BUFFER(line, len, "line: len:%ld data:", len);
 }
 
 usz  const  data_LEN = leftover_SIZE * 50;
@@ -18,7 +18,7 @@ usz   data_consumed;
 
 void data_send(usz len) {
   assert(data_consumed + len < data_LEN);
-  INFO_BUFFER("len:%ld data:", data, len, len);
+  INFO_BUFFER( data, len, "len:%ld data:", len);
   handle_data(data + data_consumed, len);
   data_consumed += len;
 }

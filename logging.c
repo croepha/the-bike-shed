@@ -106,8 +106,8 @@ static void  buf_add(char const * fmt, ...) {
 #endif // LOGGING_USE_EMAIL
 
 
-void _log_buffer(const char* severity, const char*file, const char*func, int line,
-                 enum _log_options options, u8* buf, usz buf_size, char* fmt, ...) {
+void _log(const char* severity, const char*file, const char*func, int line,
+          enum _log_options options, u8* buf, usz buf_size, char* fmt, ...) {
   struct timespec tp;
   int r = clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
   if (r != 0) {
