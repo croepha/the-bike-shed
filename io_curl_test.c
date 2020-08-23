@@ -78,13 +78,19 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
 }
 
 
+
+IO_CURL_SETUP(test, _WriteCtx, curl_type);
+
+
+
+
 int pending_events;
 void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   SHA256_Init(&c->sha256);
   c->headers_list = NULL;
   c->curl_type = _io_curl_type_test;
-  c->curl = io_curl_create_handle(&c->curl_type);
+  c->curl = test_io_curl_create_handle(c);
 
   if (previous_etag) {
     char tmp[256];
@@ -152,8 +158,7 @@ u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
-void test_io_curl_complete(CURL *easy, CURLcode result, enum _io_curl_type *private) {
-  _WriteCtx *c = (_WriteCtx*)((u8*)private - offsetof(_WriteCtx, curl_type));
+void test_io_curl_complete(CURL *easy, CURLcode result, _WriteCtx *c) {
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
   pending_events --;
@@ -167,25 +172,6 @@ void test_io_curl_complete(CURL *easy, CURLcode result, enum _io_curl_type *priv
   _dl_free(c);
 }
 
-void io_curl_completed(CURL* easy, CURLcode result) {
-  void*private;
-  CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
-  error_check_curl(cr);
-
-  _WriteCtx *c = private;
-  DEBUG("c:%p", c);
-  LOGCTX(" test_sort:id:%02d", c->id);
-  pending_events --;
-  log_allowed_fails = 100;
-  u8 is_success = download_is_successful(result, easy);
-  if (is_success == 1) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_Final(hash, &c->sha256);
-    INFO_HEXBUFFER(hash, SHA256_DIGEST_LENGTH);
-  }
-  _dl_free(c);
-
-}
 
 void _perform_all() {
   while (pending_events > 0) {

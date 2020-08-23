@@ -16,9 +16,20 @@ enum _io_curl_type { _(INVALID) _IO_CURL_TYPES _(COUNT)};
 #undef _
 
 
-#define _(name) void name ## _io_curl_complete(CURL* easy, CURLcode result, enum _io_curl_type * private) __attribute__((weak_import));
+#define _(name) void __ ## name ## _io_curl_complete(CURL* easy, CURLcode result, enum _io_curl_type * private) __attribute__((weak_import));
 _IO_CURL_TYPES
 #undef  _
+
+
+#define IO_CURL_SETUP(name, struct_name, member_name) \
+static void name ## _io_curl_complete(CURL *easy, CURLcode result, struct_name *c); \
+void __ ## name ## _io_curl_complete(CURL *easy, CURLcode result, enum _io_curl_type *private) { \
+  test_io_curl_complete(easy, result, (struct_name*)((u8*)private - offsetof(struct_name, member_name))); } \
+static CURL* test_io_curl_create_handle(struct_name *c) { \
+  c->curl_type = _io_curl_type_ ## name; \
+  return io_curl_create_handle(&c-> member_name); }
+
+
 
 
 #define CURLCHECK(_m_curl_code) ({ \
@@ -60,3 +71,4 @@ void io_curl_completed(CURL* easy, CURLcode result);
 
 CURL* io_curl_create_handle();
 void io_curl_process_events();
+

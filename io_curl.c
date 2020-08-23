@@ -83,7 +83,7 @@ void io_curl_process_events() {
       enum _io_curl_type * private;
       CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
       error_check_curl(cr);
-#define _(name) case _io_curl_type_ ## name: { assert(name ## _io_curl_complete); name ## _io_curl_complete(easy, result, private); } break;
+#define _(name) case _io_curl_type_ ## name: { assert(__ ## name ## _io_curl_complete); __ ## name ## _io_curl_complete(easy, result, private); } break;
       switch (*private) { _IO_CURL_TYPES
         case _io_curl_type_INVALID: case _io_curl_type_COUNT:
         SWITCH_DEFAULT_IS_UNEXPECTED;
