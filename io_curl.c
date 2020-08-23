@@ -31,12 +31,9 @@ void io_curl_timeout() {
 
 void io_curl_io_event(struct epoll_event epe) {
   int curl_ev = 0;
-  if (epe.events & EPOLLERR)
-    curl_ev |= CURL_CSELECT_ERR;
-  if (epe.events & EPOLLIN)
-    curl_ev |= CURL_CSELECT_IN;
-  if (epe.events & EPOLLOUT)
-    curl_ev |= CURL_CSELECT_OUT;
+  if (epe.events & EPOLLERR) curl_ev |= CURL_CSELECT_ERR;
+  if (epe.events & EPOLLIN ) curl_ev |= CURL_CSELECT_IN;
+  if (epe.events & EPOLLOUT) curl_ev |= CURL_CSELECT_OUT;
   int running_handles;
   io_EPData data = {.data = epe.data};
   CURLMcode mr = curl_multi_socket_action(multi, data.my_data.id, curl_ev, &running_handles);
@@ -70,8 +67,6 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
     return 0;
 }
 
-
-
 void io_curl_process_events() {
 
   CURLMsg *curl_msg;
@@ -84,15 +79,35 @@ void io_curl_process_events() {
       easy = curl_msg->easy_handle;
       CURLMcode mr = curl_multi_remove_handle(multi, easy);
       error_check_curlm(mr);
-      io_curl_completed(easy, result);
+
+      enum _io_curl_type * private;
+      CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
+      error_check_curl(cr);
+#define _(name) case _io_curl_type_ ## name: { assert(name ## _io_curl_complete); name ## _io_curl_complete(easy, result, private); } break;
+      switch (*private) { _IO_CURL_TYPES
+        case _io_curl_type_INVALID: case _io_curl_type_COUNT:
+        SWITCH_DEFAULT_IS_UNEXPECTED;
+      }
+#undef _
     } else {
       ERROR("unknown\n");
     }
   }
-
-
-
 }
+
+
+CURL* io_curl_create_handle(enum _io_curl_type * private) {
+  CURL *easy = curl_easy_init();
+  assert(easy);
+  CURLESET(PRIVATE, private);
+  CURLMcode mr = curl_multi_add_handle(multi, easy);
+  error_check_curlm(mr);
+  CURLcode cr = curl_easy_setopt(easy, CURLOPT_SHARE, share);
+  error_check_curl(cr);
+  return easy;
+}
+
+
 
 void io_curl_initialize() { CURLMcode mr; CURLcode cr; CURLSHcode sr;
   curl_version_info_data data = *curl_version_info(CURLVERSION_NOW);
@@ -115,15 +130,4 @@ void io_curl_initialize() { CURLMcode mr; CURLcode cr; CURLSHcode sr;
 }
 
 //  curl_share_cleanup(share);
-
-
-CURL* io_curl_create_handle() {
-  CURL* ret = curl_easy_init();
-  assert(ret);
-  CURLMcode mr = curl_multi_add_handle(multi, ret);
-  error_check_curlm(mr);
-  CURLcode cr = curl_easy_setopt(ret, CURLOPT_SHARE, share);
-  error_check_curl(cr);
-  return ret;
-}
 

@@ -6,13 +6,19 @@
 #include "common.h"
 
 #define _IO_CURL_TYPES \
+  _(test) \
   _(logging) \
   _(config_download) \
 
 
 #define _(name) _io_curl_type_ ## name,
-enum _io_curl_type { _(INVALID) _IO_TIMERS _(COUNT)};
+enum _io_curl_type { _(INVALID) _IO_CURL_TYPES _(COUNT)};
 #undef _
+
+
+#define _(name) void name ## _io_curl_complete(CURL* easy, CURLcode result, enum _io_curl_type * private) __attribute__((weak_import));
+_IO_CURL_TYPES
+#undef  _
 
 
 #define CURLCHECK(_m_curl_code) ({ \
@@ -50,7 +56,7 @@ static char const * _error_check_CURLSHcode(CURLSHcode c) {
 #define error_check_curlm( err) ({ char const * error_check_s = _error_check_CURLMcode (err); if (error_check_s) { ERROR("Error  CURLMcode:%d:%s", err, error_check_s); } })
 #define error_check_curlsh(err) ({ char const * error_check_s = _error_check_CURLSHcode(err); if (error_check_s) { ERROR("Error CURLSHcode:%d:%s", err, error_check_s); } })
 
-void io_curl_completed(char* easy, CURLcode result);
+void io_curl_completed(CURL* easy, CURLcode result);
 
 CURL* io_curl_create_handle();
 void io_curl_process_events();

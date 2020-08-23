@@ -111,10 +111,6 @@ compile    io_curl_test
 link_exec  io_curl_test -l curl -l crypto
 
 reset
-compile    log_testing
-link_exec  log_testing
-
-reset
 compile argon2/opt       -Iargon2
 compile argon2/encoding  -Iargon2
 compile argon2/thread    -Iargon2

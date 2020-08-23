@@ -32,6 +32,7 @@ typedef struct {
     struct curl_slist* headers_list;
     char etag[32];
     u64  modified_time;
+    enum _io_curl_type curl_type;
 } _WriteCtx;
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
@@ -82,7 +83,8 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   SHA256_Init(&c->sha256);
   c->headers_list = NULL;
-  c->curl = io_curl_create_handle();
+  c->curl_type = _io_curl_type_test;
+  c->curl = io_curl_create_handle(&c->curl_type);
 
   if (previous_etag) {
     char tmp[256];
@@ -107,7 +109,6 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
     CURLESET(USERAGENT, "the-bike-shed/0");
     //CURLESET(VERBOSE, 1);
     CURLESET(MAXREDIRS, 50L);
-    CURLESET(PRIVATE, c);
     CURLESET(WRITEDATA, c);
     CURLESET(HEADERDATA, c);
     CURLESET(URL, url);
@@ -151,7 +152,22 @@ u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
-void io_curl_completed(char* easy, CURLcode result) {
+void test_io_curl_complete(CURL *easy, CURLcode result, enum _io_curl_type *private) {
+  _WriteCtx *c = (_WriteCtx*)((u8*)private - offsetof(_WriteCtx, curl_type));
+  DEBUG("c:%p", c);
+  LOGCTX(" test_sort:id:%02d", c->id);
+  pending_events --;
+  log_allowed_fails = 100;
+  u8 is_success = download_is_successful(result, easy);
+  if (is_success == 1) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_Final(hash, &c->sha256);
+    INFO_HEXBUFFER(hash, SHA256_DIGEST_LENGTH);
+  }
+  _dl_free(c);
+}
+
+void io_curl_completed(CURL* easy, CURLcode result) {
   void*private;
   CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
   error_check_curl(cr);
