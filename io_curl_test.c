@@ -145,26 +145,32 @@ u8 download_is_successful(CURLcode result, CURL* easy) {
   }
 }
 
+int pending_events;
+void io_curl_completed2(char* easy, CURLcode result, void*private) {
+  _WriteCtx *c = private;
+  DEBUG("c:%p", c);
+  LOGCTX(" test_sort:id:%02d", c->id);
+  pending_events --;
+  log_allowed_fails = 100;
+  u8 is_success = download_is_successful(result, easy);
+  if (is_success == 1) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_Final(hash, &c->sha256);
+    INFO_HEXBUFFER(hash, SHA256_DIGEST_LENGTH);
+  }
+  _dl_free(c);
+
+}
 
 void _perform_all() {
-  int running = 3;
-  while (running > 0) {
+  pending_events = 3;
+  while (pending_events > 0) {
 
     io_process_events();
 
     CURLcode result; CURL* easy = 0; _WriteCtx *c;
     while (io_curl_completed(&easy, &result, &c)) {
-      DEBUG("c:%p", c);
-      LOGCTX(" test_sort:id:%02d", c->id);
-      running --;
-      log_allowed_fails = 100;
-      u8 is_success = download_is_successful(result, easy);
-      if (is_success == 1) {
-        unsigned char hash[SHA256_DIGEST_LENGTH];
-        SHA256_Final(hash, &c->sha256);
-        INFO_HEXBUFFER(hash, SHA256_DIGEST_LENGTH);
-      }
-      _dl_free(c);
+      io_curl_completed2(easy, result, c);
     }
   }
 }
