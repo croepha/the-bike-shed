@@ -77,6 +77,7 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
 }
 
 
+int pending_events;
 void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   SHA256_Init(&c->sha256);
@@ -112,6 +113,7 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
     CURLESET(URL, url);
 
   }
+  pending_events ++;
 
 }
 
@@ -145,7 +147,6 @@ u8 download_is_successful(CURLcode result, CURL* easy) {
   }
 }
 
-int pending_events;
 void io_curl_completed(char* easy, CURLcode result) {
   void*private;
   CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
@@ -167,7 +168,6 @@ void io_curl_completed(char* easy, CURLcode result) {
 }
 
 void _perform_all() {
-  pending_events = 3;
   while (pending_events > 0) {
 
     io_process_events();
