@@ -76,7 +76,7 @@ void io_curl_process_events() {
 
   CURLMsg *curl_msg;
   int curl_msg_left = 0;
-  CURLcode result; CURL* easy = 0; void *private;
+  CURLcode result; CURL* easy = 0;
 
   while (( curl_msg = curl_multi_info_read(multi, &curl_msg_left) )) {
     if (curl_msg->msg == CURLMSG_DONE) {
@@ -84,9 +84,7 @@ void io_curl_process_events() {
       easy = curl_msg->easy_handle;
       CURLMcode mr = curl_multi_remove_handle(multi, easy);
       error_check_curlm(mr);
-      CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
-      error_check_curl(cr);
-      io_curl_completed(easy, result, private);
+      io_curl_completed(easy, result);
     } else {
       ERROR("unknown\n");
     }

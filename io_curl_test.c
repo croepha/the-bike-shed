@@ -146,7 +146,11 @@ u8 download_is_successful(CURLcode result, CURL* easy) {
 }
 
 int pending_events;
-void io_curl_completed(char* easy, CURLcode result, void*private) {
+void io_curl_completed(char* easy, CURLcode result) {
+  void*private;
+  CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
+  error_check_curl(cr);
+
   _WriteCtx *c = private;
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
