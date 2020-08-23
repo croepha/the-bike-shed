@@ -78,7 +78,8 @@ u8 io_curl_completed(CURL**easy, CURLcode*result, void*private) {
     if (curl_msg->msg == CURLMSG_DONE) {
       *result = curl_msg->data.result;
       *easy = curl_msg->easy_handle;
-      curl_easy_getinfo(*easy, CURLINFO_PRIVATE, private);
+      CURLcode cr = curl_easy_getinfo(*easy, CURLINFO_PRIVATE, private);
+      error_check_curl(cr);
       return 1;
     } else {
       DEBUG("unknown\n");

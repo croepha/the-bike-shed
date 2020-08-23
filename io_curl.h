@@ -18,6 +18,7 @@
     curl_easy_strerror(_m_curl_code)); } \
 })
 
+#define error_check_curl(err) ({ if ((err)!= CURLE_OK) { ERROR("Curl error:%d:%s", err, curl_easy_strerror(err)); } })
 
 u8 io_curl_completed(CURL**easy, CURLcode*result, void*private);
 CURL* io_curl_create_handle();

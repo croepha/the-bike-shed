@@ -1,6 +1,6 @@
 
 // TODO: Write test for timeout on really slow url
-
+#define LOG_DEBUG
 #include <stdlib.h>
 #include <string.h>
 
@@ -78,7 +78,7 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
 
 
 void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
-  memset(c, 0, sizeof *c);
+  DEBUG("c:%p id:%02d", c, c->id);
   SHA256_Init(&c->sha256);
   c->headers_list = NULL;
   c->curl = io_curl_create_handle();
@@ -154,7 +154,8 @@ void _perform_all() {
 
     CURLcode result; CURL* easy = 0; _WriteCtx *c;
     while (io_curl_completed(&easy, &result, &c)) {
-      LOGCTX(" id:%d", c->id);
+      DEBUG("c:%p", c);
+      LOGCTX(" test_sort:id:%02d", c->id);
       running --;
       log_allowed_fails = 100;
       u8 is_success = download_is_successful(result, easy);
@@ -193,13 +194,13 @@ void download_test() {
 
   _perform_all();
 
-  _WriteCtx c4 = {.id = 1};
+  _WriteCtx c4 = {.id = 4};
   _dl(&c4, url, c1.etag, c1.modified_time);
 
-  _WriteCtx c5 = {.id = 2};
+  _WriteCtx c5 = {.id = 5};
   _dl(&c5, url, 0, 0);
 
-  _WriteCtx c6 = {.id = 3};
+  _WriteCtx c6 = {.id = 6};
   _dl(&c6, url2, 0, 0);
 
   _perform_all();
