@@ -42,8 +42,8 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
     if (c->print_time + 500 < now) {
         c->print_time = now;
         double total_size;
-        int r1 = curl_easy_getinfo(c->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &total_size);
-        assert(!r1);
+        CURLcode cr = curl_easy_getinfo(c->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &total_size);
+        error_check_curl(cr);
         DEBUG("%d, %f ", c->id, (float)c->downloaded/(float)total_size);
     }
     // print("size", size, "nmemb", nmemb);
@@ -120,15 +120,19 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
 void _dl_free(_WriteCtx *c) {
   curl_slist_free_all(c->headers_list);
   curl_easy_cleanup(c->curl);
+
 }
 
-u8 download_is_successful(CURLcode result, CURL* easy) {
+u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   if (result == CURLE_OK) {
     long proto;
-    curl_easy_getinfo(easy, CURLINFO_PROTOCOL, &proto);
+    cr = curl_easy_getinfo(easy, CURLINFO_PROTOCOL, &proto);
+    error_check_curl(cr);
+
     if (proto == CURLPROTO_HTTP || proto == CURLPROTO_HTTPS ) {
       long response_code;
-      curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
+      cr = curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
+      error_check_curl(cr);
       if (response_code == 200) {
         return 1;
       } if (response_code == 304) {
