@@ -5,6 +5,16 @@
 
 #include "common.h"
 
+#define _IO_CURL_TYPES \
+  _(logging) \
+  _(config_download) \
+
+
+#define _(name) _io_curl_type_ ## name,
+enum _io_curl_type { _(INVALID) _IO_TIMERS _(COUNT)};
+#undef _
+
+
 #define CURLCHECK(_m_curl_code) ({ \
   if (_m_curl_code != CURLE_OK) { \
     ERROR("CURLCODE:%s", curl_easy_strerror(_m_curl_code)); } \
