@@ -107,7 +107,7 @@ static void  buf_add(char const * fmt, ...) {
 
 
 void _log(const char* severity, const char*file, const char*func, int line,
-          enum _log_options options, u8* buf, usz buf_size, char* fmt, ...) {
+          enum _log_options options, char* buf, usz buf_size, char* fmt, ...) {
   struct timespec tp;
   int r = clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
   if (r != 0) {
@@ -128,7 +128,7 @@ void _log(const char* severity, const char*file, const char*func, int line,
         if (isprint(buf[i])) {
           LOGF("%c", buf[i]);
         } else {
-          LOGF("\\x%02d", buf[i]);
+          LOGF("\\x%02x", buf[i]);
         }
       }
       LOGF("`");
@@ -136,7 +136,7 @@ void _log(const char* severity, const char*file, const char*func, int line,
     case _log_options_buffer_hex: {
       LOGF(" [");
       for (usz i = 0; i < buf_size; i++) {
-        LOGF("%02x", buf[i]);
+        LOGF("%02hhx", buf[i]);
       }
       LOGF("]");
     } break;

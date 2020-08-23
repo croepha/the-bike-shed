@@ -11,7 +11,7 @@ int  _log_context_push(char* fmt, ...) __attribute__((__format__ (__printf__, 1,
 void _log_context_pop(int*original_len);
 
 void _log(const char* severity, const char*file, const char*func, int line,
-                 enum _log_options options, u8* buf, usz buf_size, char* fmt, ...)
+                 enum _log_options options, char* buf, usz buf_size, char* fmt, ...)
           __attribute__((__format__ (__printf__, 8, 9)));
 
 extern __thread int log_allowed_fails;
@@ -27,7 +27,7 @@ extern __thread int log_allowed_fails;
 
 
 #define LOG(severity, options, buf, buf_size, ...) \
-  _log(severity, __FILE__, __FUNCTION__, __LINE__, _log_options_ ## options, (u8*)(buf), buf_size, "" __VA_ARGS__)
+  _log(severity, __FILE__, __FUNCTION__, __LINE__, _log_options_ ## options, (buf), buf_size, "" __VA_ARGS__)
 #if ABORT_ON_ERROR
 #define FLOG(...) ({ LOG(__VA_ARGS__); if(log_allowed_fails-- <0) { abort(); }})
 #else
@@ -35,15 +35,14 @@ extern __thread int log_allowed_fails;
 #endif
 
 
-#define  INFO(          ...)  LOG(" INFO", plain, 0, 0,   __VA_ARGS__)
-#define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string, __VA_ARGS__)
-#define  INFO_HEXBUFFER(...)  LOG(" INFO", buffer_hex   , __VA_ARGS__)
-#define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,   __VA_ARGS__)
-#define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string, __VA_ARGS__)
-#define  WARN(          ...) FLOG(" WARN", plain, 0, 0,   __VA_ARGS__)
-#define ERROR(          ...) FLOG("ERROR", plain, 0, 0,   __VA_ARGS__)
-#define FATAL(          ...) FLOG("FATAL", plain, 0, 0,   __VA_ARGS__)
-
+#define  INFO(          ...)  LOG(" INFO", plain, 0, 0,      __VA_ARGS__)
+#define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string,    __VA_ARGS__)
+#define  INFO_HEXBUFFER(...)  LOG(" INFO", buffer_hex,(char*)__VA_ARGS__)
+#define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
+#define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
+#define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
+#define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
+#define FATAL(          ...) FLOG("FATAL", plain, 0, 0,      __VA_ARGS__)
 
 #ifndef LOG_DEBUG
 #undef DEBUG
@@ -52,5 +51,5 @@ extern __thread int log_allowed_fails;
 
 extern const char * const sys_errlist[];
 extern int sys_nerr;
-#define assert(expr)      ({if (!(expr))    { ERROR("Assert failed: (%s)", #expr); } })
+#define assert(expr)      ({if (!(expr))     { ERROR("Assert failed: (%s)", #expr); } })
 #define error_check(err)  ({if ((err) == -1) { ERROR("Posix like error:(%s)==-1 errno:%d:%s", #err, errno, errno < sys_nerr ? sys_errlist[errno] : "Unkown Error"); } })
