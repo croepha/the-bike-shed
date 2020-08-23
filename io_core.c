@@ -16,6 +16,7 @@ void io_initialize() {
   io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 }
 
+
 void io_process_events() {
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
@@ -74,7 +75,6 @@ void io_process_events() {
       }
     }
   }
-
 }
 
 

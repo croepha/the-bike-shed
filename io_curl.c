@@ -70,23 +70,30 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
     return 0;
 }
 
-u8 io_curl_completed(CURL**easy, CURLcode*result, void*private) {
+
+
+void io_curl_process_events() {
+
   CURLMsg *curl_msg;
   int curl_msg_left = 0;
+  CURLcode result; CURL* easy = 0; void *private;
+
   while (( curl_msg = curl_multi_info_read(multi, &curl_msg_left) )) {
     if (curl_msg->msg == CURLMSG_DONE) {
-      *result = curl_msg->data.result;
-      *easy = curl_msg->easy_handle;
-      CURLMcode mr = curl_multi_remove_handle(multi, *easy);
+      result = curl_msg->data.result;
+      easy = curl_msg->easy_handle;
+      CURLMcode mr = curl_multi_remove_handle(multi, easy);
       error_check_curlm(mr);
-      CURLcode cr = curl_easy_getinfo(*easy, CURLINFO_PRIVATE, private);
+      CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
       error_check_curl(cr);
-      return 1;
+      io_curl_completed(easy, result, private);
     } else {
       ERROR("unknown\n");
     }
   }
-  return 0;
+
+
+
 }
 
 void io_curl_initialize() { CURLMcode mr; CURLcode cr; CURLSHcode sr;

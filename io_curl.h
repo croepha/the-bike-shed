@@ -40,5 +40,7 @@ static char const * _error_check_CURLSHcode(CURLSHcode c) {
 #define error_check_curlm( err) ({ char const * error_check_s = _error_check_CURLMcode (err); if (error_check_s) { ERROR("Error  CURLMcode:%d:%s", err, error_check_s); } })
 #define error_check_curlsh(err) ({ char const * error_check_s = _error_check_CURLSHcode(err); if (error_check_s) { ERROR("Error CURLSHcode:%d:%s", err, error_check_s); } })
 
-u8 io_curl_completed(CURL**easy, CURLcode*result, void*private);
+void io_curl_completed(char* easy, CURLcode result, void*private);
+
 CURL* io_curl_create_handle();
+void io_curl_process_events();

@@ -146,7 +146,7 @@ u8 download_is_successful(CURLcode result, CURL* easy) {
 }
 
 int pending_events;
-void io_curl_completed2(char* easy, CURLcode result, void*private) {
+void io_curl_completed(char* easy, CURLcode result, void*private) {
   _WriteCtx *c = private;
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
@@ -167,11 +167,7 @@ void _perform_all() {
   while (pending_events > 0) {
 
     io_process_events();
-
-    CURLcode result; CURL* easy = 0; _WriteCtx *c;
-    while (io_curl_completed(&easy, &result, &c)) {
-      io_curl_completed2(easy, result, c);
-    }
+    io_curl_process_events();
   }
 }
 
