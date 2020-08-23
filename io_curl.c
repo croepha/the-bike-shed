@@ -50,8 +50,8 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
 
     switch (action) { SWITCH_DEFAULT_IS_UNEXPECTED;
       case CURL_POLL_REMOVE: break;
-      case CURL_POLL_IN : { epe.events=EPOLLIN ; } break;
-      case CURL_POLL_OUT: { epe.events=EPOLLOUT; } break;
+      case CURL_POLL_IN   : { epe.events=EPOLLIN           ; } break;
+      case CURL_POLL_OUT  : { epe.events=EPOLLOUT          ; } break;
       case CURL_POLL_INOUT: { epe.events=EPOLLIN & EPOLLOUT; } break;
     };
 
