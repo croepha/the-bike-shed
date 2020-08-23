@@ -57,11 +57,11 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
 static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *userdata) {
   _WriteCtx * c = userdata;
   buffer[nitems-2] = 0;
-  DEBUG("Got header: '%s'", buffer);
+  DEBUG_BUFFER("Got header:", buffer, nitems);
   struct ParsedHeader header =  parse_header(buffer);
   switch (header.type) { default: break;
     case HEADER_TYPE_ETAG: {
-      DEBUG("HEADER_TYPE_ETAG %s\n", header.value);
+      DEBUG("HEADER_TYPE_ETAG %s", header.value);
       size_t etag_len = strlen(header.value);
       if (etag_len < sizeof c->etag) {
         memcpy(c->etag, header.value, etag_len + 1);
@@ -69,7 +69,7 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
     } break;
     case HEADER_TYPE_LAST_MODIFIED: {
       u64 seconds = curl_getdate(header.value, 0);
-      DEBUG("HEADER_TYPE_LAST_MODIFIED %s %"PRId64"\n", header.value, seconds);
+      DEBUG_BUFFER("HEADER_TYPE_LAST_MODIFIED %"PRId64"", header.value, strlen(header.value), seconds);
       c->modified_time = seconds;
     } break;
   }
