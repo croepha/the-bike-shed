@@ -173,7 +173,6 @@ void io_curl_completed(char* easy, CURLcode result) {
 
 void _perform_all() {
   while (pending_events > 0) {
-
     io_process_events();
     io_curl_process_events();
   }
