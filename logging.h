@@ -49,7 +49,9 @@ extern __thread int log_allowed_fails;
 #define DEBUG(...)
 #endif
 
-extern const char * const sys_errlist[];
-extern int sys_nerr;
 #define assert(expr)      ({if (!(expr))     { ERROR("Assert failed: (%s)", #expr); } })
-#define error_check(err)  ({if ((err) == -1) { ERROR("Posix like error:(%s)==-1 errno:%d:%s", #err, errno, errno < sys_nerr ? sys_errlist[errno] : "Unkown Error"); } })
+// extern const char * const sys_errlist[];
+// extern int sys_nerr;
+// strerror(errno) -> errno < sys_nerr ? sys_errlist[errno] : "Unkown Error"
+extern char * strerror (int __errnum) __THROW;
+#define error_check(err)  ({if ((err) == -1) { ERROR("Posix like error:(%s)==-1 errno:%d:%s", #err, errno, strerror(errno)); } })

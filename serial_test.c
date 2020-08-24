@@ -21,10 +21,11 @@ grep --  'cs8'               /tmp/stty_out
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdarg.h>
 
-#define error_message(...) ({ printf("ERROR:"); printf(__VA_ARGS__); printf("\n"); fflush(stdout); assert(0); })
+#include "logging.h"
+
+//#define error_message(...) ({ printf("ERROR:"); printf(__VA_ARGS__); printf("\n"); fflush(stdout); assert(0); })
 
 // void error_message(const char* fmt, ...) {
 //   fprintf(stdout, "ERROR:");
@@ -38,13 +39,10 @@ grep --  'cs8'               /tmp/stty_out
 // }
 
 
-int set_interface_attribs (int fd, int speed, int parity) {
+int set_interface_attribs (int fd, int speed, int parity) { int r;
   struct termios tty;
-  if (tcgetattr (fd, &tty) != 0)
-  {
-    error_message ("error %d from tcgetattr", errno);
-    return -1;
-  }
+  r = tcgetattr (fd, &tty);
+  error_check(r);
 
   cfsetospeed (&tty, speed);
   cfsetispeed (&tty, speed);
@@ -68,41 +66,81 @@ int set_interface_attribs (int fd, int speed, int parity) {
   tty.c_cflag &= ~CSTOPB;
   tty.c_cflag &= ~CRTSCTS;
 
-  if (tcsetattr (fd, TCSANOW, &tty) != 0)
-  {
-    error_message ("error %d from tcsetattr", errno);
-    return -1;
-  }
+  r = tcsetattr (fd, TCSANOW, &tty);
+  error_check(r);
+
   return 0;
 }
 
-void set_blocking (int fd, int should_block) {
+void set_blocking (int fd, int should_block) { int r;
   struct termios tty;
   memset (&tty, 0, sizeof tty);
-  if (tcgetattr (fd, &tty) != 0)
-  {
-    error_message ("error %d from tggetattr", errno);
-    return;
-  }
+  r = tcgetattr (fd, &tty);
+  error_check(r);
 
   tty.c_cc[VMIN]  = should_block ? 1 : 0;
   tty.c_cc[VTIME] = 5;      // 0.5 seconds read timeout
 
-  if (tcsetattr (fd, TCSANOW, &tty) != 0)
-    error_message ("error %d setting term attributes", errno);
+  r = tcsetattr (fd, TCSANOW, &tty);
+  error_check(r);
+
 }
 
 int open_serial(char const *dev_path) {
   int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
   if (fd < 0) {
-    error_message("error %d opening %s: %s", errno, dev_path, strerror(errno));
+    ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
   }
+  error_check(fd);
   return fd;
 }
 
 
+#include <pty.h>
+
 void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
-  int fd = open_serial(path);
+
+  //int fd = open_serial(path);
+
+  int fd, follower;
+
+  int r = openpty(&fd, &follower, 0,0,0);
+  error_check(r);
+
+  pid_t child = fork();
+  error_check(child);
+  if (!child) {
+    r = close(fd);
+    error_check(r);
+    char sbuf[1024];
+    int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
+    error_check(sbuf_len);
+    assert(sbuf_len < sizeof sbuf);
+    ssz sb = write(follower, sbuf, sbuf_len);
+    error_check(sb);
+    assert(sb == sbuf_len);
+
+    for (;;) {
+      char rbuf[512];
+      ssz read_count = read(follower, rbuf, sizeof rbuf -1);
+      error_check(read_count);
+      rbuf[read_count -1] = 0;
+      INFO_BUFFER(rbuf, read_count, "Child did read: ");
+      sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
+      error_check(sbuf_len);
+      assert(sbuf_len < sizeof sbuf);
+      sb = write(follower, sbuf, sbuf_len);
+      error_check(sb);
+      assert(sb == sbuf_len);
+    }
+
+    exit(1);
+  }
+  r = close(follower);
+  error_check(r);
+
+
+  error_check(fd);
   set_interface_attribs (fd, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
   set_blocking (fd, 1);
   *inf = fdopen(fd, "r");
@@ -114,6 +152,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 int main(int argc, char**argv) {
   setbuf(stdout,0);
   setbuf(stderr,0);
+
   char*tty_path = *++argv;
   printf("ASDFASDF\n");
 

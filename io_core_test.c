@@ -91,11 +91,7 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
 }
 
 
-int main() { int r;
-  setlinebuf(stderr);
-  r = alarm(1); error_check(r);
-  io_initialize();
-
+void test_main() { int r;
   INFO("Setting timers in acending order:"); { LOGCTX("\t");
     for (int i=0; i < COUNT(timers); i++) {
       *timers[i] = 1000 + i;
@@ -173,6 +169,14 @@ int main() { int r;
   INFO("Running all events:"); { LOGCTX("\t");
     while (events_pending > 0) { io_process_events(); }
   }
+
+}
+
+int main() { int r;
+  setlinebuf(stderr);
+  r = alarm(1); error_check(r);
+  io_initialize();
+
 
   INFO("Reaping child procs");
   u8 had_error = 0;
