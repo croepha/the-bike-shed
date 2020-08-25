@@ -60,64 +60,38 @@ pi0w_host_dir="/build/pi0w-dev-host/"
 pi0w_host_lib="$pi0w_host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
 pi0w_sysroot="$pi0w_host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
 pi0w_common="--sysroot=$pi0w_sysroot $pi0w_target_flags"
-
 echo "pi0w_host_prefix=$pi0w_host_dir/bin/arm-buildroot-linux-uclibcgnueabihf" >> /build/build.ninja
-cat << 'EOF' >> /build/build.ninja
-
-EOF
 
 
-function compile() {
-O="/build/$1.c.${FLAVOR}dbg.o"
-cat << EOF >> /build/build.ninja
-build $O: cc $1.c
-  extra = -gfull -fPIC -O0 -fsanitize=address -D ABORT_ON_ERROR=1 ${@:2}
-EOF
-DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
+_OBJ_ONLY=0
 
-O="/build/$1.c.${FLAVOR}fast.o"
-cat << EOF >> /build/build.ninja
-build $O: cc $1.c
-  extra = -gfull -fPIC -Ofast -flto=thin -march=native -D ABORT_ON_ERROR=0 ${@:2}
-EOF
-FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
+function _build() { VARIANT=$1; _O="/build/$SOURCE.c.${FLAVOR}${VARIANT}.o"
+if [ $_OBJ_ONLY = 0 ]; then {
+  echo -e "build $_O: cc $SOURCE.c\n    extra = ${@:2} ${ARGS[@]}" >> /build/build.ninja
+}; fi
+eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
+}
 
-O="/build/$1.c.${FLAVOR}pi0wdbg.o"
-cat << EOF >> /build/build.ninja
-build $O: cc $1.c
-  extra = $pi0w_common -gfull -O0 -D ABORT_ON_ERROR=1 ${@:2}
-EOF
-PI0W_DBG_OBJ_FILES="$PI0W_DBG_OBJ_FILES $O"
-
-O="/build/$1.c.${FLAVOR}pi0wfast.o"
-cat << EOF >> /build/build.ninja
-build $O: cc $1.c
-  extra = $pi0w_common -gfull -O3 -D BUILD_IS_RELEASE=1 -D ABORT_ON_ERROR=0 ${@:2}
-EOF
-PI0W_FAST_OBJ_FILES="$PI0W_FAST_OBJ_FILES $O"
-
+function compile() { SOURCE="$1"; ARGS=("${@:2}")
+  _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
+  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
+  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
+  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
 }
 
 function depends_on() {
-O="/build/$1.c.${FLAVOR}dbg.o"
-DBG_OBJ_FILES="$DBG_OBJ_FILES $O"
-O="/build/$1.c.${FLAVOR}fast.o"
-FAST_OBJ_FILES="$FAST_OBJ_FILES $O"
-O="/build/$1.c.${FLAVOR}pi0wdbg.o"
-PI0W_DBG_OBJ_FILES="$PI0W_DBG_OBJ_FILES $O"
-O="/build/$1.c.${FLAVOR}pi0wfast.o"
-PI0W_FAST_OBJ_FILES="$PI0W_FAST_OBJ_FILES $O"
+  _OBJ_ONLY=1 compile "$@"
 }
 
 function link_exec() {
 cat << EOF >> /build/build.ninja
-build /build/$1.${FLAVOR}dbg.exec: link_exec $DBG_OBJ_FILES
+build /build/$1.${FLAVOR}dbg.exec: link_exec $dbg_OBJ_FILES
   extra = -gfull -fuse-ld=lld -fsanitize=address  ${@:2}
-build /build/$1.${FLAVOR}fast.exec: link_exec $FAST_OBJ_FILES
+build /build/$1.${FLAVOR}fast.exec: link_exec $fast_OBJ_FILES
   extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
-build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $PI0W_DBG_OBJ_FILES
+build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $pi0wdbg_OBJ_FILES
   extra = -ggdb3 -O0 ${@:2}
-build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $PI0W_FAST_OBJ_FILES
+build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $pi0wfast_OBJ_FILES
   extra = -ggdb3 -O3 ${@:2}
 EOF
 }
@@ -132,10 +106,10 @@ EOF
 }
 
 function reset() {
-  DBG_OBJ_FILES=""
-  FAST_OBJ_FILES=""
-  PI0W_DBG_OBJ_FILES=""
-  PI0W_FAST_OBJ_FILES=""
+  dbg_OBJ_FILES=""
+  fast_OBJ_FILES=""
+  pi0wdbg_OBJ_FILES=""
+  pi0wfast_OBJ_FILES=""
   FLAVOR=""
 }
 
