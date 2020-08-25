@@ -176,19 +176,19 @@ re parse_headers
 #  --sysroot=/build/root/pi0_usr_include/output/staging/
 
 
-pi0target_flags="-target arm-linux-gnueabihf -mfloat-abi=hard -mcpu=arm1176jzf-s -mfpu=vfpv2"
+pi0w_target_flags="-target arm-linux-gnueabihf -mfloat-abi=hard -mcpu=arm1176jzf-s -mfpu=vfpv2"
 # PI0W Debug version
-host_dir="/build/pi0w-dev-host/"
-host_lib="$host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
-sysroot="$host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
-common="--sysroot=$sysroot $pi0target_flags"
+pi0w_host_dir="/build/pi0w-dev-host/"
+pi0w_host_lib="$pi0w_host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
+pi0w_sysroot="$pi0w_host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
+pi0w_common="--sysroot=$pi0w_sysroot $pi0w_target_flags"
 
 cat << EOF >> /build/build.ninja
 build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
-  extra = $common -O0 -gfull
+  extra = $pi0w_common -O0 -gfull
 
 build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_root.pi0devstatic.c.o
-  extra = $common -L $host_lib -fuse-ld=lld -static
+  extra = $pi0w_common -L $pi0w_host_lib -fuse-ld=lld -static
 EOF
 
 reset
@@ -202,18 +202,18 @@ do_test serial_test /build/serial_test.dbg.exec
 # +output/host/bin/+ to your PATH environment variable and then to
 # use +ARCH-linux-gcc+, +ARCH-linux-objdump+, +ARCH-linux-ld+, etc.
 
-# common="--sysroot=/build/pi0w-dev-staging/ $pi0target_flags"
+# pi0w_common="--sysroot=/build/pi0w-dev-staging/ $pi0w_target_flags"
 
-echo "host_prefix=$host_dir/bin/arm-buildroot-linux-uclibcgnueabihf" >> /build/build.ninja
+echo "pi0w_host_prefix=$pi0w_host_dir/bin/arm-buildroot-linux-uclibcgnueabihf" >> /build/build.ninja
 cat << 'EOF' >> /build/build.ninja
 rule cc_br
- command = ${host_prefix}-gcc -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
+ command = ${pi0w_host_prefix}-gcc -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CCBR $out
 
 rule link_br_exec
- command = ${host_prefix}-gcc $in -o $out $extra
+ command = ${pi0w_host_prefix}-gcc $in -o $out $extra
  description = LINKBR $out
 
 EOF
@@ -222,29 +222,29 @@ cat << EOF >> /build/build.ninja
 
 
 build /build/hello_pwm.pi0dev.c.o: cc hello_pwm.c
-  extra =  $common -O0 -gfull
+  extra =  $pi0w_common -O0 -gfull
 
 build /build/hello_pwm.pi0dev.exec: link_br_exec /build/hello_pwm.pi0dev.c.o
   extra =
 
 
 build /build/logging.testpi0dev.c.o: cc logging.c
-  extra =  $common -O0 -gfull -D LOGGING_USE_EMAIL=0
+  extra =  $pi0w_common -O0 -gfull -D LOGGING_USE_EMAIL=0
 
 build /build/serial_test.pi0dev.c.o: cc serial_test.c
-  extra =  $common -O0 -gfull -D ABORT_ON_ERROR=1
+  extra =  $pi0w_common -O0 -gfull -D ABORT_ON_ERROR=1
 
 build /build/serial_test.pi0dev.exec: link_br_exec /build/serial_test.pi0dev.c.o /build/logging.testpi0dev.c.o
   extra =
 
 build /build/hello_led.pi0dev.c.o: cc hello_led.c
-  extra =  $common -O0 -gfull
+  extra =  $pi0w_common -O0 -gfull
 
 build /build/hello_led.pi0dev.exec: link_br_exec /build/hello_led.pi0dev.c.o
   extra =
 
 build /build/hello_lcd.pi0dev.c.o: cc hello_lcd.c
-  extra =  $common -O0 -gfull
+  extra =  $pi0w_common -O0 -gfull
 
 #build /build/hello_lcd.pi0dev.c.o: cc_br hello_lcd.c
 #  extra = -O0 -g
@@ -253,7 +253,7 @@ build /build/hello_lcd.pi0dev.exec: link_br_exec /build/hello_lcd.pi0dev.c.o
   extra =
 
 build /build/hello_lcd.pi0perf.c.o: cc hello_lcd.c
-  extra = -Ofast $common -O0 -gfull
+  extra = -Ofast $pi0w_common -O0 -gfull
 
 build /build/hello_lcd.pi0perf.exec: link_br_exec /build/hello_lcd.pi0perf.c.o
   extra = -Ofast
