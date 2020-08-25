@@ -20,13 +20,13 @@ static int allocate_memory(uint8_t **memory, size_t bytes_to_allocate) {
         static_memory_buf_in_use_debug = 1;
         *memory = static_memory_buf;
     } else {
-        printf("ERROR: Could not use static memory, falling back to malloc bytes:%ld in_use:%c",
+        printf("ERROR: Could not use static memory, falling back to malloc bytes:%zu in_use:%c",
             bytes_to_allocate, static_memory_buf_in_use_debug
         );
         assert(0);
         *memory = malloc(bytes_to_allocate);
     }
-    printf("allocate_memory: %p bytes:%ld\n", *memory, bytes_to_allocate);
+    printf("allocate_memory: %p bytes:%zu\n", *memory, bytes_to_allocate);
     return 0;
 }
 static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
@@ -35,7 +35,7 @@ static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
     } else {
         free(memory);
     }
-    printf("deallocate_memory: %p bytes:%ld\n", memory, bytes_to_allocate);
+    printf("deallocate_memory: %p bytes:%zu\n", memory, bytes_to_allocate);
 }
 
 char system_secret[32];

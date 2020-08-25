@@ -12,13 +12,15 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include "logging.h"
 #include "io.h"
 
 
 static void log_ep_event(struct epoll_event event) {
-#define EP_TYPES _(EPOLLIN) _(EPOLLOUT) _(EPOLLRDHUP) _(EPOLLPRI) _(EPOLLERR) _(EPOLLHUP) _(EPOLLET) _(EPOLLONESHOT) _(EPOLLWAKEUP)
+#define EP_TYPES _(EPOLLIN) _(EPOLLOUT) _(EPOLLRDHUP) _(EPOLLPRI) _(EPOLLERR) _(EPOLLHUP) _(EPOLLET) _(EPOLLONESHOT)
+// _(EPOLLWAKEUP)
   char  buf[128];
   char * buf_next = buf;
   char * const buf_END = buf + sizeof buf;
@@ -98,7 +100,7 @@ static void test_main() { int r;
     for (int i=0; i < COUNT(timers); i++) {
       *timers[i] = 1000 + i;
       events_pending ++;
-      INFO("timer:%ld, %s = %ld", timers[i] - io_timers_epoch_ms, timer_names[i], *timers[i]);
+      INFO("timer:%d, %s = %"PRId64, (s32)(timers[i] - io_timers_epoch_ms), timer_names[i], *timers[i]);
     }
   }
 
@@ -110,7 +112,7 @@ static void test_main() { int r;
     for (int i=0; i < COUNT(timers); i++) {
       *timers[i] = 1000 - i;
       events_pending ++;
-      INFO("timer:%ld, %s = %ld", timers[i] - io_timers_epoch_ms, timer_names[i], *timers[i]);
+      INFO("timer:%d, %s = %"PRId64, (int)(timers[i] - io_timers_epoch_ms), timer_names[i], *timers[i]);
     }
   }
 

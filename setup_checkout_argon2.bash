@@ -6,14 +6,14 @@ FILE_LIST=(
   src/encoding.h
   src/thread.h
   src/core.h
-  src/opt.c
+  src/ref.c
   src/encoding.c
   src/thread.c
   src/core.c
   src/argon2.c
   src/blake2/blake2b.c
   src/blake2/blake2.h
-  src/blake2/blamka-round-opt.h
+  src/blake2/blamka-round-ref.h
   src/blake2/blake2-impl.h
 )
 
