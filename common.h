@@ -24,7 +24,7 @@ long long utc_ms_since_epoch();
 
 
 
-#ifdef BUILD_IS_RELEASE
+#if BUILD_IS_RELEASE
 #define SWITCH_DEFAULT_IS_UNEXPECTED default: { ERROR("Got unexpected switch case "); } break;
 #else
 #define SWITCH_DEFAULT_IS_UNEXPECTED { ERROR("Got unexpected switch case"); } break;

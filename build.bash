@@ -92,7 +92,7 @@ PI0W_DBG_OBJ_FILES="$PI0W_DBG_OBJ_FILES $O"
 O="/build/$1.c.${FLAVOR}pi0wfast.o"
 cat << EOF >> /build/build.ninja
 build $O: cc $1.c
-  extra = $pi0w_common -gfull -O3 -D ABORT_ON_ERROR=0 ${@:2}
+  extra = $pi0w_common -gfull -O3 -D BUILD_IS_RELEASE=1 -D ABORT_ON_ERROR=0 ${@:2}
 EOF
 PI0W_FAST_OBJ_FILES="$PI0W_FAST_OBJ_FILES $O"
 
@@ -169,6 +169,12 @@ reset
 compile    mount_squash_root
 link_exec  mount_squash_root
 
+reset
+FLAVOR=static
+compile    mount_squash_root -fno-sanitize=address
+link_exec  mount_squash_root -fno-sanitize=address -static
+
+
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 FLAVOR=test depends_on logging
@@ -225,14 +231,13 @@ re parse_headers
 
 #  --sysroot=/build/root/pi0_usr_include/output/staging/
 
+# cat << EOF >> /build/build.ninja
+# build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
+#   extra = $pi0w_common -O0 -gfull
 
-cat << EOF >> /build/build.ninja
-build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c
-  extra = $pi0w_common -O0 -gfull
-
-build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_root.pi0devstatic.c.o
-  extra = $pi0w_common -L $pi0w_host_lib -fuse-ld=lld -static
-EOF
+# build /build/mount_squash_root.pi0devstatic.exec: link_exec /build/mount_squash_root.pi0devstatic.c.o
+#   extra = $pi0w_common -L $pi0w_host_lib -fuse-ld=lld -static
+# EOF
 
 reset
 FLAVOR=test depends_on logging
@@ -252,47 +257,14 @@ reset
 compile   hello_pwm
 link_exec hello_pwm
 
-cat << EOF >> /build/build.ninja
+reset
+compile   hello_led
+link_exec hello_led
 
-build /build/hello_pwm.pi0dev.c.o: cc hello_pwm.c
-  extra =  $pi0w_common -O0 -gfull
+reset
+compile   hello_lcd
+link_exec hello_lcd
 
-build /build/hello_pwm.pi0dev.exec: link_br_exec /build/hello_pwm.pi0dev.c.o
-  extra =
-
-
-build /build/logging.testpi0dev.c.o: cc logging.c
-  extra =  $pi0w_common -O0 -gfull -D LOGGING_USE_EMAIL=0
-
-build /build/serial_test.pi0dev.c.o: cc serial_test.c
-  extra =  $pi0w_common -O0 -gfull -D ABORT_ON_ERROR=1
-
-build /build/serial_test.pi0dev.exec: link_br_exec /build/serial_test.pi0dev.c.o /build/logging.testpi0dev.c.o
-  extra =
-
-build /build/hello_led.pi0dev.c.o: cc hello_led.c
-  extra =  $pi0w_common -O0 -gfull
-
-build /build/hello_led.pi0dev.exec: link_br_exec /build/hello_led.pi0dev.c.o
-  extra =
-
-build /build/hello_lcd.pi0dev.c.o: cc hello_lcd.c
-  extra =  $pi0w_common -O0 -gfull
-
-#build /build/hello_lcd.pi0dev.c.o: cc_br hello_lcd.c
-#  extra = -O0 -g
-
-build /build/hello_lcd.pi0dev.exec: link_br_exec /build/hello_lcd.pi0dev.c.o
-  extra =
-
-build /build/hello_lcd.pi0perf.c.o: cc hello_lcd.c
-  extra = -Ofast $pi0w_common -O0 -gfull
-
-build /build/hello_lcd.pi0perf.exec: link_br_exec /build/hello_lcd.pi0perf.c.o
-  extra = -Ofast
-
-
-EOF
 
 
 # output/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
