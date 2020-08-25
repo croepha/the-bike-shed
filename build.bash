@@ -232,7 +232,7 @@ build /build/logging.testpi0dev.c.o: cc logging.c
   extra =  $common -O0 -gfull -D LOGGING_USE_EMAIL=0
 
 build /build/serial_test.pi0dev.c.o: cc serial_test.c
-  extra =  $common -O0 -gfull
+  extra =  $common -O0 -gfull -D ABORT_ON_ERROR=1
 
 build /build/serial_test.pi0dev.exec: link_br_exec /build/serial_test.pi0dev.c.o /build/logging.testpi0dev.c.o
   extra =

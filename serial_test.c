@@ -14,6 +14,7 @@ grep --  'cs8'               /tmp/stty_out
 
 */
 
+#include <curl/curl.h>
 #include <stddef.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -98,20 +99,45 @@ int open_serial(char const *dev_path) {
 
 #include <pty.h>
 
+
+void dump_fds() { int r;
+  char cmd[1024];
+  r = snprintf(cmd, sizeof cmd, "lsof -p '%d'", getpid());
+  error_check(r);
+  INFO_BUFFER(cmd, r, "START cmd:");
+  assert(r < sizeof cmd);
+  r = system(cmd);
+  error_check(r);
+  INFO("END");
+}
+
 void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
   //int fd = open_serial(path);
 
   int fd, follower;
 
+  //dump_fds();
+
   int r = openpty(&fd, &follower, 0,0,0);
   error_check(r);
+
+  INFO("fd:%d follower:%d", fd, follower);
+  //dump_fds();
 
   pid_t child = fork();
   error_check(child);
   if (!child) {
+    r = alarm(10); error_check(r);
+
+    INFO("fd:%d follower:%d", fd, follower);
+    //dump_fds();
+
     r = close(fd);
     error_check(r);
+
+    set_interface_attribs (follower, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
+    set_blocking (follower, 1);
     char sbuf[1024];
     int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
     error_check(sbuf_len);
@@ -120,12 +146,15 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
     error_check(sb);
     assert(sb == sbuf_len);
 
-    for (;;) {
+    for (int i = 0; i<5; i++) { LOGCTX("forked:");
       char rbuf[512];
+      INFO("follower:%d", follower);
+      //dump_fds();
+
       ssz read_count = read(follower, rbuf, sizeof rbuf -1);
       error_check(read_count);
-      rbuf[read_count -1] = 0;
-      INFO_BUFFER(rbuf, read_count, "Child did read: ");
+      INFO_BUFFER(rbuf, read_count, "Child did read: len:%zd rbuf:", read_count);
+      rbuf[read_count] = 0;
       sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
       error_check(sbuf_len);
       assert(sbuf_len < sizeof sbuf);
@@ -134,7 +163,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
       assert(sb == sbuf_len);
     }
 
-    exit(1);
+    exit(0);
   }
   r = close(follower);
   error_check(r);
@@ -149,33 +178,59 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
   *outf = fdopen(fd2, "a");
 }
 
-int main(int argc, char**argv) {
-  setbuf(stdout,0);
-  setbuf(stderr,0);
-
-  char*tty_path = *++argv;
+void test_main() {
+  //char*tty_path = *++argv;
+  char* tty_path = 0;
   printf("ASDFASDF\n");
 
   FILE*inf = 0, *outf = 0;
 
   fopen_serial_115200_8n1(tty_path, &inf, &outf);
 
-  for (;;) {
-    char *buf = 0;
-    size_t n = 0;
+  for (int i=0;i<5;i++) {
+    static char *buf = 0;
+    static size_t n = 0;
     size_t r1 = getline(&buf, &n, inf);
-    assert(r1>=0);
-    if (buf[n-2] == '\n') buf[n-2] = 0;
+    error_check(r1);
+    //if (buf[n-2] == '\n') buf[n-2] = 0;
+    size_t len = strlen(buf);
 
-    printf("ECHO: %s", buf);
+    INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
 
-    int r_int = fprintf(outf, "ECHO: %s", buf);
-    if (r_int == -1) {
-      printf("fprintf error? %s .. %s\n", strerror(errno), strerror(ferror(outf)));
-    }
+    int r = fprintf(outf, "Message %d:", i);
+    error_check(r);
+    r = fflush(outf);
+    error_check(r);
 
   }
 
 }
 
 
+#include <sys/wait.h>
+
+int main() { int r;
+  setlinebuf(stderr);
+  r = alarm(3); error_check(r);
+
+  test_main();
+
+  INFO("Reaping child procs");
+  u8 had_error = 0;
+  for (;;) {
+    int wstatus;
+    //DEBUG("Waiting for child");
+    pid_t child = wait(&wstatus);
+    if (child == -1 && errno == ECHILD) {
+      break;
+    }
+    error_check(child);
+    //INFO("Child exit:%d", WEXITSTATUS(wstatus));
+    if (! WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0) {
+      had_error = 1;
+    }
+  }
+  if (had_error) {
+    ERROR("Atleast one child process had an error");
+  }
+}

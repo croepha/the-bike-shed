@@ -180,7 +180,6 @@ int main() { int r;
 
   test_main();
 
-
   INFO("Reaping child procs");
   u8 had_error = 0;
   for (;;) {
