@@ -18,12 +18,18 @@ __thread s32 log_allowed_fails;
 // TODO, for robustness, we should install some exception handlers for segfaults and aborts, attempt to send final log buffers, and if that fails
 //       dump to disk
 
+#ifndef now_sec
+u64 now_sec() {
+  return time(0);
+}
+#endif
+
 #include "email.h"
 // TODO: setup gmail to delete old emails
-static  s32 const buf_SIZE = 1<20;
+static  s32 const log_email_buf_SIZE = 1<<20;
 static  s32 const EMAIL_COOLDOWN_SECONDS = 60 * 10; // 10 minutes
-static char buf[buf_SIZE];
-static  s32 buf_used;
+static char log_email_buf[log_email_buf_SIZE];
+static  s32 log_email_buf_used;
 static   u8 recursing_error;
 static  u64 last_sent_epoch_sec;
 static   u8 internal_error;
@@ -33,7 +39,7 @@ struct email_Send email_ctx;
 
 static void poke_state_machine() {
   u64 now_epoch_sec = time(0);
-  if (!buf_used) {
+  if (!log_email_buf_used) {
     // do nothing, no logs
     IO_TIMER(logging_send) = -1;
   } else if (sent_size) {
@@ -42,16 +48,16 @@ static void poke_state_machine() {
   } else if (last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_sec ) {
     // do nothing, cooling down...
   } else {
-    email_init(&email_ctx, io_curl_create_handle(), logging_email_rcpt, buf, buf_used, "Logs");
-    sent_size = buf_used;
+    email_init(&email_ctx, logging_email_rcpt, log_email_buf, log_email_buf_used, "Logs");
+    sent_size = log_email_buf_used;
     last_sent_epoch_sec = now_epoch_sec;
   }
 }
 
 void email_done(u8 success) {
   if (success) {
-    memmove(buf, buf + sent_size, sent_size);
-    buf_used -= sent_size;
+    memmove(log_email_buf, log_email_buf + sent_size, sent_size);
+    log_email_buf_used -= sent_size;
   }
   sent_size = 0;
   poke_state_machine();
@@ -67,7 +73,7 @@ void logging_send_timeout() {
 
 static void  vbuf_add(char const * fmt, va_list va) {
   recursing_error = 1;
-  s32 r = vsnprintf(buf + buf_used, buf_SIZE - buf_used, fmt, va);
+  s32 r = vsnprintf(log_email_buf + log_email_buf_used, log_email_buf_SIZE - log_email_buf_used, fmt, va);
   if (r < 0) { // Pretty rare error, but want to handle this case since we need to be super robust
     if (recursing_error) { // Hitting this case would be even rarer
       internal_error = 1;
@@ -80,8 +86,8 @@ static void  vbuf_add(char const * fmt, va_list va) {
     recursing_error = 0;
     return;
   }
-  buf_used += r;
-  if (buf_used > buf_SIZE) {
+  log_email_buf_used += r;
+  if (log_email_buf_used > log_email_buf_SIZE) {
     internal_error = 1;
     ERROR("Formatted log string is too long %d, dropping...", r);
     recursing_error = 0;

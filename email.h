@@ -18,7 +18,7 @@ struct email_Send {
     EMAIL_STATE_SENDING_BODY,
   } state;
 };
-void email_init(struct email_Send *ctx, CURL *easy, char const * to_addr, char const * body_,
+void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject);
 void email_free(struct email_Send *ctx);
 void email_setup(char* from_address, char* smtp_server, char* user_pass);

@@ -173,6 +173,11 @@ reset
 FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
 
 reset
+compile logging_test
+link_exec logging_test
+do_test logging_test /build/logging_test.dbg.exec
+
+reset
 FLAVOR=test depends_on logging
 depends_on io_core
 depends_on misc
