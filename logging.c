@@ -26,14 +26,14 @@ u64 now_sec() {
 
 #include "email.h"
 // TODO: setup gmail to delete old emails
-static  s32 const log_email_buf_SIZE = 1<<20;
-static  s32 const EMAIL_COOLDOWN_SECONDS = 60 * 10; // 10 minutes
+static  u32 const log_email_buf_SIZE = 1<<20;
+static  u32 const EMAIL_COOLDOWN_SECONDS = 60 * 10; // 10 minutes
 static char log_email_buf[log_email_buf_SIZE];
-static  s32 log_email_buf_used;
+static  u32 log_email_buf_used;
 static   u8 recursing_error;
 static  u64 last_sent_epoch_sec;
 static   u8 internal_error;
-static  s32 sent_size;
+static  u32 sent_size;
 static char const * const logging_email_rcpt = "logging@test.test";
 struct email_Send email_ctx;
 

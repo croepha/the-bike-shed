@@ -4,8 +4,9 @@
 #define LOGGING_USE_EMAIL 1
 
 #include "logging.c"
+#include <inttypes.h>
 
-u64 io_timers_epoch_ms[_io_timer_logging_send];
+u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
 
 void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
@@ -17,15 +18,24 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
 }
 
 
+void dump_email_state() {
+  fprintf(stderr, "email_state: IO_TIMER(logging_send):%"PRIu64" last_sent_epoch_sec:%"PRIu64" log_email_buf_used:%u sent_size:%u\n",
+    IO_TIMER(logging_send), last_sent_epoch_sec, log_email_buf_used, sent_size
+  );
+}
+
 #define log_usage(...) fprintf(stderr, "Usage: "#__VA_ARGS__"\n"); __VA_ARGS__
 int main () {
   setlinebuf(stderr);
 
   fprintf(stderr, "Starting logging test\n");
+  dump_email_state();
 
   fprintf(stderr, "Typical usage:\n");
   log_usage( INFO("First line"); );
+  dump_email_state();
   log_usage( INFO("Second Line"); );
+  dump_email_state();
 
 
 }
