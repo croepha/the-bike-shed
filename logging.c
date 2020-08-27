@@ -41,10 +41,10 @@ static void poke_state_machine() {
   u64 now_epoch_sec = time(0);
   if (!log_email_buf_used) {
     // do nothing, no logs
-    IO_TIMER(logging_send) = -1;
+    IO_TIMER_MS(logging_send) = -1;
   } else if (sent_size) {
     // Do nothing... waiting for email to send or timeout
-    IO_TIMER(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
+    IO_TIMER_MS(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
   } else if (last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_sec ) {
     // do nothing, cooling down...
   } else {

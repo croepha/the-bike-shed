@@ -25,8 +25,8 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
 
 
 void dump_email_state() {
-  fprintf(stderr, "email_state: IO_TIMER(logging_send):%"PRIu64" last_sent_epoch_sec:%"PRIu64" log_email_buf_used:%u sent_size:%u\n",
-    IO_TIMER(logging_send), last_sent_epoch_sec, log_email_buf_used, sent_size
+  fprintf(stderr, "email_state: IO_TIMER_MS(logging_send):%"PRIu64" last_sent_epoch_sec:%"PRIu64" log_email_buf_used:%u sent_size:%u\n",
+    IO_TIMER_MS(logging_send), last_sent_epoch_sec, log_email_buf_used, sent_size
   );
 }
 

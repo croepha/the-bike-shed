@@ -10,13 +10,13 @@
 
 static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
   if (timeout_ms_ < 0) {
-    IO_TIMER(io_curl) = 0;
+    IO_TIMER_MS(io_curl) = 0;
   } else {
-    IO_TIMER(io_curl) = utc_ms_since_epoch() + timeout_ms_;
+    IO_TIMER_MS(io_curl) = utc_ms_since_epoch() + timeout_ms_;
   }
 
   DEBUG("timeout: %ld ms, new timer: %"PRId64"\n",
-      timeout_ms_, IO_TIMER(io_curl));
+      timeout_ms_, IO_TIMER_MS(io_curl));
   return 0;
 }
 
