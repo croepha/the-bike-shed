@@ -2,6 +2,12 @@
 
 #include "io.h"
 #define LOGGING_USE_EMAIL 1
+#define now_sec now_sec
+
+u64 now_sec_value;
+u64 now_sec() {
+  return now_sec_value++;
+}
 
 #include "logging.c"
 #include <inttypes.h>

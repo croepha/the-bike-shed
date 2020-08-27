@@ -93,8 +93,6 @@ static void  vbuf_add(char const * fmt, va_list va) {
     recursing_error = 0;
     return;
   }
-
-
   recursing_error = 0;
 }
 
@@ -109,6 +107,7 @@ static void  buf_add(char const * fmt, ...) {
 #else // LOGGING_USE_EMAIL
 #define VLOGF(fmt, va)  vfprintf(stderr, fmt, va)
 #define  LOGF(fmt, ...)  fprintf(stderr, fmt, ##__VA_ARGS__)
+void poke_state_machine() {};
 #endif // LOGGING_USE_EMAIL
 
 
@@ -148,6 +147,7 @@ void _log(const char* severity, const char*file, const char*func, int line,
     } break;
   }
   LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
+  poke_state_machine();
 }
 
 

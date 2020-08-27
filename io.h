@@ -42,7 +42,7 @@ _IO_SOCKET_TYPES
 #undef  _
 
 extern u64 io_timers_epoch_ms[];
-#define IO_TIMER(name) io_timers_epoch_ms[_io_timer_ ## name]
+#define IO_TIMER_MS(name) io_timers_epoch_ms[_io_timer_ ## name]
 
 void io_initialize();
 void io_process_events();
