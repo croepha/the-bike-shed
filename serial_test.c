@@ -122,7 +122,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
   int r = openpty(&fd, &follower, 0,0,0);
   error_check(r);
 
-  INFO("fd:%d follower:%d", fd, follower);
+  DEBUG("fd:%d follower:%d", fd, follower);
   //dump_fds();
 
   pid_t child = fork();
@@ -130,7 +130,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
   if (!child) {
     r = alarm(10); error_check(r);
 
-    INFO("fd:%d follower:%d", fd, follower);
+    DEBUG("fd:%d follower:%d", fd, follower);
     //dump_fds();
 
     r = close(fd);
@@ -148,7 +148,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
     for (int i = 0; i<5; i++) { LOGCTX("forked:");
       char rbuf[512];
-      INFO("follower:%d", follower);
+      DEBUG("follower:%d", follower);
       //dump_fds();
 
       ssz read_count = read(follower, rbuf, sizeof rbuf -1);
