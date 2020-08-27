@@ -28,24 +28,21 @@ void email_free(struct email_Send *ctx) {
 }
 
 void dump_email_state() {
-  fprintf(stderr, "email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
-    IO_TIMER_MS(logging_send), email_sent_epoch_sec, email_buf_used, email_sent_bytes
+  fprintf(stderr, "now:%"PRIu64" email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
+    now_sec_value, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
   );
 }
 
-#define log_usage(...) fprintf(stderr, "Usage: "#__VA_ARGS__"\n"); __VA_ARGS__
+#define log_usage(...)   dump_email_state(); fprintf(stderr, "Usage: "#__VA_ARGS__"\n"); __VA_ARGS__
 int main () {
   setlinebuf(stderr);
 
   fprintf(stderr, "Starting logging test\n");
   now_sec_value = 100000;
-  dump_email_state();
 
   fprintf(stderr, "Typical usage:\n");
   log_usage( INFO("First line"); );
-  dump_email_state();
   log_usage( INFO("Second Line"); );
   dump_email_state();
-
 
 }

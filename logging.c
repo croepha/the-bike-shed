@@ -41,7 +41,7 @@ struct email_Send email_ctx;
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
 
-  if (email_sent_bytes) {
+  if (email_sent_bytes) { // If our email is timing out, lets abort it
     assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
     if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
       email_free(&email_ctx);
@@ -50,14 +50,19 @@ static void poke_state_machine() {
   }
 
   if (email_sent_bytes) {
+    // We already have an email in flight, lets not try to queue up annother
   } else if (!email_buf_used) {
+    // If we have nothing in the buffer to send, lets turn off the low threshold timer
     email_sent_epoch_sec = 0;
+    IO_TIMER_MS(logging_send) = -1;
   } else {
     if (email_sent_epoch_sec == 0) {
+      // our buffer just started filling up, lets mark the time, we will probably set the low threshold timer
       email_sent_epoch_sec = now_epoch_sec;
     }
     if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
       email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS <= now_epoch_sec) {
+        // one of the thresholds are met, lets queue up an email
         email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
         email_sent_bytes     = email_buf_used;
         email_sent_epoch_sec = now_epoch_sec;
@@ -70,17 +75,15 @@ static void poke_state_machine() {
 
 void email_done(u8 success) {
   if (success) {
-    email_free(&email_ctx);
     memmove(email_buf, email_buf + email_sent_bytes, email_sent_bytes);
     email_buf_used -= email_sent_bytes;
   }
   email_sent_bytes = 0;
+  email_free(&email_ctx);
   poke_state_machine();
 }
 
-void logging_send_timeout() {
-  poke_state_machine();
-}
+void logging_send_timeout() { poke_state_machine(); }
 
 
 #define VLOGF(fmt, va)  vbuf_add(fmt, va)
