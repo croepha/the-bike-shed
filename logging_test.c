@@ -14,7 +14,7 @@ u64 now_sec() {
 
 u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
-
+// TODO Maybe do a checksum of body, make sure it wasn't changed while email was in flight...
 void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
   fprintf(stderr, "email_init: to:%s subject:%s body_len:%zu body:\n",
@@ -23,6 +23,9 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
   fprintf(stderr, "email_init end\n");
 }
 
+void email_free(struct email_Send *ctx) {
+  fprintf(stderr, "email_free\n");
+}
 
 void dump_email_state() {
   fprintf(stderr, "email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",

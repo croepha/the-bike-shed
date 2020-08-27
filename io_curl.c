@@ -67,6 +67,11 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
     return 0;
 }
 
+void io_curl_abort(CURL* easy) {
+      CURLMcode mr = curl_multi_remove_handle(multi, easy);
+      error_check_curlm(mr);
+}
+
 void io_curl_process_events() {
 
   CURLMsg *curl_msg;

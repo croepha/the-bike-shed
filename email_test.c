@@ -13,7 +13,7 @@
 CURL* io_curl_create_handle() {
   return curl_easy_init();
 }
-
+void io_curl_abort(CURL* easy) {}
 int main() {
   email_setup(
     "from@longlonglonglonglonglonglonglonghost.com",

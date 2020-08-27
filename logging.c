@@ -40,23 +40,37 @@ struct email_Send email_ctx;
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
-  if (!email_buf_used) {
-    // do nothing, no logs
-    IO_TIMER_MS(logging_send) = -1;
-  } else if (email_sent_bytes) {
-    // Do nothing... waiting for email to send or timeout
-    IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
-  } else if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS > now_epoch_sec ) {
-    // do nothing, cooling down...
+
+  if (email_sent_bytes) {
+    assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
+    if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
+      email_free(&email_ctx);
+      email_sent_bytes = 0;
+    }
+  }
+
+  if (email_sent_bytes) {
+  } else if (!email_buf_used) {
+    email_sent_epoch_sec = 0;
   } else {
-    email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
-    email_sent_bytes     = email_buf_used;
-    email_sent_epoch_sec = now_epoch_sec;
+    if (email_sent_epoch_sec == 0) {
+      email_sent_epoch_sec = now_epoch_sec;
+    }
+    if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
+      email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS <= now_epoch_sec) {
+        email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
+        email_sent_bytes     = email_buf_used;
+        email_sent_epoch_sec = now_epoch_sec;
+        IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+    } else {
+      IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
+    }
   }
 }
 
 void email_done(u8 success) {
   if (success) {
+    email_free(&email_ctx);
     memmove(email_buf, email_buf + email_sent_bytes, email_sent_bytes);
     email_buf_used -= email_sent_bytes;
   }
@@ -65,7 +79,7 @@ void email_done(u8 success) {
 }
 
 void logging_send_timeout() {
-
+  poke_state_machine();
 }
 
 
