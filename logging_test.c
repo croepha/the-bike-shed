@@ -25,8 +25,8 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
 
 
 void dump_email_state() {
-  fprintf(stderr, "email_state: IO_TIMER_MS(logging_send):%"PRIu64" last_sent_epoch_sec:%"PRIu64" log_email_buf_used:%u sent_size:%u\n",
-    IO_TIMER_MS(logging_send), last_sent_epoch_sec, log_email_buf_used, sent_size
+  fprintf(stderr, "email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
+    IO_TIMER_MS(logging_send), email_sent_epoch_sec, email_buf_used, email_sent_bytes
   );
 }
 
@@ -35,6 +35,7 @@ int main () {
   setlinebuf(stderr);
 
   fprintf(stderr, "Starting logging test\n");
+  now_sec_value = 100000;
   dump_email_state();
 
   fprintf(stderr, "Typical usage:\n");

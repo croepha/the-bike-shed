@@ -19,47 +19,48 @@ __thread s32 log_allowed_fails;
 //       dump to disk
 
 #ifndef now_sec
-u64 now_sec() {
-  return time(0);
-}
+u64 now_sec() { return time(0); }
 #endif
 
 #include "email.h"
 // TODO: setup gmail to delete old emails
-static  u32 const log_email_buf_SIZE = 1<<20;
-static  u32 const EMAIL_COOLDOWN_SECONDS = 60 * 10; // 10 minutes
-static char log_email_buf[log_email_buf_SIZE];
-static  u32 log_email_buf_used;
+// LOW_THRESHOLDS: We will start considering sending logs once we have accumulated this much bytes/time
+static char const * const email_rcpt = "logging@test.test";
+static  u32 const EMAIL_LOW_THRESHOLD_BYTES = 1<<10   ; // 1 KB
+static  u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
+static  u32 const EMAIL_TIMEOUT_SECS        = 60 * 10 ; // 10 Minutes
+static  u32 const email_buf_SIZE  = 1<<20   ; // 1 MB
+static char email_buf[email_buf_SIZE];
+static  u32 email_buf_used;
+static  u64 email_sent_epoch_sec;
+static  u32 email_sent_bytes;
 static   u8 recursing_error;
-static  u64 last_sent_epoch_sec;
 static   u8 internal_error;
-static  u32 sent_size;
-static char const * const logging_email_rcpt = "logging@test.test";
 struct email_Send email_ctx;
 
 static void poke_state_machine() {
-  u64 now_epoch_sec = time(0);
-  if (!log_email_buf_used) {
+  u64 now_epoch_sec = now_sec();
+  if (!email_buf_used) {
     // do nothing, no logs
     IO_TIMER_MS(logging_send) = -1;
-  } else if (sent_size) {
+  } else if (email_sent_bytes) {
     // Do nothing... waiting for email to send or timeout
-    IO_TIMER_MS(logging_send) = last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS;
-  } else if (last_sent_epoch_sec + EMAIL_COOLDOWN_SECONDS > now_epoch_sec ) {
+    IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+  } else if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS > now_epoch_sec ) {
     // do nothing, cooling down...
   } else {
-    email_init(&email_ctx, logging_email_rcpt, log_email_buf, log_email_buf_used, "Logs");
-    sent_size = log_email_buf_used;
-    last_sent_epoch_sec = now_epoch_sec;
+    email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
+    email_sent_bytes     = email_buf_used;
+    email_sent_epoch_sec = now_epoch_sec;
   }
 }
 
 void email_done(u8 success) {
   if (success) {
-    memmove(log_email_buf, log_email_buf + sent_size, sent_size);
-    log_email_buf_used -= sent_size;
+    memmove(email_buf, email_buf + email_sent_bytes, email_sent_bytes);
+    email_buf_used -= email_sent_bytes;
   }
-  sent_size = 0;
+  email_sent_bytes = 0;
   poke_state_machine();
 }
 
@@ -73,7 +74,7 @@ void logging_send_timeout() {
 
 static void  vbuf_add(char const * fmt, va_list va) {
   recursing_error = 1;
-  s32 r = vsnprintf(log_email_buf + log_email_buf_used, log_email_buf_SIZE - log_email_buf_used, fmt, va);
+  s32 r = vsnprintf(email_buf + email_buf_used, email_buf_SIZE - email_buf_used, fmt, va);
   if (r < 0) { // Pretty rare error, but want to handle this case since we need to be super robust
     if (recursing_error) { // Hitting this case would be even rarer
       internal_error = 1;
@@ -86,8 +87,8 @@ static void  vbuf_add(char const * fmt, va_list va) {
     recursing_error = 0;
     return;
   }
-  log_email_buf_used += r;
-  if (log_email_buf_used > log_email_buf_SIZE) {
+  email_buf_used += r;
+  if (email_buf_used > email_buf_SIZE) {
     internal_error = 1;
     ERROR("Formatted log string is too long %d, dropping...", r);
     recursing_error = 0;
