@@ -1,6 +1,7 @@
 
 
 #include "io.h"
+#include <unistd.h>
 #define LOGGING_USE_EMAIL 1
 #define now_sec now_sec
 
@@ -33,9 +34,19 @@ void dump_email_state() {
   );
 }
 
+void reset_email_state() {
+    now_sec_value  = 0;
+    IO_TIMER_MS(logging_send) = -1;
+    email_sent_epoch_sec = 0;
+    email_buf_used = 0;
+    email_sent_bytes = 0;
+}
+
+
+
 #define log_usage(...)   dump_email_state(); fprintf(stderr, "Usage: "#__VA_ARGS__"\n"); __VA_ARGS__
 int main () {
-  setlinebuf(stderr);
+  setlinebuf(stderr); alarm(1);
 
   fprintf(stderr, "Starting logging test\n");
   now_sec_value = 100000;
@@ -43,6 +54,41 @@ int main () {
   fprintf(stderr, "Typical usage:\n");
   log_usage( INFO("First line"); );
   log_usage( INFO("Second Line"); );
+
+  now_sec_value = IO_TIMER_MS(logging_send)/1000;
+  log_usage( logging_send_timeout(); );
+
+  log_usage( INFO("Third line"); );
+  log_usage( INFO("Fourth Line"); );
+
+  log_usage( email_done(1); );
+
+  log_usage( INFO("line 6"); );
+  log_usage( INFO("line 7"); );
+
+  now_sec_value = IO_TIMER_MS(logging_send)/1000;
+  log_usage( logging_send_timeout(); );
+  now_sec_value = IO_TIMER_MS(logging_send)/1000;
+  log_usage( logging_send_timeout(); );
+
+  now_sec_value = 100000;
+  reset_email_state();
+  fprintf(stderr, "Large logs\n");
+
+  for (int i=0; i<20; i++) {
+    log_usage( INFO("BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG"); );
+  }
+
+  for (int i=0; i<200; i++) {
+    INFO("BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG");
+  }
+  dump_email_state();
+
+
+
+
+
+
   dump_email_state();
 
 }

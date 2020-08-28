@@ -28,8 +28,9 @@ u64 now_sec() { return time(0); }
 static char const * const email_rcpt = "logging@test.test";
 static  u32 const EMAIL_LOW_THRESHOLD_BYTES = 1<<10   ; // 1 KB
 static  u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
-static  u32 const EMAIL_TIMEOUT_SECS        = 60 * 10 ; // 10 Minutes
-static  u32 const email_buf_SIZE  = 1<<20   ; // 1 MB
+static  u32 const EMAIL_RAPID_THRESHOLD_SECS = 20    ; // 20 Seconds  Prevent emails from being sent more often than this
+static  u32 const EMAIL_TIMEOUT_SECS        = 60 * 2  ; // 10 Minutes
+static  u32 const email_buf_SIZE  = 1<<22   ; // 4 MB
 static char email_buf[email_buf_SIZE];
 static  u32 email_buf_used;
 static  u64 email_sent_epoch_sec;
@@ -44,7 +45,9 @@ static void poke_state_machine() {
   if (email_sent_bytes) { // If our email is timing out, lets abort it
     assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
     if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
+      fprintf(stderr, "Error: log email took too long, aborting\n");
       email_free(&email_ctx);
+      email_sent_epoch_sec = now_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS;
       email_sent_bytes = 0;
     }
   }
@@ -62,11 +65,17 @@ static void poke_state_machine() {
     }
     if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
       email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS <= now_epoch_sec) {
-        // one of the thresholds are met, lets queue up an email
-        email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
-        email_sent_bytes     = email_buf_used;
-        email_sent_epoch_sec = now_epoch_sec;
-        IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+        // one of the low thresholds are met
+        if (email_sent_epoch_sec  > now_epoch_sec) {
+          fprintf(stderr, "Warning: log email cooling down\n");
+          IO_TIMER_MS(logging_send) = now_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS;
+        } else {
+          // lets queue up an email
+          email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
+          email_sent_bytes     = email_buf_used;
+          email_sent_epoch_sec = now_epoch_sec;
+          IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+        }
     } else {
       IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
     }
