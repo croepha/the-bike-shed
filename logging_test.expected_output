@@ -1,11 +1,12 @@
 Starting logging test
+Usage: reset_email_state();
+now:100000 email_state: IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0
 Typical usage:
-now:100000 email_state: IO_TIMER_MS(logging_send):0 sent_epoch_sec:0 buf_used:0 sent_bytes:0
 Usage: INFO("First line");
 now:100001 email_state: IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:65 sent_bytes:0
 Usage: INFO("Second Line");
-now:100060 email_state: IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:131 sent_bytes:0
-Usage: logging_send_timeout();
+now:100002 email_state: IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:131 sent_bytes:0
+Usage: timer_skip();
 email_init: to:logging@test.test subject:Logs body_len:131 body:
  INFO: First line	(logging_test.c main)
  INFO: Second Line	(logging_test.c main)
@@ -21,22 +22,18 @@ now:100064 email_state: IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 b
 Usage: INFO("line 6");
 now:100065 email_state: IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:192 sent_bytes:0
 Usage: INFO("line 7");
-now:100120 email_state: IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:253 sent_bytes:0
-Usage: logging_send_timeout();
+now:100066 email_state: IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:253 sent_bytes:0
+Usage: timer_skip();
 email_init: to:logging@test.test subject:Logs body_len:253 body:
  INFO: Third line	(logging_test.c main)
  INFO: Fourth Line	(logging_test.c main)
  INFO: line 6	(logging_test.c main)
  INFO: line 7	(logging_test.c main)
 email_init end
-now:100240 email_state: IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:253 sent_bytes:253
-Usage: logging_send_timeout();
+now:100121 email_state: IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:253 sent_bytes:253
+Usage: timer_skip();
 Error: log email took too long, aborting
 email_free
-email_init: to:logging@test.test subject:Logs body_len:253 body:
- INFO: Third line	(logging_test.c main)
- INFO: Fourth Line	(logging_test.c main)
- INFO: line 6	(logging_test.c main)
- INFO: line 7	(logging_test.c main)
-email_init end
-now:100241 email_state: IO_TIMER_MS(logging_send):100360 sent_epoch_sec:100240 buf_used:253 sent_bytes:253
+now:100241 email_state: IO_TIMER_MS(logging_send):100320 sent_epoch_sec:100260 buf_used:253 sent_bytes:0
+Usage: reset_email_state();
+now:100000 email_state: IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0

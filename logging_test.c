@@ -15,12 +15,56 @@ u64 now_sec() {
 
 u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
+#define SPLIT_MEM(s, s_end, chr, var) for (typeof(*s) * var = s, * var ## _end; \
+  __SPLIT_MEM(s_end, &var, &var ## _end, chr) ; var = var ## _end + 1)
+static u8 __SPLIT_MEM(char const * s_end, char const ** var, char const ** var_end, char chr) {
+start:
+  if (s_end <= *var) { return 0; }
+  *var_end = memchr(*var, chr, s_end-*var);
+  if (!*var_end) { *var_end = s_end; }
+  if (*var == *var_end) {
+    *var = *var_end + 1;
+    goto start;
+  }
+  return 1;
+}
+
+void test_SPLIT_MEM() {
+  fprintf(stderr, "test_SPLIT_MEM 1:");
+
+  char const * s = "1  2 3 4 5 6 7 8 9 ";
+  SPLIT_MEM(s, s + strlen(s), ' ', num) {
+    int num_len = num_end - num;
+    fprintf(stderr, "%.*s|", num_len, num);
+  }
+  fprintf(stderr, "\n");
+
+}
+
 // TODO Maybe do a checksum of body, make sure it wasn't changed while email was in flight...
 void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
   fprintf(stderr, "email_init: to:%s subject:%s body_len:%zu body:\n",
     to_addr, subject, body_len_ );
-  fprintf(stderr, "%s", body_);
+
+  // char const * body_end = body_ + body_len_;
+  // while (body_end > line && (line_end = memchr(line, '\n', body_end-line))) {
+  //   int line_len = line_end - line;
+  //   fprintf(stderr, "%.*s", line_len, body_);
+  //   line = line_end + 1;
+  // }
+
+  // for (char const * line_end = mem)
+
+  // for (char const* line = body_; line && (line-body_) < body_len_; line = memchr(line, '\n', body_end-line) )  {
+  //   body_
+  // }
+  if (body_len_ > 128) {
+    fprintf(stderr, "%.*s... Truncated ...%.*s",
+      (int)40, body_, (int)40, body_+(body_len_-40) );
+  } else {
+    fprintf(stderr, "%.*s", (int)body_len_, body_);
+  }
   fprintf(stderr, "email_init end\n");
 }
 
@@ -35,60 +79,59 @@ void dump_email_state() {
 }
 
 void reset_email_state() {
-    now_sec_value  = 0;
+    now_sec_value  = 100000;
     IO_TIMER_MS(logging_send) = -1;
     email_sent_epoch_sec = 0;
     email_buf_used = 0;
     email_sent_bytes = 0;
+ }
+
+void timer_skip() {
+  now_sec_value = IO_TIMER_MS(logging_send)/1000;
+  logging_send_timeout();
 }
 
-
-
-#define log_usage(...)   dump_email_state(); fprintf(stderr, "Usage: "#__VA_ARGS__"\n"); __VA_ARGS__
+#define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 int main () {
   setlinebuf(stderr); alarm(1);
 
+  test_SPLIT_MEM();
+
   fprintf(stderr, "Starting logging test\n");
-  now_sec_value = 100000;
 
-  fprintf(stderr, "Typical usage:\n");
-  log_usage( INFO("First line"); );
-  log_usage( INFO("Second Line"); );
+  if (0) {
+    fprintf(stderr, "Typical usage:\n");
+    log_usage( reset_email_state(); );
+    log_usage( INFO("First line"); );
+    log_usage( INFO("Second Line"); );
 
-  now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  log_usage( logging_send_timeout(); );
+    log_usage( timer_skip(); );
 
-  log_usage( INFO("Third line"); );
-  log_usage( INFO("Fourth Line"); );
+    log_usage( INFO("Third line"); );
+    log_usage( INFO("Fourth Line"); );
 
-  log_usage( email_done(1); );
+    log_usage( email_done(1); );
 
-  log_usage( INFO("line 6"); );
-  log_usage( INFO("line 7"); );
+    log_usage( INFO("line 6"); );
+    log_usage( INFO("line 7"); );
 
-  now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  log_usage( logging_send_timeout(); );
-  now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  log_usage( logging_send_timeout(); );
+    log_usage( timer_skip(); );
+    log_usage( timer_skip(); );
 
-  now_sec_value = 100000;
-  reset_email_state();
-  fprintf(stderr, "Large logs\n");
-
-  for (int i=0; i<20; i++) {
-    log_usage( INFO("BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG"); );
   }
 
-  for (int i=0; i<200; i++) {
-    INFO("BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG BIIG");
+  if (0) {
+    fprintf(stderr, "Large logs\n");
+    log_usage( reset_email_state(); );
+
+    char big_log[1024];
+    memset(big_log, 'B', sizeof big_log);
+    big_log[sizeof big_log - 1] = 0;
+
+    for (int i=0; i<20; i++) {
+      log_usage( INFO("Big: %s", big_log); );
+    }
   }
-  dump_email_state();
 
-
-
-
-
-
-  dump_email_state();
-
+  return -1;
 }
