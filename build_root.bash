@@ -72,9 +72,11 @@ function build_remote2() ( $_F
 
 )
 
-function remote_pull() {
+function remote_pull() ( $_F
     SSH_HOST=build
     _w=/workspaces/the-bike-shed/
+    _o=$_w/build/
+
     git diff --exit-code
     git diff --cached --exit-code
     ssh "$SSH_HOST" bash "$_w"'/build_root.bash VARIANT='$VARIANT'pi0w-dev archive' | tar zx -C /
@@ -106,7 +108,7 @@ function remote_pull() {
     cp -v $_h/lib/gcc/$_target/8.4.0/{crtbeginT.o,crtend.o} \
         $_h/$_target/sysroot/usr/lib/
 
-}
+)
 
 
 function build_remote() ($_F
