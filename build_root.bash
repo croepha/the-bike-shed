@@ -121,6 +121,7 @@ function build_remote() ($_F
 
 eval "$@"
 
+exit 0
 while true; do {
     read
     echo "pausing"
