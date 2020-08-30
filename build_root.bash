@@ -72,6 +72,43 @@ function build_remote2() ( $_F
 
 )
 
+function remote_pull() {
+    SSH_HOST=build
+    _w=/workspaces/the-bike-shed/
+    git diff --exit-code
+    git diff --cached --exit-code
+    ssh "$SSH_HOST" bash "$_w"'/build_root.bash VARIANT='$VARIANT'pi0w-dev archive' | tar zx -C /
+    scp "$SSH_HOST":$_o/$VARIANT-rootfs.squashfs.xz $_o
+    [[ ! "$VARIANT" =~ "host" ]] &&
+    scp "$SSH_HOST":$_o/$VARIANT-sdcard.img.xz      $_o
+    scp "$SSH_HOST":$_o/$VARIANT-host.tar.xz        $_o
+    scp "$SSH_HOST":$_o/$VARIANT-staging.tar.xz     $_o
+
+    unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
+    [[ ! "$VARIANT" =~ "host" ]] &&
+    unxz -fv $_o/$VARIANT-sdcard.img.xz
+
+    _h=/build/$VARIANT-host/
+    rm -rvf    $_h
+    mkdir -p   $_h
+    tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
+
+    _h=/build/$VARIANT-staging/
+    rm -rvf    $_h
+    mkdir -p   $_h
+    tar xJv -C $_h -f $_o/$VARIANT-staging.tar.xz
+
+    if [[ "$VARIANT" =~ "host" ]]; then
+        _target=x86_64-buildroot-linux-uclibc
+    else
+        _target=arm-buildroot-linux-uclibcgnueabihf
+    fi
+    cp -v $_h/lib/gcc/$_target/8.4.0/{crtbeginT.o,crtend.o} \
+        $_h/$_target/sysroot/usr/lib/
+
+}
+
+
 function build_remote() ($_F
     SSH_HOST=build
     _w=/workspaces/the-bike-shed/
