@@ -75,8 +75,8 @@ eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 function compile() { SOURCE="$1"; ARGS=("${@:2}")
   _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
   _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
-  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
-  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
+  # _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
+  # _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
 }
 
 function depends_on() {
@@ -89,10 +89,10 @@ build /build/$1.${FLAVOR}dbg.exec: link_exec $dbg_OBJ_FILES
   extra = -gfull -fuse-ld=lld -fsanitize=address  ${@:2}
 build /build/$1.${FLAVOR}fast.exec: link_exec $fast_OBJ_FILES
   extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
-build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $pi0wdbg_OBJ_FILES
-  extra = -ggdb3 -O0 ${@:2}
-build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $pi0wfast_OBJ_FILES
-  extra = -ggdb3 -O3 ${@:2}
+# build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $pi0wdbg_OBJ_FILES
+#   extra = -ggdb3 -O0 ${@:2}
+# build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $pi0wfast_OBJ_FILES
+#   extra = -ggdb3 -O3 ${@:2}
 EOF
 }
 
@@ -264,7 +264,7 @@ if [ $SHOULD_CLEAN != 0 ]; then {
 }; fi
 
 
-ninja -f /build/build.ninja | cat
+ninja -f /build/build.ninja -k 0 | cat
 # clang-check-10 -fixit --fix-what-you-can *.c
 
 

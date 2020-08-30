@@ -78,7 +78,7 @@ apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10 clang-tools-10 \
         libncurses5-dev bzr cvs mercurial subversion unzip bc \
-        dosfstools nginx libcurl4-openssl-dev
+        dosfstools nginx libcurl4-openssl-dev libssl-dev re2c
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
@@ -103,6 +103,7 @@ EOF
 
 # in.tftpd -lca 0.0.0.0:9161 /
 
+exit
 
 ~/the-bike-shed/build/esp_venv/bin/esptool.py \
   --chip esp32 --port "/dev/cu.SLAB_USBtoUART" \
@@ -133,9 +134,6 @@ if false; then {
   git clone --depth=1 --no-tags https://github.com/espressif/esp-idf.git
 
 }; fi
-
-
-
 
 
 # Extras:

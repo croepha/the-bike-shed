@@ -3,24 +3,38 @@ export GIT_WORK_TREE=/workspaces/the-bike-shed/
 export GIT_DIR=$GIT_WORK_TREE/.git
 export XZ_OPT="-9e --threads=0 -v"
 export _F="set -eEuo pipefail"
+export BR_VERSION=2020.02.2
 
 function make() ($_F
     /usr/bin/make -C /build/root O=/build/root$VARIANT "$@"
 )
 
 function full_build() ($_F
+    apt install -y cpio rsync sudo ccache build-essential unzip bc
+    locale-gen en_US.UTF-8
+    update-locale
+
+
+    if [ ! -d /build/root ]; then
+        mkdir -p /build/root
+        cd /build/root
+        wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
+        tar xvf buildroot.tar.gz --strip-components=1
+    fi
+    cd /build/root
+
     _b=/build/root$VARIANT/
     _w=/workspaces/the-bike-shed/
     _i=$_b/images/
     _o=$_w/build/
 
-    if [[ "( "$@" )" =~ " clean " ]]; then
+    if [[ "( "$@" )" =~ " clean " || ! -f "/build/root/$VARIANT/.config" ]]; then
         make clean
-        make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
+        rm -vf                    $_o/$VARIANT-*
     fi
+    make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
 
     make all
-    rm -vf                    $_o/$VARIANT-*
     mkdir -p                  $_o
     cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
     xz                        $_o/$VARIANT-rootfs.squashfs
@@ -40,25 +54,46 @@ function save_configs() ($_F
     make uclibc-update-config
 )
 
+function archive() ( $_F
+    _w=/workspaces/the-bike-shed/
+    tar zc $_w/build_root.bash $_w/$VARIANT-*.config
+)
+
+
+function build_remote2() ( $_F
+    SSH_HOST=build
+    _w=/workspaces/the-bike-shed/
+    archive | ssh $SSH_HOST tar zx -C /
+    ssh "$SSH_HOST" 'touch /build/'$VARIANT'-full_build.working'
+    ssh "$SSH_HOST" tmux new-session -Ad
+    ssh "$SSH_HOST" build tmux set-option -g remain-on-exit on
+    ssh "$SSH_HOST" tmux new-window -d \
+        'bash '$_w'/build_root.bash VARIANT='$VARIANT' full_build'
+
+)
+
 function build_remote() ($_F
+    SSH_HOST=build
     _w=/workspaces/the-bike-shed/
     _o=$_w/build/
 
-    ssh super1 'touch /build/'$VARIANT'-full_build.working'
+    ssh "$SSH_HOST" 'touch /build/'$VARIANT'-full_build.working'
+    ssh "$SSH_HOST" tmux new-session -Ad
+    ssh "$SSH_HOST" build tmux set-option -g remain-on-exit on
 
-    scp $_w/build_root.bash super1:/build/
-    ssh super1 tmux new-window -d \
+    scp $_w/build_root.bash "$SSH_HOST":/build/
+    ssh "$SSH_HOST" tmux new-window -d \
         'bash /build/build_root.bash VARIANT='$VARIANT' full_build'
 
-    while ssh super1 '[ -e /build/'$VARIANT'-full_build.working ]'; do {
+    while ssh "$SSH_HOST" '[ -e /build/'$VARIANT'-full_build.working ]'; do {
         echo "waiting"
         sleep 20
     }; done
-    scp super1:$_o/$VARIANT-rootfs.squashfs.xz $_o
+    scp "$SSH_HOST":$_o/$VARIANT-rootfs.squashfs.xz $_o
     [[ ! "$VARIANT" =~ "host" ]] &&
-    scp super1:$_o/$VARIANT-sdcard.img.xz      $_o
-    scp super1:$_o/$VARIANT-host.tar.xz        $_o
-    scp super1:$_o/$VARIANT-staging.tar.xz     $_o
+    scp "$SSH_HOST":$_o/$VARIANT-sdcard.img.xz      $_o
+    scp "$SSH_HOST":$_o/$VARIANT-host.tar.xz        $_o
+    scp "$SSH_HOST":$_o/$VARIANT-staging.tar.xz     $_o
 
     unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
     [[ ! "$VARIANT" =~ "host" ]] &&
