@@ -99,7 +99,7 @@ int main () {
 
   fprintf(stderr, "Starting logging test\n");
 
-  if (0) {
+  if (1) {
     fprintf(stderr, "Typical usage:\n");
     log_usage( reset_email_state(); );
     log_usage( INFO("First line"); );
@@ -119,8 +119,9 @@ int main () {
     log_usage( timer_skip(); );
 
   }
+  return -1;
 
-  if (0) {
+  if (1) {
     fprintf(stderr, "Large logs\n");
     log_usage( reset_email_state(); );
 
@@ -133,5 +134,5 @@ int main () {
     }
   }
 
-  return -1;
+//  return -1;
 }

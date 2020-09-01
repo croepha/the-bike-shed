@@ -27,8 +27,8 @@ u64 now_sec() { return time(0); }
 // LOW_THRESHOLDS: We will start considering sending logs once we have accumulated this much bytes/time
 static char const * const email_rcpt = "logging@test.test";
 static  u32 const EMAIL_LOW_THRESHOLD_BYTES = 1<<14   ; // 16 KB
-static  u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
 static  u32 const EMAIL_RAPID_THRESHOLD_SECS = 20    ; // 20 Seconds  Prevent emails from being sent more often than this
+static  u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
 static  u32 const EMAIL_TIMEOUT_SECS        = 60 * 2  ; // 10 Minutes
 static  u32 const email_buf_SIZE  = 1<<22   ; // 4 MB  // dont increase over 24 MB, gmail has a hard limit at 25MB
 static char email_buf[email_buf_SIZE];
@@ -42,43 +42,43 @@ struct email_Send email_ctx;
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
 
-  if (email_sent_bytes) { // If our email is timing out, lets abort it
+  if (email_sent_bytes) {
     assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
     if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
+      // If our email is timing out, lets abort it
       fprintf(stderr, "Error: log email took too long, aborting\n");
       email_free(&email_ctx);
-      email_sent_epoch_sec = now_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS;
       email_sent_bytes = 0;
+      IO_TIMER_MS(logging_send) = -1;
+    } else {
+      return; // Email is in flight, lets not do anything for now
     }
   }
-
-  if (email_sent_bytes) {
-    // We already have an email in flight, lets not try to queue up annother
-  } else if (!email_buf_used) {
-    // If we have nothing in the buffer to send, lets turn off the low threshold timer
-    email_sent_epoch_sec = 0;
+  // No email is in flight currently
+  if (! email_buf_used ) {
+    // No data
+    if (now_epoch_sec >= email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS) {
+      email_sent_epoch_sec = 0;  // Turn off low threshold timer, if were past the rapid cooldown timer
+    }
     IO_TIMER_MS(logging_send) = -1;
-  } else {
-    if (email_sent_epoch_sec == 0) {
-      // our buffer just started filling up, lets mark the time, we will probably set the low threshold timer
+    return; // No data, do nothing for now
+  }
+  // There is data to be sent
+  if (now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) {
+    // Were still cooling down from last send, do nothing for now
+    IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
+    return; // No data, do nothing for now
+  }
+  // We have data to send, and were not cooling down
+  if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
+    now_epoch_sec >= email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) {
+      // one of the low thresholds are met, lets queue up an email
+      email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
+      email_sent_bytes     = email_buf_used;
       email_sent_epoch_sec = now_epoch_sec;
-    }
-    if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
-      email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS <= now_epoch_sec) {
-        // one of the low thresholds are met
-        if (email_sent_epoch_sec  > now_epoch_sec) {
-          fprintf(stderr, "Warning: log email cooling down\n");
-          IO_TIMER_MS(logging_send) = now_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS;
-        } else {
-          // lets queue up an email
-          email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
-          email_sent_bytes     = email_buf_used;
-          email_sent_epoch_sec = now_epoch_sec;
-          IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
-        }
-    } else {
-      IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
-    }
+      IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+  } else {
+    IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
   }
 }
 
