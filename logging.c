@@ -41,6 +41,9 @@ struct email_Send email_ctx;
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
+  assert(now_epoch_sec > EMAIL_RAPID_THRESHOLD_SECS);
+  assert(now_epoch_sec > EMAIL_LOW_THRESHOLD_SECS);
+  assert(now_epoch_sec > EMAIL_TIMEOUT_SECS);
 
   if (email_sent_bytes) {
     assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
@@ -68,6 +71,10 @@ static void poke_state_machine() {
     // Were still cooling down from last send, do nothing for now
     IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
     return; // No data, do nothing for now
+  }
+  if (email_sent_epoch_sec == 0) {
+    // our buffer just started filling up, lets mark the time, we will probably set the low threshold timer
+    email_sent_epoch_sec = now_epoch_sec - EMAIL_RAPID_THRESHOLD_SECS;
   }
   // We have data to send, and were not cooling down
   if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||

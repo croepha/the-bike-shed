@@ -59,11 +59,15 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
   // for (char const* line = body_; line && (line-body_) < body_len_; line = memchr(line, '\n', body_end-line) )  {
   //   body_
   // }
-  if (body_len_ > 128) {
-    fprintf(stderr, "%.*s... Truncated ...%.*s",
-      (int)40, body_, (int)40, body_+(body_len_-40) );
-  } else {
-    fprintf(stderr, "%.*s", (int)body_len_, body_);
+
+  SPLIT_MEM(body_, body_ + body_len_, '\n', line) {
+    int line_len = line_end - line;
+    if (line_len > 128) {
+      fprintf(stderr, "%.*s...Truncated...%.*s\n",
+        (int)40, line, (int)40, line+(line_len-40) );
+    } else {
+      fprintf(stderr, "%.*s\n", (int)body_len_, body_);
+    }
   }
   fprintf(stderr, "email_init end\n");
 }
@@ -119,7 +123,7 @@ int main () {
     log_usage( timer_skip(); );
 
   }
-  return -1;
+//  return -1;
 
   if (1) {
     fprintf(stderr, "Large logs\n");
