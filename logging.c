@@ -39,6 +39,10 @@ static   u8 recursing_error;
 static   u8 internal_error;
 struct email_Send email_ctx;
 
+#undef  DEBUG
+
+#define DEBUG(...) fprintf(stderr, "DEBUG: " __VA_ARGS__); fprintf(stderr, "\n")
+
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
   assert(now_epoch_sec > EMAIL_RAPID_THRESHOLD_SECS);
@@ -48,43 +52,49 @@ static void poke_state_machine() {
   if (email_sent_bytes) {
     assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
     if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
-      // If our email is timing out, lets abort it
+      DEBUG("If our email is timing out, lets abort it");
       fprintf(stderr, "Error: log email took too long, aborting\n");
       email_free(&email_ctx);
       email_sent_bytes = 0;
       IO_TIMER_MS(logging_send) = -1;
     } else {
-      return; // Email is in flight, lets not do anything for now
+      DEBUG("Email is in flight, lets not do anything for now");
+      return;
     }
   }
-  // No email is in flight currently
+  DEBUG("No email is in flight currently");
   if (! email_buf_used ) {
-    // No data
+    DEBUG("No data");
     if (now_epoch_sec >= email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS) {
-      email_sent_epoch_sec = 0;  // Turn off low threshold timer, if were past the rapid cooldown timer
+      DEBUG("past the rapid cooldown timer, Turning off low threshold timer");
+      email_sent_epoch_sec = 0;
     }
     IO_TIMER_MS(logging_send) = -1;
-    return; // No data, do nothing for now
+    DEBUG("No data, do nothing for now");
+    return;
   }
-  // There is data to be sent
+  DEBUG("There is data to be sent");
   if (now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) {
-    // Were still cooling down from last send, do nothing for now
+    DEBUG("Were still cooling down from last send, do nothing for now");
     IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
-    return; // No data, do nothing for now
+    DEBUG("No data, do nothing for now");
+    return;
   }
+  DEBUG("We are not cooling down");
   if (email_sent_epoch_sec == 0) {
-    // our buffer just started filling up, lets mark the time, we will probably set the low threshold timer
-    email_sent_epoch_sec = now_epoch_sec - EMAIL_RAPID_THRESHOLD_SECS;
+    DEBUG("our buffer just started filling up, lets mark the time, we will probably set the low threshold timer");
+    email_sent_epoch_sec = now_epoch_sec;
   }
-  // We have data to send, and were not cooling down
+  DEBUG("We have data to send, and were not cooling down");
   if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
     now_epoch_sec >= email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) {
-      // one of the low thresholds are met, lets queue up an email
+      DEBUG("one of the low thresholds are met, lets queue up an email");
       email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
       email_sent_bytes     = email_buf_used;
       email_sent_epoch_sec = now_epoch_sec;
       IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
   } else {
+    DEBUG("Waiting on threshold timeout or more data");
     IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
   }
 }

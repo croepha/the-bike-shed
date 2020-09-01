@@ -66,7 +66,7 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
       fprintf(stderr, "%.*s...Truncated...%.*s\n",
         (int)40, line, (int)40, line+(line_len-40) );
     } else {
-      fprintf(stderr, "%.*s\n", (int)body_len_, body_);
+      fprintf(stderr, "%.*s\n", (int)line_len, line);
     }
   }
   fprintf(stderr, "email_init end\n");
