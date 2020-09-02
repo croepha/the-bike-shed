@@ -39,11 +39,25 @@ static   u8 recursing_error;
 static   u8 internal_error;
 struct email_Send email_ctx;
 
-#undef  DEBUG
+enum EMAIL_STATE_T {
+  EMAIL_STATE_COLLECTING,
+  EMAIL_STATE_SENT,
+  EMAIL_STATE_NO_DATA,
+  EMAIL_STAGE_COOLDOWN,
+};
+enum EMAIL_STATE_T email_state;
 
-#define DEBUG(...) fprintf(stderr, "DEBUG: " __VA_ARGS__); fprintf(stderr, "\n")
+#undef  DEBUG
+#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
 
 static void poke_state_machine() {
+  start: switch (email_state) {
+    case EMAIL_STATE_COLLECTING: {
+
+    } break;
+
+  }
+
   u64 now_epoch_sec = now_sec();
   assert(now_epoch_sec > EMAIL_RAPID_THRESHOLD_SECS);
   assert(now_epoch_sec > EMAIL_LOW_THRESHOLD_SECS);
@@ -74,11 +88,14 @@ static void poke_state_machine() {
     return;
   }
   DEBUG("There is data to be sent");
-  if (now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) {
-    DEBUG("Were still cooling down from last send, do nothing for now");
+  if (email_sent_epoch_sec &&
+      now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS &&
+      email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ) {
+    DEBUG("Were hitting the bytes threshold, but were still cooling down from last send, do nothing for now");
     IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
     DEBUG("No data, do nothing for now");
     return;
+
   }
   DEBUG("We are not cooling down");
   if (email_sent_epoch_sec == 0) {
