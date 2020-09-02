@@ -88,6 +88,7 @@ void reset_email_state() {
     email_sent_epoch_sec = 0;
     email_buf_used = 0;
     email_sent_bytes = 0;
+    email_state = 0;
  }
 
 void timer_skip() {
@@ -119,7 +120,11 @@ int main () {
     log_usage( INFO("line 6"); );
     log_usage( INFO("line 7"); );
 
+    DEBUG("Expect cooldown finish");
     log_usage( timer_skip(); );
+    DEBUG("Expect email send");
+    log_usage( timer_skip(); );
+    DEBUG("Expect email timeout");
     log_usage( timer_skip(); );
 
   }

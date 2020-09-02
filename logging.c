@@ -39,80 +39,77 @@ static   u8 recursing_error;
 static   u8 internal_error;
 struct email_Send email_ctx;
 
-enum EMAIL_STATE_T {
-  EMAIL_STATE_COLLECTING,
-  EMAIL_STATE_SENT,
-  EMAIL_STATE_NO_DATA,
-  EMAIL_STAGE_COOLDOWN,
+enum LOG_EMAIL_STATE_T {
+  LOG_EMAIL_STATE_NO_DATA,
+  LOG_EMAIL_STATE_COLLECTING,
+  LOG_EMAIL_STATE_SENT,
+  LOG_EMAIL_STATE_COOLDOWN,
 };
-enum EMAIL_STATE_T email_state;
+enum LOG_EMAIL_STATE_T email_state;
 
 #undef  DEBUG
-#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
+#undef  ERROR
+//#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
+#define DEBUG(...)
+#define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
 
 static void poke_state_machine() {
-  start: switch (email_state) {
-    case EMAIL_STATE_COLLECTING: {
-
-    } break;
-
-  }
-
   u64 now_epoch_sec = now_sec();
   assert(now_epoch_sec > EMAIL_RAPID_THRESHOLD_SECS);
   assert(now_epoch_sec > EMAIL_LOW_THRESHOLD_SECS);
   assert(now_epoch_sec > EMAIL_TIMEOUT_SECS);
 
-  if (email_sent_bytes) {
-    assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
-    if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
-      DEBUG("If our email is timing out, lets abort it");
-      fprintf(stderr, "Error: log email took too long, aborting\n");
-      email_free(&email_ctx);
-      email_sent_bytes = 0;
-      IO_TIMER_MS(logging_send) = -1;
-    } else {
-      DEBUG("Email is in flight, lets not do anything for now");
-      return;
-    }
-  }
-  DEBUG("No email is in flight currently");
-  if (! email_buf_used ) {
-    DEBUG("No data");
-    if (now_epoch_sec >= email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS) {
-      DEBUG("past the rapid cooldown timer, Turning off low threshold timer");
-      email_sent_epoch_sec = 0;
-    }
-    IO_TIMER_MS(logging_send) = -1;
-    DEBUG("No data, do nothing for now");
-    return;
-  }
-  DEBUG("There is data to be sent");
-  if (email_sent_epoch_sec &&
-      now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS &&
-      email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ) {
-    DEBUG("Were hitting the bytes threshold, but were still cooling down from last send, do nothing for now");
-    IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
-    DEBUG("No data, do nothing for now");
-    return;
-
-  }
-  DEBUG("We are not cooling down");
-  if (email_sent_epoch_sec == 0) {
-    DEBUG("our buffer just started filling up, lets mark the time, we will probably set the low threshold timer");
-    email_sent_epoch_sec = now_epoch_sec;
-  }
-  DEBUG("We have data to send, and were not cooling down");
-  if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
-    now_epoch_sec >= email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) {
-      DEBUG("one of the low thresholds are met, lets queue up an email");
-      email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
-      email_sent_bytes     = email_buf_used;
-      email_sent_epoch_sec = now_epoch_sec;
-      IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
-  } else {
-    DEBUG("Waiting on threshold timeout or more data");
-    IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
+  start: switch (email_state) {  SWITCH_DEFAULT_IS_UNEXPECTED;
+    case LOG_EMAIL_STATE_NO_DATA: {
+      if (email_buf_used) {
+        email_sent_epoch_sec = now_epoch_sec;
+        email_state = LOG_EMAIL_STATE_COLLECTING;
+        goto start;
+      } else {
+        DEBUG("No data, do nothing");
+      }
+    } break;
+    case LOG_EMAIL_STATE_COLLECTING: {
+      if (email_buf_used >= EMAIL_LOW_THRESHOLD_BYTES ||
+        now_epoch_sec >= email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) {
+          DEBUG("one of the low thresholds are met, lets queue up an email");
+          email_init(&email_ctx, email_rcpt, email_buf, email_buf_used, "Logs");
+          email_sent_bytes     = email_buf_used;
+          email_sent_epoch_sec = now_epoch_sec;
+          IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000;
+          email_state = LOG_EMAIL_STATE_SENT;
+      } else {
+        DEBUG("Waiting on threshold timeout or more data");
+        IO_TIMER_MS(logging_send) = (email_sent_epoch_sec + EMAIL_LOW_THRESHOLD_SECS) * 1000;
+      }
+    } break;
+    case LOG_EMAIL_STATE_SENT: {
+      assert( IO_TIMER_MS(logging_send) == (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS) * 1000 );
+      if (email_sent_epoch_sec + EMAIL_TIMEOUT_SECS <= now_epoch_sec) {
+        DEBUG("If our email is timing out, lets abort it");
+        fprintf(stderr, "Error: log email took too long, aborting\n");
+        email_free(&email_ctx);
+        email_sent_bytes = 0;
+        IO_TIMER_MS(logging_send) = -1;
+        email_state = LOG_EMAIL_STATE_COOLDOWN;
+        goto start;
+      } else {
+        DEBUG("Email is in flight, lets not do anything for now");
+      }
+    } break;
+    case LOG_EMAIL_STATE_COOLDOWN: {
+      if ( now_epoch_sec < email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS) {
+        DEBUG("Were cooling down");
+        IO_TIMER_MS(logging_send) = ( email_sent_epoch_sec + EMAIL_RAPID_THRESHOLD_SECS ) * 1000;
+      } else {
+        if (email_buf_used) {
+          email_state = LOG_EMAIL_STATE_COLLECTING;
+        } else {
+          email_state = LOG_EMAIL_STATE_NO_DATA;
+        }
+        goto start;
+      }
+    } break;
   }
 }
 
@@ -123,6 +120,7 @@ void email_done(u8 success) {
   }
   email_sent_bytes = 0;
   email_free(&email_ctx);
+  email_state = LOG_EMAIL_STATE_COOLDOWN;
   poke_state_machine();
 }
 
