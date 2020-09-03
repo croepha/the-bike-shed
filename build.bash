@@ -174,6 +174,7 @@ FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
 
 reset
 FLAVOR=logging_test compile logging -D 'LOGGING_USE_EMAIL=1' -D FOR_TESTS -D now_sec=now_sec
+FLAVOR=logging_test compile supervisor -D 'LOGGING_USE_EMAIL=1' -D FOR_TESTS -D now_sec=now_sec
 compile logging_test
 link_exec logging_test
 do_test logging_test /build/logging_test.dbg.exec
