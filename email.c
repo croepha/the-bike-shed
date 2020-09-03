@@ -55,7 +55,6 @@ static size_t email_read_callback(void *ptr, size_t size, size_t nmemb,
 void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
   assert(!ctx->easy);
-  CURL *easy = io_curl_create_handle();
   assert(from_addr && strlen(from_addr));
   assert(smtp_server && strlen(smtp_server));
   assert(user_pass && strlen(user_pass));
@@ -63,6 +62,8 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
   memset(ctx, 0, sizeof(struct email_Send));
 
   ctx->state = EMAIL_STATE_SENDING_HEADER;
+
+  CURL *easy = io_curl_create_handle();
   ctx->easy = easy;
 
   int r = snprintf(ctx->header, sizeof ctx->header,

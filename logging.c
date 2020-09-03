@@ -130,9 +130,21 @@ void logging_send_timeout() { poke_state_machine(); }
 #define VLOGF(fmt, va)  vbuf_add(fmt, va)
 #define  LOGF(fmt, ...)  buf_add(fmt, ##__VA_ARGS__)
 
+static void buf_add_step1(char**buf_, usz*buf_space_left) {
+  *buf_ = email_buf + email_buf_used;
+  *buf_space_left = email_buf_SIZE - email_buf_used;
+}
+// static void buf_add_step2(usz new_space_used) {
+//   assert(new_space_used <= email_buf_SIZE - email_buf_used);
+//   email_buf_used += new_space_used;
+// }
+
 static void  vbuf_add(char const * fmt, va_list va) {
   recursing_error = 1;
-  s32 r = vsnprintf(email_buf + email_buf_used, email_buf_SIZE - email_buf_used, fmt, va);
+  char * buf; usz    space_left;
+  buf_add_step1(&buf, &space_left);
+
+  s32 r = vsnprintf(buf, space_left, fmt, va);
   if (r < 0) { // Pretty rare error, but want to handle this case since we need to be super robust
     if (recursing_error) { // Hitting this case would be even rarer
       internal_error = 1;

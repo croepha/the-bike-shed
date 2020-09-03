@@ -11,7 +11,9 @@
 
 
 CURL* io_curl_create_handle() {
-  return curl_easy_init();
+  CURL* ret = curl_easy_init();
+  assert(ret);
+  return ret;
 }
 void io_curl_abort(CURL* easy) {}
 int main() {
@@ -26,7 +28,7 @@ int main() {
     ;
 
   for (int i=0; i<1;i++) {
-    struct email_Send email_ctx;
+    struct email_Send email_ctx = {};
     email_init(
         &email_ctx, "to@longlonglonglonglonglonglonglonghost.com", body_,
         strlen(body_),
