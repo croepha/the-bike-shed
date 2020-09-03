@@ -137,12 +137,12 @@ static void buf_add_step1(char**buf_, usz*buf_space_left) {
 static void buf_add_step2(usz new_space_used) {
   assert(new_space_used <= email_buf_SIZE - email_buf_used);
   if(memchr(email_buf + email_buf_used, '\n', new_space_used)) {
-    //poke_state_machine();
+    email_buf_used += new_space_used;
+    poke_state_machine();
+  } else {
+    email_buf_used += new_space_used;
   }
-  email_buf_used += new_space_used;
 }
-static void buf_add_step1(char**buf_, usz*buf_space_left);
-static void buf_add_step2(usz new_space_used);
 
 static void  vbuf_add(char const * fmt, va_list va) {
   recursing_error = 1;
@@ -222,9 +222,7 @@ void _log(const char* severity, const char*file, const char*func, int line,
       LOGF("]");
     } break;
   }
-  poke_state_machine();
-  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
-}
+  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);}
 
 
 
