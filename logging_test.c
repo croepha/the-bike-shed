@@ -128,6 +128,28 @@ void timer_skip() {
   logging_send_timeout();
 }
 
+
+void buf_add_step1(char**buf_, usz*buf_space_left);
+void buf_add_step2(usz new_space_used);
+
+__attribute__((__format__ (__printf__, 1, 2)))
+void test_printf(char const * fmt, ...) {
+  char * buf; usz    space_left;
+  buf_add_step1(&buf, &space_left);
+  va_list va;
+  va_start(va, fmt);
+  s32 r = vsnprintf(buf, space_left, fmt, va);
+  va_end(va);
+  if (r >= space_left) {
+    fprintf(stderr, "r >= space_left\n");
+    abort();
+  }
+  buf_add_step2(r);
+}
+#undef INFO
+#define INFO(...) test_printf("" __VA_ARGS__)
+
+
 #define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 int main () {
   setlinebuf(stderr); alarm(1);
