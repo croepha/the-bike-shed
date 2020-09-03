@@ -9,6 +9,7 @@
 #include "io_curl.h"
 #include "logging.h"
 
+
 static __thread char _log_ctx_buffer[1024];
 static __thread  s32 _log_ctx_len;
 
@@ -18,6 +19,7 @@ __thread s32 log_allowed_fails;
 // TODO, for robustness, we should install some exception handlers for segfaults and aborts, attempt to send final log buffers, and if that fails
 //       dump to disk
 
+u64 now_sec();
 #ifndef now_sec
 u64 now_sec() { return time(0); }
 #endif
@@ -25,18 +27,18 @@ u64 now_sec() { return time(0); }
 #include "email.h"
 // TODO: setup gmail to delete old emails
 // LOW_THRESHOLDS: We will start considering sending logs once we have accumulated this much bytes/time
-static char const * const email_rcpt = "logging@test.test";
-static  u32 const EMAIL_LOW_THRESHOLD_BYTES = 1<<14   ; // 16 KB
-static  u32 const EMAIL_RAPID_THRESHOLD_SECS = 20    ; // 20 Seconds  Prevent emails from being sent more often than this
-static  u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
-static  u32 const EMAIL_TIMEOUT_SECS        = 60 * 2  ; // 10 Minutes
-static  u32 const email_buf_SIZE  = 1<<22   ; // 4 MB  // dont increase over 24 MB, gmail has a hard limit at 25MB
-static char email_buf[email_buf_SIZE];
-static  u32 email_buf_used;
-static  u64 email_sent_epoch_sec;
-static  u32 email_sent_bytes;
-static   u8 recursing_error;
-static   u8 internal_error;
+char const * const email_rcpt = "logging@test.test";
+ u32 const EMAIL_LOW_THRESHOLD_BYTES = 1<<14   ; // 16 KB
+ u32 const EMAIL_RAPID_THRESHOLD_SECS = 20    ; // 20 Seconds  Prevent emails from being sent more often than this
+ u32 const EMAIL_LOW_THRESHOLD_SECS  = 60 * 1  ; // 1 Minute
+ u32 const EMAIL_TIMEOUT_SECS        = 60 * 2  ; // 10 Minutes
+ u32 const email_buf_SIZE  = 1<<22   ; // 4 MB  // dont increase over 24 MB, gmail has a hard limit at 25MB
+char email_buf[email_buf_SIZE];
+ u32 email_buf_used;
+ u64 email_sent_epoch_sec;
+ u32 email_sent_bytes;
+  u8 recursing_error;
+  u8 internal_error;
 struct email_Send email_ctx;
 
 enum LOG_EMAIL_STATE_T {
@@ -52,6 +54,7 @@ enum LOG_EMAIL_STATE_T email_state;
 //#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
 #define DEBUG(...)
 #define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
+
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();

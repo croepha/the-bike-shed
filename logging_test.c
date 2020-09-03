@@ -4,14 +4,58 @@
 #include <unistd.h>
 #define LOGGING_USE_EMAIL 1
 #define now_sec now_sec
+#include <stdio.h>
+
+#include "logging.h"
+#include <inttypes.h>
+
+#undef  DEBUG
+#undef  ERROR
+//#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
+#define DEBUG(...)
+#define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
 
 u64 now_sec_value;
+
+extern u32 email_buf_used;
+extern u64 email_sent_epoch_sec;
+extern u32 email_sent_bytes;
+enum LOG_EMAIL_STATE_T {
+  LOG_EMAIL_STATE_NO_DATA,
+  LOG_EMAIL_STATE_COLLECTING,
+  LOG_EMAIL_STATE_SENT,
+  LOG_EMAIL_STATE_COOLDOWN,
+};
+extern enum LOG_EMAIL_STATE_T email_state;
+
+
+
+
+void dump_email_state() {
+  fprintf(stderr, "now:%"PRIu64" email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
+    now_sec_value, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
+  );
+}
+
+void reset_email_state() {
+    now_sec_value  = 100000;
+    IO_TIMER_MS(logging_send) = -1;
+    email_sent_epoch_sec = 0;
+    email_buf_used = 0;
+    email_sent_bytes = 0;
+    email_state = 0;
+ }
+
+
+
 u64 now_sec() {
   return now_sec_value++;
 }
 
-#include "logging.c"
-#include <inttypes.h>
+//#include "logging.c"
+#include <string.h>
+#include "email.h"
+void email_done(u8 success);
 
 u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
@@ -76,20 +120,8 @@ void email_free(struct email_Send *ctx) {
   fprintf(stderr, "email_free\n");
 }
 
-void dump_email_state() {
-  fprintf(stderr, "now:%"PRIu64" email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
-    now_sec_value, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
-  );
-}
-
-void reset_email_state() {
-    now_sec_value  = 100000;
-    IO_TIMER_MS(logging_send) = -1;
-    email_sent_epoch_sec = 0;
-    email_buf_used = 0;
-    email_sent_bytes = 0;
-    email_state = 0;
- }
+void dump_email_state();
+void reset_email_state();
 
 void timer_skip() {
   now_sec_value = IO_TIMER_MS(logging_send)/1000;
