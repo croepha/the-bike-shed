@@ -29,8 +29,6 @@ enum LOG_EMAIL_STATE_T {
 extern enum LOG_EMAIL_STATE_T email_state;
 
 
-
-
 void dump_email_state() {
   fprintf(stderr, "now:%"PRIu64" email_state:%d IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
     now_sec_value, email_state, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
