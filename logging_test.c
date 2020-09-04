@@ -32,8 +32,8 @@ extern enum LOG_EMAIL_STATE_T email_state;
 
 
 void dump_email_state() {
-  fprintf(stderr, "now:%"PRIu64" email_state: IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
-    now_sec_value, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
+  fprintf(stderr, "now:%"PRIu64" email_state:%d IO_TIMER_MS(logging_send):%"PRIu64" sent_epoch_sec:%"PRIu64" buf_used:%u sent_bytes:%u\n",
+    now_sec_value, email_state, IO_TIMER_MS(logging_send)/1000, email_sent_epoch_sec, email_buf_used, email_sent_bytes
   );
 }
 
@@ -125,6 +125,12 @@ void reset_email_state();
 
 void timer_skip() {
   now_sec_value = IO_TIMER_MS(logging_send)/1000;
+  if (now_sec_value > 100000000000) {
+    fprintf(stderr, "now_sec_value > 100000000000\n");
+    abort();
+  }
+
+
   logging_send_timeout();
 }
 
@@ -147,7 +153,7 @@ void test_printf(char const * fmt, ...) {
   buf_add_step2(r);
 }
 #undef INFO
-#define INFO(...) test_printf("" __VA_ARGS__)
+#define INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
 
 
 #define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
