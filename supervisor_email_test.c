@@ -140,8 +140,8 @@ void test_printf(char const * fmt, ...) {
   }
   buf_add_step2(r);
 }
-#undef INFO
-#define INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
+
+#define TEST_INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
 
 //#define log_usage(...)   INFO("Usage: %s", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 #define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
@@ -157,18 +157,18 @@ int main () {
     //INFO("Typical usage:");
     fprintf(stderr, "Typical usage:\n");
     log_usage( reset_email_state(); );
-    log_usage( INFO("First line"); );
-    log_usage( INFO("Second Line"); );
+    log_usage( TEST_INFO("First line"); );
+    log_usage( TEST_INFO("Second Line"); );
 
     log_usage( timer_skip(); );
 
-    log_usage( INFO("Third line"); );
-    log_usage( INFO("Fourth Line"); );
+    log_usage( TEST_INFO("Third line"); );
+    log_usage( TEST_INFO("Fourth Line"); );
 
     log_usage( email_done(1); );
 
-    log_usage( INFO("line 6"); );
-    log_usage( INFO("line 7"); );
+    log_usage( TEST_INFO("line 6"); );
+    log_usage( TEST_INFO("line 7"); );
 
     DEBUG("Expect cooldown finish");
     log_usage( timer_skip(); );
@@ -190,7 +190,7 @@ int main () {
     big_log[sizeof big_log - 1] = 0;
 
     for (int i=0; i<20; i++) {
-      log_usage( INFO("Big: %s", big_log); );
+      log_usage( TEST_INFO("Big: %s", big_log); );
     }
   }
 
