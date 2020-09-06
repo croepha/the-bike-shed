@@ -14,7 +14,11 @@ int   supr_read_from_child_fd = -1;
 int   supr_child_write_to_fd = -1;
 int   supr_signal_fd = -1;
 pid_t supr_child_pid;
-char** supr_child_argv;
+
+void supr_exec_child();
+void supr_email_add_data_start(char**buf_, usz*buf_space_left);
+void supr_email_add_data_finish(usz new_space_used);
+
 
 void supr_start_child() { int r;
   r = fflush(stdout);                                            error_check(r);
@@ -23,9 +27,9 @@ void supr_start_child() { int r;
   if (supr_child_pid == 0) {
     struct rlimit limits = { 1<<30, 1<<30 };
     r = setrlimit(RLIMIT_CORE, &limits);                         error_check(r);
-    r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
-    r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
-    r = execv(*supr_child_argv, supr_child_argv);          error_check(r);
+    // r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
+    // r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
+    supr_exec_child();
   }
   INFO("Child:%d forked", supr_child_pid);
 }
@@ -57,15 +61,14 @@ void supr_signal_fd_io_event(struct epoll_event epe) { int r;
 }
 
 void supr_read_from_child_io_event(struct epoll_event epe) { int r;
-  char buf[1024];
-  r = read(supr_read_from_child_fd, buf, sizeof buf - 1);   error_check(r);
-  buf[r] = 0;
-  INFO_BUFFER(buf, r, "read_from_child: ");
+  char* buf; usz buf_len; supr_email_add_data_start(&buf, &buf_len);
+  r = read(supr_read_from_child_fd, buf, buf_len);   error_check(r);
+  supr_email_add_data_finish(r);
 }
 
-int main (int argc, char**argv) { int r;
+void supr_main () { int r;
   setlinebuf(stderr);
-  supr_child_argv = ++argv;
+  //supr_exec_child();
   io_initialize();
 
   {

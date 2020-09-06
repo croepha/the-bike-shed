@@ -174,17 +174,18 @@ FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
 
 reset
 FLAVOR=logging_test compile logging -D 'LOGGING_USE_EMAIL=1' -D FOR_TESTS -D now_sec=now_sec
-FLAVOR=logging_test compile supervisor -D 'LOGGING_USE_EMAIL=1' -D FOR_TESTS -D now_sec=now_sec
+FLAVOR=logging_test compile supervisor_email -D 'LOGGING_USE_EMAIL=1' -D FOR_TESTS -D now_sec=now_sec
 compile logging_test
-link_exec logging_test
-do_test logging_test /build/logging_test.dbg.exec
+link_exec supervisor_email_test
+do_test supervisor_email_test /build/supervisor_email_test.dbg.exec
 
 reset
 FLAVOR=test depends_on logging
 compile     supervisor_io
+compile     supervisor_io_test
 depends_on  io_core
 depends_on  misc
-link_exec   supervisor
+link_exec   supervisor_io_test
 
 
 reset
