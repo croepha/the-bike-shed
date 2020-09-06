@@ -181,6 +181,14 @@ do_test logging_test /build/logging_test.dbg.exec
 
 reset
 FLAVOR=test depends_on logging
+compile     supervisor_io
+depends_on  io_core
+depends_on  misc
+link_exec   supervisor
+
+
+reset
+FLAVOR=test depends_on logging
 depends_on io_core
 depends_on misc
 compile    io_core_test

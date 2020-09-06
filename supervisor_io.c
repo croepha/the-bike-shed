@@ -24,7 +24,7 @@ void supr_start_child() { int r;
     r = setrlimit(RLIMIT_CORE, &limits);                         error_check(r);
     r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
     r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
-    r = execl("/bin/sh", "-c", "echo SSS; sleep 1; cat /etc/lsb_release");          error_check(r);
+    r = execl("/bin/sh", "sh", "-c", "echo SSS; sleep 1; cat /etc/lsb-release");          error_check(r);
   }
   fprintf(stderr, "Child:%d forked \n", supr_child_pid);
 }
@@ -63,6 +63,8 @@ void supr_read_from_child_io_event(struct epoll_event epe) { int r;
 }
 
 int main () { int r;
+  io_initialize();
+
   {
     sigset_t mask;
     r = sigemptyset(&mask);                                       error_check(r);
