@@ -5,6 +5,7 @@
 #include "logging.h"
 
 char buf[1024];
+
 void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
     *buf_ = buf;
     *buf_space_left = sizeof buf - 1;

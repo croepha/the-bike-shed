@@ -118,11 +118,12 @@ void email_done(u8 success) {
 }
 
 void logging_send_timeout() { poke_state_machine(); }
-void buf_add_step1(char**buf_, usz*buf_space_left) {
+
+void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
   *buf_ = supr_email_buf + supr_email_buf_used;
   *buf_space_left = supr_email_buf_SIZE - supr_email_buf_used;
 }
-void buf_add_step2(usz new_space_used) {
+void supr_email_add_data_finish(usz new_space_used) {
   assert(new_space_used <= supr_email_buf_SIZE - supr_email_buf_used);
   if (memchr(supr_email_buf + supr_email_buf_used, '\n', new_space_used)) {
     supr_email_buf_used += new_space_used;

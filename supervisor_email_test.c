@@ -123,13 +123,10 @@ void timer_skip() {
 }
 
 
-void buf_add_step1(char**buf_, usz*buf_space_left);
-void buf_add_step2(usz new_space_used);
-
 __attribute__((__format__ (__printf__, 1, 2)))
 void test_printf(char const * fmt, ...) {
   char * buf; usz    space_left;
-  buf_add_step1(&buf, &space_left);
+  supr_email_add_data_start(&buf, &space_left);
   va_list va;
   va_start(va, fmt);
   s32 r = vsnprintf(buf, space_left, fmt, va);
@@ -138,7 +135,7 @@ void test_printf(char const * fmt, ...) {
     fprintf(stderr, "r >= space_left\n");
     abort();
   }
-  buf_add_step2(r);
+  supr_email_add_data_finish(r);
 }
 
 #define TEST_INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
