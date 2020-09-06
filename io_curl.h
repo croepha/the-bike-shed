@@ -10,7 +10,6 @@
   _(logging) \
   _(config_download) \
 
-
 #define _(name) _io_curl_type_ ## name,
 enum _io_curl_type { _(INVALID) _IO_CURL_TYPES _(COUNT)};
 #undef _

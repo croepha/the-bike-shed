@@ -71,6 +71,7 @@ int sockets[socket_COUNT];
 void sock_read_line(int fd, char * buf, size_t buf_size) {
   ssize_t r = read(fd, buf, buf_size);
   error_check(r);
+  INFO_BUFFER(buf, r);
   //DEBUG("fd:%d buf_size:`%.*s`", fd, (int)r, buf);
   assert(r > 0);
   assert(buf[r-1] == '\n');
@@ -132,7 +133,7 @@ static void test_main() { int r;
     pid_t fork_pid = fork();
     error_check(fork_pid);
 
-    if (!fork_pid) { LOGCTX("forked:%02d", i);
+    if (!fork_pid) {   LOGCTX("\ttest_sort:id:%02d forked", i);
       r = close(sv[0]); error_check(r);
 
       u64 now = utc_ms_since_epoch();

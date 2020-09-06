@@ -16,14 +16,11 @@ void supr_email_add_data_finish(usz new_space_used) {
     INFO_BUFFER(buf, new_space_used, "supr_email_add_data: ");
 }
 
-
 char** supr_child_argv;
-
 
 void supr_exec_child() { int r;
     r = execvp(*supr_child_argv, supr_child_argv);          error_check(r);
 }
-
 
 void supr_main ();
 int main(int argc, char** argv) {
