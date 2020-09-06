@@ -197,6 +197,15 @@ link_exec  io_core_test
 
 reset
 depends_on logging
+depends_on io_core
+depends_on misc
+compile    io_test_full
+link_exec  io_test_full
+
+
+
+reset
+depends_on logging
 compile   email
 compile   email_test
 link_exec email_test -l curl
@@ -204,6 +213,7 @@ link_exec email_test -l curl
 
 do_test io_core_test /build/io_core_test.dbg.exec
 do_test io_curl_test /build/io_curl_test.dbg.exec
+do_test io_test_full /build/io_test_full.dbg.exec
 do_test config_download_test2 /build/config_download_test2.dbg.exec
 
 reset

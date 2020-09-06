@@ -1,21 +1,3 @@
-#define _GNU_SOURCE
-#define LOG_DEBUG
-#include <sys/epoll.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <time.h>
-#include <inttypes.h>
-
-#include "logging.h"
-#include "io.h"
 
 #include "io_test.h"
 
