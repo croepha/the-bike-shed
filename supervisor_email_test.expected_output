@@ -18,17 +18,17 @@ Usage: INFO("First line");
 Usage: INFO("Second Line");
  INFO: now:100002 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:23 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
-email_init: to:logging@test.test subject:Logs body_len:23 body:
-First line
-Second Line
-email_init end
+ INFO: email_init: to:logging@test.test subject:Logs body_len:23 body:	(supervisor_email_test.c email_init)
+ INFO: First line	(supervisor_email_test.c email_init)
+ INFO: Second Line	(supervisor_email_test.c email_init)
+ INFO: email_init end	(supervisor_email_test.c email_init)
  INFO: now:100061 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:23 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Third line");
  INFO: now:100062 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:34 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Fourth Line");
  INFO: now:100063 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:46 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: email_done(1);
-email_free
+ INFO: email_free	(supervisor_email_test.c email_free)
  INFO: now:100064 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:23 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("line 6");
  INFO: now:100065 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:30 sent_bytes:0	(supervisor_email_test.c dump_email_state)
@@ -37,22 +37,22 @@ Usage: INFO("line 7");
 Usage: timer_skip();
  INFO: now:100081 email_state:1 IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:37 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
-email_init: to:logging@test.test subject:Logs body_len:37 body:
-Third line
-Fourth Line
-line 6
-line 7
-email_init end
+ INFO: email_init: to:logging@test.test subject:Logs body_len:37 body:	(supervisor_email_test.c email_init)
+ INFO: Third line	(supervisor_email_test.c email_init)
+ INFO: Fourth Line	(supervisor_email_test.c email_init)
+ INFO: line 6	(supervisor_email_test.c email_init)
+ INFO: line 7	(supervisor_email_test.c email_init)
+ INFO: email_init end	(supervisor_email_test.c email_init)
  INFO: now:100121 email_state:2 IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:37 sent_bytes:37	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
 Error: log email took too long, aborting
-email_free
-email_init: to:logging@test.test subject:Logs body_len:37 body:
-Third line
-Fourth Line
-line 6
-line 7
-email_init end
+ INFO: email_free	(supervisor_email_test.c email_free)
+ INFO: email_init: to:logging@test.test subject:Logs body_len:37 body:	(supervisor_email_test.c email_init)
+ INFO: Third line	(supervisor_email_test.c email_init)
+ INFO: Fourth Line	(supervisor_email_test.c email_init)
+ INFO: line 6	(supervisor_email_test.c email_init)
+ INFO: line 7	(supervisor_email_test.c email_init)
+ INFO: email_init end	(supervisor_email_test.c email_init)
  INFO: now:100241 email_state:2 IO_TIMER_MS(logging_send):100360 sent_epoch_sec:100240 buf_used:37 sent_bytes:37	(supervisor_email_test.c dump_email_state)
 Large logs
 Usage: reset_email_state();
@@ -88,24 +88,24 @@ Usage: INFO("Big: %s", big_log);
 Usage: INFO("Big: %s", big_log);
  INFO: now:100015 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:15435 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-email_init: to:logging@test.test subject:Logs body_len:16464 body:
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
-email_init end
+ INFO: email_init: to:logging@test.test subject:Logs body_len:16464 body:	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB	(supervisor_email_test.c email_init)
+ INFO: email_init end	(supervisor_email_test.c email_init)
  INFO: now:100016 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:16464 sent_bytes:16464	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
  INFO: now:100017 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:17493 sent_bytes:16464	(supervisor_email_test.c dump_email_state)

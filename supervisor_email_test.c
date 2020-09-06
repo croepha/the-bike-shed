@@ -81,7 +81,7 @@ void test_SPLIT_MEM() {
 // TODO Maybe do a checksum of body, make sure it wasn't changed while email was in flight...
 void email_init(struct email_Send *ctx, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
-  fprintf(stderr, "email_init: to:%s subject:%s body_len:%zu body:\n",
+  INFO("email_init: to:%s subject:%s body_len:%zu body:",
     to_addr, subject, body_len_ );
 
   // char const * body_end = body_ + body_len_;
@@ -100,17 +100,17 @@ void email_init(struct email_Send *ctx, char const * to_addr, char const * body_
   SPLIT_MEM(body_, body_ + body_len_, '\n', line) {
     int line_len = line_end - line;
     if (line_len > 128) {
-      fprintf(stderr, "%.*s...Truncated...%.*s\n",
+      INFO("%.*s...Truncated...%.*s",
         (int)40, line, (int)40, line+(line_len-40) );
     } else {
-      fprintf(stderr, "%.*s\n", (int)line_len, line);
+      INFO("%.*s", (int)line_len, line);
     }
   }
-  fprintf(stderr, "email_init end\n");
+  INFO("email_init end");
 }
 
 void email_free(struct email_Send *ctx) {
-  fprintf(stderr, "email_free\n");
+  INFO("email_free");
 }
 
 void dump_email_state();
@@ -118,12 +118,7 @@ void reset_email_state();
 
 void timer_skip() {
   now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  if (now_sec_value > 100000000000) {
-    fprintf(stderr, "now_sec_value > 100000000000\n");
-    abort();
-  }
-
-
+  assert(now_sec_value < 100000000000);
   logging_send_timeout();
 }
 
@@ -148,16 +143,18 @@ void test_printf(char const * fmt, ...) {
 #undef INFO
 #define INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
 
-
+//#define log_usage(...)   INFO("Usage: %s", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 #define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 int main () {
   setlinebuf(stderr); alarm(1);
 
   test_SPLIT_MEM();
 
+//  INFO("Starting logging test");
   fprintf(stderr, "Starting logging test\n");
 
   if (1) {
+    //INFO("Typical usage:");
     fprintf(stderr, "Typical usage:\n");
     log_usage( reset_email_state(); );
     log_usage( INFO("First line"); );
@@ -185,6 +182,7 @@ int main () {
 
   if (1) {
     fprintf(stderr, "Large logs\n");
+    //INFO("Large logs");
     log_usage( reset_email_state(); );
 
     char big_log[1024];
