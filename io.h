@@ -13,6 +13,8 @@ extern int io_epoll_fd;
 //#define _io_socket_type_FIRST _io_socket_type_io_curl
 #define _IO_SOCKET_TYPES \
  _(io_curl) \
+ _(supr_signal_fd) \
+ _(supr_read_from_child) \
  _(test1) \
 
 
