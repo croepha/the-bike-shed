@@ -2,30 +2,30 @@ test_SPLIT_MEM 1:1|2|3|4|5|6|7|8|9|
 Starting logging test
 Typical usage:
 Usage: reset_email_state();
-now:100000 email_state:0 IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0
+ INFO: now:100000 email_state:0 IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("First line");
-now:100001 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:11 sent_bytes:0
+ INFO: now:100001 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:11 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Second Line");
-now:100002 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:23 sent_bytes:0
+ INFO: now:100002 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:23 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
 email_init: to:logging@test.test subject:Logs body_len:23 body:
 First line
 Second Line
 email_init end
-now:100061 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:23 sent_bytes:23
+ INFO: now:100061 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:23 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Third line");
-now:100062 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:34 sent_bytes:23
+ INFO: now:100062 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:34 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Fourth Line");
-now:100063 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:46 sent_bytes:23
+ INFO: now:100063 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:46 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: email_done(1);
 email_free
-now:100064 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:23 sent_bytes:0
+ INFO: now:100064 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:23 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("line 6");
-now:100065 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:30 sent_bytes:0
+ INFO: now:100065 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:30 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("line 7");
-now:100066 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:37 sent_bytes:0
+ INFO: now:100066 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:37 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
-now:100081 email_state:1 IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:37 sent_bytes:0
+ INFO: now:100081 email_state:1 IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:37 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
 email_init: to:logging@test.test subject:Logs body_len:37 body:
 Third line
@@ -33,7 +33,7 @@ Fourth Line
 line 6
 line 7
 email_init end
-now:100121 email_state:2 IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:37 sent_bytes:37
+ INFO: now:100121 email_state:2 IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:37 sent_bytes:37	(supervisor_email_test.c dump_email_state)
 Usage: timer_skip();
 Error: log email took too long, aborting
 email_free
@@ -43,40 +43,40 @@ Fourth Line
 line 6
 line 7
 email_init end
-now:100241 email_state:2 IO_TIMER_MS(logging_send):100360 sent_epoch_sec:100240 buf_used:37 sent_bytes:37
+ INFO: now:100241 email_state:2 IO_TIMER_MS(logging_send):100360 sent_epoch_sec:100240 buf_used:37 sent_bytes:37	(supervisor_email_test.c dump_email_state)
 Large logs
 Usage: reset_email_state();
-now:100000 email_state:0 IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0
+ INFO: now:100000 email_state:0 IO_TIMER_MS(logging_send):18446744073709551 sent_epoch_sec:0 buf_used:0 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100001 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:1029 sent_bytes:0
+ INFO: now:100001 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:1029 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100002 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:2058 sent_bytes:0
+ INFO: now:100002 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:2058 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100003 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:3087 sent_bytes:0
+ INFO: now:100003 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:3087 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100004 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:4116 sent_bytes:0
+ INFO: now:100004 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:4116 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100005 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:5145 sent_bytes:0
+ INFO: now:100005 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:5145 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100006 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:6174 sent_bytes:0
+ INFO: now:100006 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:6174 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100007 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:7203 sent_bytes:0
+ INFO: now:100007 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:7203 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100008 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:8232 sent_bytes:0
+ INFO: now:100008 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:8232 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100009 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:9261 sent_bytes:0
+ INFO: now:100009 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:9261 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100010 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:10290 sent_bytes:0
+ INFO: now:100010 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:10290 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100011 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:11319 sent_bytes:0
+ INFO: now:100011 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:11319 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100012 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:12348 sent_bytes:0
+ INFO: now:100012 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:12348 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100013 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:13377 sent_bytes:0
+ INFO: now:100013 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:13377 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100014 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:14406 sent_bytes:0
+ INFO: now:100014 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:14406 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100015 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:15435 sent_bytes:0
+ INFO: now:100015 email_state:1 IO_TIMER_MS(logging_send):100060 sent_epoch_sec:100000 buf_used:15435 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
 email_init: to:logging@test.test subject:Logs body_len:16464 body:
 Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
@@ -96,12 +96,12 @@ Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBB
 Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 Big: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB...Truncated...BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 email_init end
-now:100016 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:16464 sent_bytes:16464
+ INFO: now:100016 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:16464 sent_bytes:16464	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100017 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:17493 sent_bytes:16464
+ INFO: now:100017 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:17493 sent_bytes:16464	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100018 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:18522 sent_bytes:16464
+ INFO: now:100018 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:18522 sent_bytes:16464	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100019 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:19551 sent_bytes:16464
+ INFO: now:100019 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:19551 sent_bytes:16464	(supervisor_email_test.c dump_email_state)
 Usage: INFO("Big: %s", big_log);
-now:100020 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:20580 sent_bytes:16464
+ INFO: now:100020 email_state:2 IO_TIMER_MS(logging_send):100135 sent_epoch_sec:100015 buf_used:20580 sent_bytes:16464	(supervisor_email_test.c dump_email_state)

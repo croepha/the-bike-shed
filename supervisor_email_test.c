@@ -9,11 +9,6 @@
 #include "logging.h"
 #include <inttypes.h>
 
-#undef  DEBUG
-#undef  ERROR
-//#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
-#define DEBUG(...)
-#define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
 
 u64 now_sec_value;
 
@@ -29,9 +24,8 @@ enum SUPR_LOG_EMAIL_STATE_T {
 extern enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
 void dump_email_state() {
-  fprintf(stderr,
-          "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
-          " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u\n",
+  INFO(  "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
+          " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u",
           now_sec_value, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
           supr_email_sent_epoch_sec, supr_email_buf_used,
           supr_email_sent_bytes);
