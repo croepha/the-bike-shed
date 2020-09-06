@@ -33,12 +33,6 @@ enum SUPR_LOG_EMAIL_STATE_T {
 };
 enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
-#undef  DEBUG
-#undef  ERROR
-//#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
-#define DEBUG(...)
-#define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
-
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
