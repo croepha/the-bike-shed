@@ -14,6 +14,7 @@ int   supr_read_from_child_fd = -1;
 int   supr_child_write_to_fd = -1;
 int   supr_signal_fd = -1;
 pid_t supr_child_pid;
+char** supr_child_argv;
 
 void supr_start_child() { int r;
   r = fflush(stdout);                                            error_check(r);
@@ -24,9 +25,9 @@ void supr_start_child() { int r;
     r = setrlimit(RLIMIT_CORE, &limits);                         error_check(r);
     r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
     r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
-    r = execl("/bin/sh", "sh", "-c", "echo SSS; sleep 1; cat /etc/lsb-release");          error_check(r);
+    r = execv(*supr_child_argv, supr_child_argv);          error_check(r);
   }
-  fprintf(stderr, "Child:%d forked \n", supr_child_pid);
+  INFO("Child:%d forked", supr_child_pid);
 }
 
 void supr_signal_fd_io_event(struct epoll_event epe) { int r;
@@ -41,15 +42,15 @@ void supr_signal_fd_io_event(struct epoll_event epe) { int r;
         assert(!WIFSTOPPED(wstatus));
         assert(WIFEXITED(wstatus) || WIFSIGNALED(wstatus) );
         if (WIFEXITED(wstatus)) {
-          fprintf(stderr, "Child:%d exited: status:%d\n", pid, WEXITSTATUS(wstatus) );
+          ERROR("Child:%d exited: status:%d", pid, WEXITSTATUS(wstatus) );
         }
         if (WIFSIGNALED(wstatus)) {
-          fprintf(stderr, "Child:%d terminated signal:%d dump:%d\n", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
+          ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
         }
         if (pid == supr_child_pid) {
           supr_start_child();
         } else {
-          fprintf(stderr, "Strange, pid isn't our main child... doing nothign\n");
+          ERROR("Strange, pid isn't our main child... doing nothign");
         }
 
     }
@@ -59,10 +60,12 @@ void supr_read_from_child_io_event(struct epoll_event epe) { int r;
   char buf[1024];
   r = read(supr_read_from_child_fd, buf, sizeof buf - 1);   error_check(r);
   buf[r] = 0;
-  printf("read_from_child: `%.*s'\n", r, buf);
+  INFO_BUFFER(buf, r, "read_from_child: ");
 }
 
-int main () { int r;
+int main (int argc, char**argv) { int r;
+  setlinebuf(stderr);
+  supr_child_argv = ++argv;
   io_initialize();
 
   {
