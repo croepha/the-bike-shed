@@ -15,59 +15,8 @@ static __thread  s32 _log_ctx_len;
 
 __thread s32 log_allowed_fails;
 
-#if LOGGING_USE_EMAIL
-// TODO, for robustness, we should install some exception handlers for segfaults and aborts, attempt to send final log buffers, and if that fails
-//       dump to disk
-  u8 recursing_error;
-  u8 internal_error;
-
-
-#define VLOGF(fmt, va)  vbuf_add(fmt, va)
-#define  LOGF(fmt, ...)  buf_add(fmt, ##__VA_ARGS__)
-
-void buf_add_step1(char**buf_, usz*buf_space_left);
-void buf_add_step2(usz new_space_used);
-
-static void  vbuf_add(char const * fmt, va_list va) {
-  recursing_error = 1;
-  char * buf; usz    space_left;
-  buf_add_step1(&buf, &space_left);
-
-  s32 r = vsnprintf(buf, space_left, fmt, va);
-  if (r < 0) { // Pretty rare error, but want to handle this case since we need to be super robust
-    if (recursing_error) { // Hitting this case would be even rarer
-      internal_error = 1;
-      fprintf(stderr, "Recursive error, not recursing further... fmt:`%s' \n", fmt);
-      vfprintf(stderr, fmt, va);
-      fprintf(stderr, "\nEnd\n");
-    } else {
-      ERROR("Failed to format log string: `%s'", fmt);
-    }
-    recursing_error = 0;
-    return;
-  }
-  if (r >= space_left) {
-    internal_error = 1;
-    ERROR("Formatted log string is too long %d, dropping...", r);
-    recursing_error = 0;
-    return;
-  }
-  buf_add_step2(r);
-  recursing_error = 0;
-}
-
-__attribute__((__format__ (__printf__, 1, 2)))
-static void  buf_add(char const * fmt, ...) {
-  va_list va;
-  va_start(va, fmt);
-  vbuf_add(fmt, va);
-  va_end(va);
-}
-
-#else // LOGGING_USE_EMAIL
 #define VLOGF(fmt, va)  vfprintf(stderr, fmt, va)
 #define  LOGF(fmt, ...)  fprintf(stderr, fmt, ##__VA_ARGS__)
-#endif // LOGGING_USE_EMAIL
 
 
 void _log(const char* severity, const char*file, const char*func, int line,

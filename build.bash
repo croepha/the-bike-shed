@@ -151,7 +151,7 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 depends_on email
 compile    misc
 compile    io_core
@@ -170,17 +170,17 @@ compile hello_argon2     -Iargon2
 link_exec hello_argon2 -l pthread
 
 reset
-FLAVOR=test compile logging -D 'LOGGING_USE_EMAIL=0'
+compile logging
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 FLAVOR=logging_test compile supervisor_email -D now_sec=now_sec
 compile supervisor_email_test
 link_exec supervisor_email_test
 do_test supervisor_email_test /build/supervisor_email_test.dbg.exec
 
 reset
-FLAVOR=test depends_on logging
+depends_on  logging
 compile     supervisor_io
 compile     supervisor_io_test
 depends_on  io_core
@@ -189,14 +189,14 @@ link_exec   supervisor_io_test
 
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 depends_on io_core
 depends_on misc
 compile    io_core_test
 link_exec  io_core_test
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 compile   email
 compile   email_test
 link_exec email_test -l curl
@@ -207,12 +207,12 @@ do_test io_curl_test /build/io_curl_test.dbg.exec
 do_test config_download_test2 /build/config_download_test2.dbg.exec
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 compile config_download_test2
 link_exec config_download_test2
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 compile local_config
 link_exec local_config_test
 
@@ -230,7 +230,7 @@ re parse_headers
 # EOF
 
 reset
-FLAVOR=test depends_on logging
+depends_on logging
 compile serial_test
 link_exec serial_test -l util
 do_test serial_test /build/serial_test.dbg.exec
