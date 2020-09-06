@@ -1,22 +1,8 @@
 
 
-#include <stdio.h>
-#include <errno.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/un.h>
-#include <sys/socket.h>
-#include <fcntl.h>
-#include "logging.h"
-#include "io.h"
-
-#include "io_test.h"
-
+const int socket_COUNT = 20;
+int sockets[socket_COUNT];
 int events_pending;
-
-u64 start_time;
-
-int sockets[20];
 
 void sock_read_line(int fd, char * buf, size_t buf_size) {
   ssize_t r = read(fd, buf, buf_size);
@@ -27,7 +13,9 @@ void sock_read_line(int fd, char * buf, size_t buf_size) {
   buf[r-1] = 0;
 }
 
-void echo_test_socket(int i, int type, char* name) { int r;
+u64 start_time;
+
+void echo_test_socket(int i, int type, char const * name) { int r;
     int sv[2] = {-1,-1};
     r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv); error_check(r);
     sockets[i] = sv[0];
@@ -35,7 +23,7 @@ void echo_test_socket(int i, int type, char* name) { int r;
     pid_t fork_pid = fork();
     error_check(fork_pid);
 
-    if (!fork_pid) { LOGCTX("forked:%02d", i);
+    if (!fork_pid) { LOGCTX("\ttest_sort:id:%02d forked", i);
       r = close(sv[0]); error_check(r);
 
       u64 now = utc_ms_since_epoch();
@@ -68,33 +56,3 @@ void echo_test_socket(int i, int type, char* name) { int r;
 }
 
 
-void test_main() {
-    start_time = utc_ms_since_epoch() + 50;
-}
-
-
-int main() { int r;
-  setlinebuf(stderr);
-  r = alarm(1); error_check(r);
-
-  test_main();
-
-  INFO("Reaping child procs");
-  u8 had_error = 0;
-  for (;;) {
-    int wstatus;
-    //DEBUG("Waiting for child");
-    pid_t child = wait(&wstatus);
-    if (child == -1 && errno == ECHILD) {
-      break;
-    }
-    error_check(child);
-    //INFO("Child exit:%d", WEXITSTATUS(wstatus));
-    if (! WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0) {
-      had_error = 1;
-    }
-  }
-  if (had_error) {
-    ERROR("Atleast one child process had an error");
-  }
-}
