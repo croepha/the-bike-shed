@@ -68,14 +68,13 @@ start:
 }
 
 void test_SPLIT_MEM() {
-  fprintf(stderr, "test_SPLIT_MEM 1:");
-
+  INFO("test_SPLIT_MEM 1:");
   char const * s = "1  2 3 4 5 6 7 8 9 ";
   SPLIT_MEM(s, s + strlen(s), ' ', num) {
     int num_len = num_end - num;
-    fprintf(stderr, "%.*s|", num_len, num);
+    INFO("%.*s|", num_len, num);
   }
-  fprintf(stderr, "\n");
+  INFO("test_SPLIT_MEM done");
 
 }
 

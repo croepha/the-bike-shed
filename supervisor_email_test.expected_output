@@ -1,4 +1,14 @@
-test_SPLIT_MEM 1:1|2|3|4|5|6|7|8|9|
+ INFO: test_SPLIT_MEM 1:	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 1|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 2|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 3|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 4|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 5|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 6|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 7|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 8|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: 9|	(supervisor_email_test.c test_SPLIT_MEM)
+ INFO: test_SPLIT_MEM done	(supervisor_email_test.c test_SPLIT_MEM)
 Starting logging test
 Typical usage:
 Usage: reset_email_state();
