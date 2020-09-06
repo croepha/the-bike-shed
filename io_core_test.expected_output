@@ -34,7 +34,7 @@
  INFO: Running all events:	(io_core_test.c test_main)
  INFO:	 io_curl Timeout	(io_core_test.c timeout_cb)
  INFO:	 logging_send Timeout	(io_core_test.c timeout_cb)
- INFO: Reaping child procs	(io_core_test.c main)
+ INFO: Reaping child procs	(./io_test.h main)
  INFO:	test_sort:id:00  `SEND00\x0a`	(./io_test.h sock_read_line)
  INFO:	test_sort:id:00 IO Event io_curl type:1 buf:'SEND00'	(io_core_test.c io_event_cb)
  INFO:	test_sort:id:00	 EPOLLIN	(io_core_test.c log_ep_event)

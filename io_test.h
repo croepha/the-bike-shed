@@ -54,5 +54,30 @@ void echo_test_socket(int i, int type, char const * name) { int r;
     events_pending++;
 
 }
+void test_main();
+int main() { int r;
+  setlinebuf(stderr);
+  r = alarm(1); error_check(r);
 
+  test_main();
+
+  INFO("Reaping child procs");
+  u8 had_error = 0;
+  for (;;) {
+    int wstatus;
+    //DEBUG("Waiting for child");
+    pid_t child = wait(&wstatus);
+    if (child == -1 && errno == ECHILD) {
+      break;
+    }
+    error_check(child);
+    //INFO("Child exit:%d", WEXITSTATUS(wstatus));
+    if (! WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0) {
+      had_error = 1;
+    }
+  }
+  if (had_error) {
+    ERROR("Atleast one child process had an error");
+  }
+}
 

@@ -82,7 +82,7 @@ void io_event_cb(char* name, struct epoll_event epe) { int r;
 }
 
 
-static void test_main() {
+void test_main() {
   io_initialize();
 
   INFO("Setting timers in acending order:"); { LOGCTX("\t");
@@ -127,30 +127,4 @@ static void test_main() {
     while (events_pending > 0) { io_process_events(); }
   }
 
-}
-
-int main() { int r;
-  setlinebuf(stderr);
-  r = alarm(1); error_check(r);
-
-  test_main();
-
-  INFO("Reaping child procs");
-  u8 had_error = 0;
-  for (;;) {
-    int wstatus;
-    //DEBUG("Waiting for child");
-    pid_t child = wait(&wstatus);
-    if (child == -1 && errno == ECHILD) {
-      break;
-    }
-    error_check(child);
-    //INFO("Child exit:%d", WEXITSTATUS(wstatus));
-    if (! WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0) {
-      had_error = 1;
-    }
-  }
-  if (had_error) {
-    ERROR("Atleast one child process had an error");
-  }
 }
