@@ -5,9 +5,10 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/un.h>
-#include "logging.h"
 #include <sys/socket.h>
 #include <fcntl.h>
+#include "logging.h"
+#include "io.h"
 
 
 
@@ -26,7 +27,7 @@ void sock_read_line(int fd, char * buf, size_t buf_size) {
   buf[r-1] = 0;
 }
 
-int echo_test_socket(int i, int type) { int r;
+void echo_test_socket(int i, int type, char* name) { int r;
     int sv[2] = {-1,-1};
     r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv); error_check(r);
     sockets[i] = sv[0];
@@ -57,12 +58,13 @@ int echo_test_socket(int i, int type) { int r;
 
     io_EPData data;
     data.my_data.id = i;
-    data.my_data.event_type = socket_types[type_i];
+    data.my_data.event_type = type;
     struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
     r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe); error_check(r);
 
-    INFO("socket id:%02d type:%s:%d", i, socket_type_names[type_i], socket_types[type_i]);
+    INFO("socket id:%02d type:%s:%d", i, name, type);
     events_pending++;
+
 }
 
 
