@@ -10,7 +10,17 @@
     "Accept": "*/*", 
     "Host": "httpbin.org", 
   }, 
-  "origin": "136.24.45.123", 
   "url": "https://httpbin.org/get?id=1"
 }
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<test@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=111']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <test@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'asdfasdfasdfasdf'
+------------ END MESSAGE ------------
  INFO: Reaping child procs	(./io_test.h main)

@@ -87,7 +87,7 @@ void test_main() {
     }
   }
 
-  system("cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' ");
+  system("cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '\"origin\"' ");
   system("cat  /build/email_mock_test@asdfasdf.no");
   curl_global_cleanup();
 
