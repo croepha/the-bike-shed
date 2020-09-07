@@ -11,6 +11,8 @@
 
 void io_curl_abort(CURL* easy) {}
 int main() {
+  system("rm -f /build/email_mock_email_test_to@longlonglonglonglonglonglonglonghost.com");
+
   email_setup(
     "from@longlonglonglonglonglonglonglonghost.com",
     "smtp://127.0.0.1:8025",
@@ -24,7 +26,7 @@ int main() {
   for (int i=0; i<1;i++) {
     struct email_Send email_ctx = {};
     email_init(
-        &email_ctx, curl_easy_init(), "to@longlonglonglonglonglonglonglonghost.com", body_,
+        &email_ctx, curl_easy_init(), "email_test_to@longlonglonglonglonglonglonglonghost.com", body_,
         strlen(body_),
         " asdk fja;lksf;lasjdklfa;klsdfj;akdsjf;ajd;kljadk fa;dk f;akd "
         " asdlfaskl;djfa;klsf;kajsd;klf askdf a;kldf ;lasd f;a subject!! 6");
@@ -35,6 +37,8 @@ int main() {
 
     curl_global_cleanup();
     DEBUG("end?");
+
+    system("cat /build/email_mock_email_test_to@longlonglonglonglonglonglonglonghost.com");
 
   }
 }

@@ -127,9 +127,9 @@ build /build/$NAME.test_results: test /workspaces/the-bike-shed/io_core_test.bas
 EOF
 }
 
-cat << EOF >> /build/build.ninja
-build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
-EOF
+# cat << EOF >> /build/build.ninja
+# build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
+# EOF
 
 
 # -target arm-unknown-linux-gnueabihf
@@ -211,7 +211,7 @@ compile   email
 compile   email_test
 link_exec email_test -l curl
 
-
+do_test email_test   /build/email_test.dbg.exec
 do_test io_core_test /build/io_core_test.dbg.exec
 do_test io_curl_test /build/io_curl_test.dbg.exec
 do_test io_test_full /build/io_test_full.dbg.exec
@@ -230,7 +230,7 @@ link_exec local_config_test
 
 re parse_headers
 
-#  --sysroot=/build/root/pi0_usr_include/output/staging/
+#  --sysroot=/build/root/pi0_usr_include/output/staging//build/email_test.dbg.exec
 
 # cat << EOF >> /build/build.ninja
 # build /build/mount_squash_root.pi0devstatic.c.o: cc mount_squash_root.c

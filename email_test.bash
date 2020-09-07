@@ -28,7 +28,7 @@ script_pid=$$
     kill -INT $script_pid
  ) &
 
-EMAIL_PATH='/build/email_mock_to@longlonglonglonglonglonglonglonghost.com'
+EMAIL_PATH='/build/email_mock_email_test_to@longlonglonglonglonglonglonglonghost.com'
 rm -f "$EMAIL_PATH"
 $EXEC
 sleep .1
