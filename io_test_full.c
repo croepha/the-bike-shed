@@ -58,7 +58,7 @@ void test_main() {
     dl_ctx.f = fopen("/build/io_test_full_00", "w"); error_check(dl_ctx.f?0:-1);
     CURLESET(WRITEDATA, dl_ctx.f);
     CURLESET(URL, "https://httpbin.org/get?id=1");
-    CURLESET(VERBOSE, 1);
+    //CURLESET(VERBOSE, 1);
     events_pending++;
   }
 
@@ -68,7 +68,7 @@ void test_main() {
     //email_Init
     CURLESET(WRITEDATA, dl_ctx.f);
     CURLESET(URL, "https://httpbin.org/get?id=1");
-    CURLESET(VERBOSE, 1);
+    // CURLESET(VERBOSE, 1);
     events_pending++;
   }
 
@@ -83,7 +83,7 @@ void test_main() {
     }
   }
 
-  system("cat /build/io_test_full_00");
+  system("cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' ");
 
 }
 

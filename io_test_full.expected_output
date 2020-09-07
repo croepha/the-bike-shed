@@ -1,0 +1,16 @@
+ INFO: Running all events:	(io_test_full.c test_main)
+ INFO:	 	(io_test_full.c logging_send_timeout)
+ INFO:	 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 result: No error	(io_test_full.c test_io_curl_complete)
+{
+  "args": {
+    "id": "1"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "origin": "136.24.45.123", 
+  "url": "https://httpbin.org/get?id=1"
+}
+ INFO: Reaping child procs	(./io_test.h main)
