@@ -1,26 +1,253 @@
  INFO: Running all events:	(io_test_full.c test_main)
  INFO:	 	(io_test_full.c logging_send_timeout)
- INFO:	 result: No error	(io_test_full.c logging_io_curl_complete)
- INFO:	 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO: cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
 {
   "args": {
-    "id": "1"
+    "id": "00"
   }, 
   "headers": {
     "Accept": "*/*", 
     "Host": "httpbin.org", 
   }, 
-  "url": "https://httpbin.org/get?id=1"
+  "url": "https://httpbin.org/get?id=00"
 }
+ INFO: cat /build/io_test_full_01 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "01"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=01"
+}
+ INFO: cat /build/io_test_full_02 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "02"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=02"
+}
+ INFO: cat /build/io_test_full_03 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "03"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=03"
+}
+ INFO: cat /build/io_test_full_04 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "04"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=04"
+}
+ INFO: cat /build/io_test_full_05 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "05"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=05"
+}
+ INFO: cat /build/io_test_full_06 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "06"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=06"
+}
+ INFO: cat /build/io_test_full_07 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "07"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=07"
+}
+ INFO: cat /build/io_test_full_08 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "08"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=08"
+}
+ INFO: cat /build/io_test_full_09 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(io_test_full.c test_main)
+{
+  "args": {
+    "id": "09"
+  }, 
+  "headers": {
+    "Accept": "*/*", 
+    "Host": "httpbin.org", 
+  }, 
+  "url": "https://httpbin.org/get?id=09"
+}
+ INFO: cat  /build/email_mock_io_test_full00@asdfasdf.no	(io_test_full.c test_main)
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
-===> RCPT TO:<test@asdfasdf.no>
+===> RCPT TO:<io_test_full00@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=111']
+mail options: ['SIZE=137']
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
-b'To: <test@asdfasdf.no>'
+b'To: <io_test_full00@asdfasdf.no>'
 b'Subject: asdasdf'
 b'X-Peer: 127.0.0.1'
 b''
-b'asdfasdfasdfasdf'
+b'body: io_test_full00@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full01@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full01@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full01@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full01@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full02@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full02@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full02@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full02@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full03@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full03@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full03@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full03@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full04@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full04@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full04@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full04@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full05@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full05@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full05@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full05@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full06@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full06@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full06@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full06@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full07@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full07@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full07@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full07@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full08@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full08@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full08@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full08@asdfasdf.no'
+------------ END MESSAGE ------------
+ INFO: cat  /build/email_mock_io_test_full09@asdfasdf.no	(io_test_full.c test_main)
+===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
+===> RCPT TO:<io_test_full09@asdfasdf.no>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=137']
+b'From: <from@longlonglonglonglonglonglonglonghost.com>'
+b'To: <io_test_full09@asdfasdf.no>'
+b'Subject: asdasdf'
+b'X-Peer: 127.0.0.1'
+b''
+b'body: io_test_full09@asdfasdf.no'
 ------------ END MESSAGE ------------
  INFO: Reaping child procs	(./io_test.h main)
+ INFO:	 test_sort:A00 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A01 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A02 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A03 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A04 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A05 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A06 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A07 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A08 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:A09 result: No error	(io_test_full.c test_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)
+ INFO:	 test_sort:B00 result: No error	(io_test_full.c logging_io_curl_complete)

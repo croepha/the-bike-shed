@@ -1,3 +1,5 @@
+#define _GNU_SOURCE         /* See feature_test_macros(7) */
+#include <stdio.h>
 #include <curl/curl.h>
 #include "email.h"
 #include "io.h"
@@ -22,6 +24,7 @@ typedef struct {
   enum _io_curl_type curl_type;
   int id;
   struct email_Send email;
+  char *body;
 } EmailCtx;
 
 
@@ -29,20 +32,21 @@ IO_CURL_SETUP(test, DLCtx, curl_type);
 IO_CURL_SETUP(logging, EmailCtx, curl_type);
 
 void test_io_curl_complete(CURL* easy, CURLcode result, DLCtx * ctx) {
-  INFO("result: %s", curl_easy_strerror(result));
+  INFO("test_sort:A%02d result: %s", ctx->id, curl_easy_strerror(result));
   int r = fclose(ctx->f); error_check(r);
   events_pending--;
   curl_easy_cleanup(easy);
 }
 
 void logging_io_curl_complete(CURL* easy, CURLcode result, EmailCtx * ctx) {
-  INFO("result: %s", curl_easy_strerror(result));
+  INFO("test_sort:B%02d result: %s", ctx->id, curl_easy_strerror(result));
   events_pending--;
   email_free(&ctx->email);
+  free(ctx->body); ctx->body = 0;
 }
 
-DLCtx dl_ctx;
-EmailCtx email_ctx;
+DLCtx dl_ctx[10];
+EmailCtx email_ctx[10];
 
 void test_main() {
   io_initialize();
@@ -52,30 +56,33 @@ void test_main() {
     "smtp://127.0.0.1:8025",
     "username:password");
 
-  unlink("/build/io_test_full_00");
-  unlink("/build/email_mock_test@asdfasdf.no");
-
+  system("rm -f /build/io_test_full_* /build/email_mock_io_test_full*");
 
   start_time = utc_ms_since_epoch() + 50;
+  char buf[1024];
 
-  {
-    CURL*easy = test_io_curl_create_handle(&dl_ctx);
-    dl_ctx.f = fopen("/build/io_test_full_00", "w"); error_check(dl_ctx.f?0:-1);
-    CURLESET(WRITEDATA, dl_ctx.f);
-    CURLESET(URL, "https://httpbin.org/get?id=1");
+  for (int i=0; i<COUNT(dl_ctx); i++) {
+    CURL*easy = test_io_curl_create_handle(&dl_ctx[i]);
+    snprintf(buf, sizeof buf, "/build/io_test_full_%02d", i);
+    dl_ctx[i].f = fopen(buf, "w"); error_check(dl_ctx[i].f?0:-1);
+    dl_ctx[i].id = i;
+    CURLESET(WRITEDATA, dl_ctx[i].f);
+    snprintf(buf, sizeof buf, "https://httpbin.org/get?id=%02d", i);
+    CURLESET(URL, buf);
     //CURLESET(VERBOSE, 1);
     events_pending++;
   }
 
-  {
-    char* body = "asdfasdfasdfasdf";
-    CURL*easy = logging_io_curl_create_handle(&email_ctx);
-    char* to_addr = "test@asdfasdf.no";
-    email_init(&email_ctx.email, easy, to_addr, body, strlen(body), "asdasdf");
+  memset(email_ctx, 0, sizeof email_ctx);
+  for (int i=0; i<COUNT(email_ctx); i++) {
+    asprintf(&email_ctx[i].body, "body: io_test_full%02d@asdfasdf.no", i);
+
+    CURL*easy = logging_io_curl_create_handle(&email_ctx[i]);
+    email_init(&email_ctx[i].email, easy, email_ctx[i].body+6,
+        email_ctx[i].body, strlen(email_ctx[i].body), "asdasdf");
     // CURLESET(VERBOSE, 1);
     events_pending++;
   }
-
 
   IO_TIMER_MS(logging_send) = start_time;
   events_pending++;
@@ -87,8 +94,17 @@ void test_main() {
     }
   }
 
-  system("cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '\"origin\"' ");
-  system("cat  /build/email_mock_test@asdfasdf.no");
+  for (int i=0; i<COUNT(dl_ctx); i++) {
+    snprintf(buf, sizeof buf, "cat /build/io_test_full_%02d | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '\"origin\"' ", i);
+    INFO("%s", buf);
+    int r = system(buf); error_check(r);
+  }
+  for (int i=0; i<COUNT(email_ctx); i++) {
+    snprintf(buf, sizeof buf, "cat  /build/email_mock_io_test_full%02d@asdfasdf.no", i);
+    INFO("%s", buf);
+    int r = system(buf); error_check(r);
+  }
+
   curl_global_cleanup();
 
 }

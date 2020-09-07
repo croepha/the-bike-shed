@@ -75,7 +75,7 @@ void echo_test_socket(int i, int type, char const * name) { int r;
 void test_main();
 int main() { int r;
   setlinebuf(stderr);
-  r = alarm(1); error_check(r);
+  r = alarm(3); error_check(r);
 
   test_main();
 
