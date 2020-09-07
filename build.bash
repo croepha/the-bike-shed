@@ -199,6 +199,7 @@ reset
 depends_on logging
 depends_on io_core
 depends_on io_curl
+depends_on email
 depends_on misc
 compile    io_test_full
 link_exec  io_test_full -l curl
