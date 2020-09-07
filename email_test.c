@@ -9,6 +9,8 @@
 #include "io_curl.h"
 #include "email.h"
 
+u64 now_sec() { return 0; }
+
 void io_curl_abort(CURL* easy) {}
 int main() {
   system("rm -f /build/email_mock_email_test_to@longlonglonglonglonglonglonglonghost.com");

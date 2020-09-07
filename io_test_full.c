@@ -7,6 +7,7 @@
 #include "io_test.h"
 #include "logging.h"
 
+u64 now_sec() { return 0; }
 
 void logging_send_timeout() {
   INFO();

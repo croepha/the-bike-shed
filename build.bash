@@ -152,7 +152,7 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-depends_on email
+FLAVOR=test depends_on email
 compile    misc
 compile    io_core
 compile    io_curl
@@ -199,7 +199,7 @@ reset
 depends_on logging
 depends_on io_core
 depends_on io_curl
-depends_on email
+FLAVOR=test depends_on email
 depends_on misc
 compile    io_test_full
 link_exec  io_test_full -l curl
@@ -207,7 +207,7 @@ link_exec  io_test_full -l curl
 
 reset
 depends_on logging
-compile   email
+FLAVOR=test compile   email -D now_sec=now_sec
 compile   email_test
 link_exec email_test -l curl
 

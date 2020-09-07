@@ -10,6 +10,13 @@
 
 #define MIN(a,b) (a < b ? a : b)
 
+u64 now_sec();
+#ifndef now_sec
+#include <time.h>
+u64 now_sec() { return time(0); }
+#endif
+
+
 static char *from_addr;
 static char *smtp_server;
 static char *user_pass;
@@ -68,7 +75,7 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   ctx->state = EMAIL_STATE_SENDING_HEADER;
   ctx->easy = easy;
 
-  time_t  now_seconds = 0;
+  time_t  now_seconds = now_sec();
   struct tm now_tmstruct; gmtime_r(&now_seconds, &now_tmstruct);
   char now_string[50];
   ssize_t sr = strftime(now_string, sizeof now_string, "%a, %d %b %Y %T %z",
