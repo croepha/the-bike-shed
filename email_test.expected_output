@@ -1,7 +1,8 @@
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<to@longlonglonglonglonglonglonglonghost.com>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=278']
+mail options: ['SIZE=316']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <to@longlonglonglonglonglonglonglonghost.com>'
 b'Subject:  asdk fja;lksf;lasjdklfa;klsdfj;akdsjf;ajd;kljadk fa;dk f;akd  asdlfaskl;djfa;klsf;kajsd;klf askdf a;kldf ;lasd f;a subject!! 6'

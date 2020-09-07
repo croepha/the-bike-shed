@@ -1,5 +1,8 @@
+// TODO: might want to avoid curl_easy_cleanup between emails, ie keep the connection open for reuse between emails...
+
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "logging.h"
 #include "email.h"
@@ -65,15 +68,23 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   ctx->state = EMAIL_STATE_SENDING_HEADER;
   ctx->easy = easy;
 
+  time_t  now_seconds = 0;
+  struct tm now_tmstruct; gmtime_r(&now_seconds, &now_tmstruct);
+  char now_string[50];
+  ssize_t sr = strftime(now_string, sizeof now_string, "%a, %d %b %Y %T %z",
+                        &now_tmstruct); error_check(sr);
   int r = snprintf(ctx->header, sizeof ctx->header,
-                   "From: <%s>\n"
-                   "To: <%s>\n"
-                   "Subject: %s\n"
-                   "\n",
-                   from_addr, to_addr, subject);
-  DEBUG("r:%d", r);
-  assert(r>=0);
-  assert(r<sizeof ctx->header);
+    "Date: %s\n"
+    "From: <%s>\n"
+    "To: <%s>\n"
+    "Subject: %s\n"
+    "\n",
+    now_string, from_addr, to_addr, subject);
+  error_check(r);
+  assert(r < sizeof ctx->header);
+  if (r >= sizeof ctx->header) {
+    r = sizeof ctx->header - 1;
+  }
   ctx->header_len = r;
 
   ctx->body = body_;

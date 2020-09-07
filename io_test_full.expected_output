@@ -114,7 +114,8 @@
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full00@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full00@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -126,7 +127,8 @@ b'body: io_test_full00@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full01@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full01@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -138,7 +140,8 @@ b'body: io_test_full01@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full02@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full02@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -150,7 +153,8 @@ b'body: io_test_full02@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full03@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full03@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -162,7 +166,8 @@ b'body: io_test_full03@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full04@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full04@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -174,7 +179,8 @@ b'body: io_test_full04@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full05@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full05@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -186,7 +192,8 @@ b'body: io_test_full05@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full06@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full06@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -198,7 +205,8 @@ b'body: io_test_full06@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full07@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full07@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -210,7 +218,8 @@ b'body: io_test_full07@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full08@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full08@asdfasdf.no>'
 b'Subject: asdasdf'
@@ -222,7 +231,8 @@ b'body: io_test_full08@asdfasdf.no'
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full09@asdfasdf.no>
 ---------- MESSAGE FOLLOWS ----------
-mail options: ['SIZE=137']
+mail options: ['SIZE=175']
+b'Date: Thu, 01 Jan 1970 00:00:00 +0000'
 b'From: <from@longlonglonglonglonglonglonglonghost.com>'
 b'To: <io_test_full09@asdfasdf.no>'
 b'Subject: asdasdf'
