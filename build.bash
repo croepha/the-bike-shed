@@ -123,7 +123,7 @@ function do_test() {
   NAME=$1
   EXEC=$2
 cat << EOF >> /build/build.ninja
-build /build/$NAME.test_results: test /workspaces/the-bike-shed/io_core_test.bash $EXEC $NAME.expected_output
+build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output
 EOF
 }
 
