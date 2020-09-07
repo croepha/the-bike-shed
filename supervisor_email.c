@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "io_curl.h"
 #include "logging.h"
 #include "common.h"
 #include "io.h"
@@ -33,6 +34,12 @@ enum SUPR_LOG_EMAIL_STATE_T {
 };
 enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
+struct SupervisorEmailCtx {
+  enum _io_curl_type curl_type;
+};
+struct SupervisorEmailCtx supr_email_email_ctx;
+IO_CURL_SETUP(supervisor_email, struct SupervisorEmailCtx, curl_type);
+
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
@@ -57,7 +64,9 @@ static void poke_state_machine() {
           now_epoch_sec >=
               supr_email_sent_epoch_sec + SUPR_EMAIL_LOW_THRESHOLD_SECS) {
         DEBUG("one of the low thresholds are met, lets queue up an email");
-        email_init(&supr_email_ctx, supr_email_rcpt, supr_email_buf,
+        email_init(&supr_email_ctx,
+                   supervisor_email_io_curl_create_handle(&supr_email_email_ctx),
+                   supr_email_rcpt, supr_email_buf,
                    supr_email_buf_used, "Logs");
         supr_email_sent_bytes = supr_email_buf_used;
         supr_email_sent_epoch_sec = now_epoch_sec;
@@ -105,16 +114,19 @@ static void poke_state_machine() {
     }
 }
 
-void email_done(u8 success) {
-  if (success) {
+void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct SupervisorEmailCtx * ctx) {
+  if (result == CURLE_OK) {
     memmove(supr_email_buf, supr_email_buf + supr_email_sent_bytes,
             supr_email_sent_bytes);
     supr_email_buf_used -= supr_email_sent_bytes;
+  } else {
+    INFO("failed %s", curl_easy_strerror(result));
   }
   supr_email_sent_bytes = 0;
   email_free(&supr_email_ctx);
   supr_email_state = SUPR_LOG_EMAIL_STATE_COOLDOWN;
   poke_state_machine();
+
 }
 
 void logging_send_timeout() { poke_state_machine(); }

@@ -19,8 +19,6 @@
 #include "io_curl.h"
 #include "downloading.h"
 
-void  io_curl_initialize();
-
 #include <openssl/sha.h>
 
 typedef struct {

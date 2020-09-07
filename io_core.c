@@ -17,7 +17,7 @@ void io_initialize() {
 }
 
 
-void io_process_events() {
+void io_process_events() { start:;
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
   for (int i=1; i < _io_timer_COUNT; i++) {
@@ -49,13 +49,17 @@ void io_process_events() {
   }
 
   struct epoll_event epes[16];
-  int r1 = epoll_wait(io_epoll_fd, epes, COUNT(epes), timeout_interval_ms);
-  error_check(r1);
-  //assert(r1 != -1 || errno == EINTR);
 
-  if (!r1) {
+  int epoll_ret = epoll_wait(io_epoll_fd, epes, COUNT(epes), timeout_interval_ms);
+  if (epoll_ret == -1 && errno == EINTR) {
+    INFO("Got interrupted system call, restarting wait");
+    goto start;
+  }
+  error_check(epoll_ret);
+
+  if (!epoll_ret) {
     switch (running_timer) {
-      #define _(name) case _io_timer_ ## name: name ## _timeout(); break;
+      #define _(name) case _io_timer_ ## name: { assert(name ## _timeout); name ## _timeout(); } break;
       _IO_TIMERS
       #undef  _
       case _io_timer_NO_TIMER: { WARN("edge case: timer wake up for no timer"); } break;
@@ -64,7 +68,7 @@ void io_process_events() {
       } break;
     }
   } else {
-    for (int i = 0; i < r1; i++) {
+    for (int i = 0; i < epoll_ret; i++) {
       struct epoll_event epe = epes[i];
       io_EPData data = {.data = epe.data};
       switch (data.my_data.event_type) {

@@ -27,7 +27,7 @@ Usage: TEST_INFO("Third line");
  INFO: now:100062 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:34 sent_bytes:23	(supervisor_email_test.c dump_email_state)
 Usage: TEST_INFO("Fourth Line");
  INFO: now:100063 email_state:2 IO_TIMER_MS(logging_send):100180 sent_epoch_sec:100060 buf_used:46 sent_bytes:23	(supervisor_email_test.c dump_email_state)
-Usage: email_done(1);
+Usage: __supervisor_email_io_curl_complete(0, CURLE_OK, &supr_email_email_ctx.curl_type)
  INFO: email_free	(supervisor_email_test.c email_free)
  INFO: now:100064 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:23 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: TEST_INFO("line 6");

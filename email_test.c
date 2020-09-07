@@ -9,12 +9,6 @@
 #include "io_curl.h"
 #include "email.h"
 
-
-CURL* io_curl_create_handle() {
-  CURL* ret = curl_easy_init();
-  assert(ret);
-  return ret;
-}
 void io_curl_abort(CURL* easy) {}
 int main() {
   email_setup(
@@ -30,7 +24,7 @@ int main() {
   for (int i=0; i<1;i++) {
     struct email_Send email_ctx = {};
     email_init(
-        &email_ctx, "to@longlonglonglonglonglonglonglonghost.com", body_,
+        &email_ctx, curl_easy_init(), "to@longlonglonglonglonglonglonglonghost.com", body_,
         strlen(body_),
         " asdk fja;lksf;lasjdklfa;klsdfj;akdsjf;ajd;kljadk fa;dk f;akd "
         " asdlfaskl;djfa;klsf;kajsd;klf askdf a;kldf ;lasd f;a subject!! 6");

@@ -9,9 +9,13 @@
 #include "logging.h"
 #include <inttypes.h>
 
+#undef  DEBUG
+#undef  ERROR
+//#define DEBUG(...) fprintf(stderr, "TRACE: " __VA_ARGS__); fprintf(stderr, "\n")
+#define DEBUG(...)
+#define ERROR(...) fprintf(stderr, "ERROR: " __VA_ARGS__); fprintf(stderr, "\n"); abort();
 
 u64 now_sec_value;
-
 
 extern u32 supr_email_buf_used;
 extern u64 supr_email_sent_epoch_sec;
@@ -25,8 +29,9 @@ enum SUPR_LOG_EMAIL_STATE_T {
 extern enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
 void dump_email_state() {
-  INFO(  "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
-          " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u",
+  fprintf(stderr,
+          "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
+          " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u\n",
           now_sec_value, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
           supr_email_sent_epoch_sec, supr_email_buf_used,
           supr_email_sent_bytes);
@@ -50,16 +55,7 @@ u64 now_sec() {
 //#include "logging.c"
 #include <string.h>
 #include "email.h"
-#include "io_curl.h"
-
-struct SupervisorEmailCtx {
-  enum _io_curl_type curl_type;
-};
-extern struct SupervisorEmailCtx supr_email_email_ctx;
-
-CURL* __io_curl_create_handle() {
-  return 0;
-}
+void email_done(u8 success);
 
 u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
@@ -78,20 +74,21 @@ start:
 }
 
 void test_SPLIT_MEM() {
-  INFO("test_SPLIT_MEM 1:");
+  fprintf(stderr, "test_SPLIT_MEM 1:");
+
   char const * s = "1  2 3 4 5 6 7 8 9 ";
   SPLIT_MEM(s, s + strlen(s), ' ', num) {
     int num_len = num_end - num;
-    INFO("%.*s|", num_len, num);
+    fprintf(stderr, "%.*s|", num_len, num);
   }
-  INFO("test_SPLIT_MEM done");
+  fprintf(stderr, "\n");
 
 }
 
 // TODO Maybe do a checksum of body, make sure it wasn't changed while email was in flight...
 void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
-  INFO("email_init: to:%s subject:%s body_len:%zu body:",
+  fprintf(stderr, "email_init: to:%s subject:%s body_len:%zu body:\n",
     to_addr, subject, body_len_ );
 
   // char const * body_end = body_ + body_len_;
@@ -110,17 +107,17 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   SPLIT_MEM(body_, body_ + body_len_, '\n', line) {
     int line_len = line_end - line;
     if (line_len > 128) {
-      INFO("%.*s...Truncated...%.*s",
+      fprintf(stderr, "%.*s...Truncated...%.*s\n",
         (int)40, line, (int)40, line+(line_len-40) );
     } else {
-      INFO("%.*s", (int)line_len, line);
+      fprintf(stderr, "%.*s\n", (int)line_len, line);
     }
   }
-  INFO("email_init end");
+  fprintf(stderr, "email_init end\n");
 }
 
 void email_free(struct email_Send *ctx) {
-  INFO("email_free");
+  fprintf(stderr, "email_free\n");
 }
 
 void dump_email_state();
@@ -128,15 +125,23 @@ void reset_email_state();
 
 void timer_skip() {
   now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  assert(now_sec_value < 100000000000);
+  if (now_sec_value > 100000000000) {
+    fprintf(stderr, "now_sec_value > 100000000000\n");
+    abort();
+  }
+
+
   logging_send_timeout();
 }
 
 
+void buf_add_step1(char**buf_, usz*buf_space_left);
+void buf_add_step2(usz new_space_used);
+
 __attribute__((__format__ (__printf__, 1, 2)))
 void test_printf(char const * fmt, ...) {
   char * buf; usz    space_left;
-  supr_email_add_data_start(&buf, &space_left);
+  buf_add_step1(&buf, &space_left);
   va_list va;
   va_start(va, fmt);
   s32 r = vsnprintf(buf, space_left, fmt, va);
@@ -145,37 +150,35 @@ void test_printf(char const * fmt, ...) {
     fprintf(stderr, "r >= space_left\n");
     abort();
   }
-  supr_email_add_data_finish(r);
+  buf_add_step2(r);
 }
+#undef INFO
+#define INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
 
-#define TEST_INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
 
-//#define log_usage(...)   INFO("Usage: %s", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 #define log_usage(...)   fprintf(stderr, "Usage: %s\n", #__VA_ARGS__); __VA_ARGS__; dump_email_state()
 int main () {
   setlinebuf(stderr); alarm(1);
 
   test_SPLIT_MEM();
 
-//  INFO("Starting logging test");
   fprintf(stderr, "Starting logging test\n");
 
   if (1) {
-    //INFO("Typical usage:");
     fprintf(stderr, "Typical usage:\n");
     log_usage( reset_email_state(); );
-    log_usage( TEST_INFO("First line"); );
-    log_usage( TEST_INFO("Second Line"); );
+    log_usage( INFO("First line"); );
+    log_usage( INFO("Second Line"); );
 
     log_usage( timer_skip(); );
 
-    log_usage( TEST_INFO("Third line"); );
-    log_usage( TEST_INFO("Fourth Line"); );
+    log_usage( INFO("Third line"); );
+    log_usage( INFO("Fourth Line"); );
 
-    log_usage( __supervisor_email_io_curl_complete(0, CURLE_OK, &supr_email_email_ctx.curl_type) );
+    log_usage( email_done(1); );
 
-    log_usage( TEST_INFO("line 6"); );
-    log_usage( TEST_INFO("line 7"); );
+    log_usage( INFO("line 6"); );
+    log_usage( INFO("line 7"); );
 
     DEBUG("Expect cooldown finish");
     log_usage( timer_skip(); );
@@ -189,7 +192,6 @@ int main () {
 
   if (1) {
     fprintf(stderr, "Large logs\n");
-    //INFO("Large logs");
     log_usage( reset_email_state(); );
 
     char big_log[1024];
@@ -197,7 +199,7 @@ int main () {
     big_log[sizeof big_log - 1] = 0;
 
     for (int i=0; i<20; i++) {
-      log_usage( TEST_INFO("Big: %s", big_log); );
+      log_usage( INFO("Big: %s", big_log); );
     }
   }
 

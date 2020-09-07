@@ -101,7 +101,7 @@ void io_curl_process_events() {
 }
 
 
-CURL* io_curl_create_handle(enum _io_curl_type * private) {
+CURL* __io_curl_create_handle(enum _io_curl_type * private) {
   CURL *easy = curl_easy_init();
   assert(easy);
   CURLESET(PRIVATE, private);

@@ -9,6 +9,7 @@
   _(test) \
   _(logging) \
   _(config_download) \
+  _(supervisor_email) \
 
 #define _(name) _io_curl_type_ ## name,
 enum _io_curl_type { _(INVALID) _IO_CURL_TYPES _(COUNT)};
@@ -23,10 +24,10 @@ _IO_CURL_TYPES
 #define IO_CURL_SETUP(name, struct_name, member_name) \
 static void name ## _io_curl_complete(CURL *easy, CURLcode result, struct_name *c); \
 void __ ## name ## _io_curl_complete(CURL *easy, CURLcode result, enum _io_curl_type *private) { \
-  test_io_curl_complete(easy, result, (struct_name*)((u8*)private - offsetof(struct_name, member_name))); } \
-static CURL* test_io_curl_create_handle(struct_name *c) { \
-  c->curl_type = _io_curl_type_ ## name; \
-  return io_curl_create_handle(&c-> member_name); }
+  name ## _io_curl_complete(easy, result, (struct_name*)((u8*)private - __builtin_offsetof(struct_name, member_name))); } \
+static CURL* name ## _io_curl_create_handle(struct_name *c) { \
+  c->member_name = _io_curl_type_ ## name; \
+  return __io_curl_create_handle(&c-> member_name); }
 
 
 
@@ -67,6 +68,7 @@ static char const * _error_check_CURLSHcode(CURLSHcode c) {
 #define error_check_curlsh(err) ({ char const * error_check_s = _error_check_CURLSHcode(err); if (error_check_s) { ERROR("Error CURLSHcode:%d:%s", err, error_check_s); } })
 
 void io_curl_abort(CURL* easy);
-CURL* io_curl_create_handle();
+CURL* __io_curl_create_handle();
 void io_curl_process_events();
+void io_curl_initialize();
 

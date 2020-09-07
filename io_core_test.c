@@ -14,7 +14,6 @@ EP_TYPES
   INFO("%s", buf);
 }
 
-int events_pending;
 
 void timeout_cb(char* name, enum _io_timers timer) {
   io_timers_epoch_ms[timer] = -1;

@@ -67,7 +67,7 @@ _OBJ_ONLY=0
 
 function _build() { VARIANT=$1; _O="/build/$SOURCE.c.${FLAVOR}${VARIANT}.o"
 if [ $_OBJ_ONLY = 0 ]; then {
-  echo -e "build $_O: cc $SOURCE.c\n    extra = ${@:2} ${ARGS[@]}" >> /build/build.ninja
+  echo -e "build $_O: cc ./$SOURCE.c\n    extra = ${@:2} ${ARGS[@]}" >> /build/build.ninja
 }; fi
 eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 }
@@ -176,7 +176,7 @@ reset
 depends_on logging
 FLAVOR=logging_test compile supervisor_email -D now_sec=now_sec
 compile supervisor_email_test
-link_exec supervisor_email_test
+link_exec supervisor_email_test -l curl
 do_test supervisor_email_test /build/supervisor_email_test.dbg.exec
 
 reset
@@ -198,10 +198,10 @@ link_exec  io_core_test
 reset
 depends_on logging
 depends_on io_core
+depends_on io_curl
 depends_on misc
 compile    io_test_full
-link_exec  io_test_full
-
+link_exec  io_test_full -l curl
 
 
 reset
