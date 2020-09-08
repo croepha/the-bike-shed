@@ -18,6 +18,8 @@ pid_t supr_child_pid;
 void supr_exec_child();
 void supr_email_add_data_start(char**buf_, usz*buf_space_left);
 void supr_email_add_data_finish(usz new_space_used);
+void supr_test_hook_pre_restart();
+void supr_test_hook_pre_wait();
 
 
 void supr_start_child() { int r;
@@ -27,8 +29,8 @@ void supr_start_child() { int r;
   if (supr_child_pid == 0) {
     struct rlimit limits = { 1<<30, 1<<30 };
     r = setrlimit(RLIMIT_CORE, &limits);                         error_check(r);
-    // r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
-    // r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
+    r = dup2(supr_child_write_to_fd, 1);                         error_check(r);
+    r = dup2(supr_child_write_to_fd, 2);                         error_check(r);
     supr_exec_child();
   }
   INFO("Child:%d forked", supr_child_pid);
@@ -52,6 +54,7 @@ void supr_signal_fd_io_event(struct epoll_event epe) { int r;
           ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
         }
         if (pid == supr_child_pid) {
+          supr_test_hook_pre_restart();
           supr_start_child();
         } else {
           ERROR("Strange, pid isn't our main child... doing nothign");
@@ -97,6 +100,9 @@ void supr_main () { int r;
     r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, supr_read_from_child_fd, &epe); error_check(r);
   }
   supr_start_child();
-  for (;;) { io_process_events(); }
+  for (;;) {
+    supr_test_hook_pre_wait();
+    io_process_events();
+  }
 }
 

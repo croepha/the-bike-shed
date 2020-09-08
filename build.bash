@@ -186,6 +186,7 @@ compile     supervisor_io_test
 depends_on  io_core
 depends_on  misc
 link_exec   supervisor_io_test
+do_test supervisor_io_test /build/supervisor_io_test.dbg.exec
 
 
 reset

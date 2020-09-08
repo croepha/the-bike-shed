@@ -64,11 +64,12 @@ static void poke_state_machine() {
           now_epoch_sec >=
               supr_email_sent_epoch_sec + SUPR_EMAIL_LOW_THRESHOLD_SECS) {
         DEBUG("one of the low thresholds are met, lets queue up an email");
+        usz email_size = supr_email_buf_used;
         email_init(&supr_email_ctx,
                    supervisor_email_io_curl_create_handle(&supr_email_email_ctx),
                    supr_email_rcpt, supr_email_buf,
-                   supr_email_buf_used, "Logs");
-        supr_email_sent_bytes = supr_email_buf_used;
+                   email_size, "Logs");
+        supr_email_sent_bytes = email_size;
         supr_email_sent_epoch_sec = now_epoch_sec;
         IO_TIMER_MS(logging_send) =
             (supr_email_sent_epoch_sec + SUPR_EMAIL_TIMEOUT_SECS) * 1000;
