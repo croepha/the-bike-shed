@@ -182,9 +182,10 @@ int main () {
     log_usage( timer_skip(); );
     INFO("Expect email send");
     log_usage( timer_skip(); );
-    log_allowed_fails = 1;
     INFO("Expect email timeout");
+    log_allowed_fails = 1;
     log_usage( timer_skip(); );
+    assert(log_allowed_fails == 0);
 
   }
   // return -1;
