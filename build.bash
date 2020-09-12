@@ -199,6 +199,13 @@ compile     supervisor_email
 compile     supervisor
 link_exec   supervisor -l curl
 
+
+reset
+depends_on logging
+compile    config_test
+link_exec  config_test
+do_test    config_test /build/config_test.dbg.exec
+
 reset
 depends_on logging
 depends_on io_core
