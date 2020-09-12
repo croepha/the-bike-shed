@@ -1,20 +1,19 @@
+#define LOG_DEBUG
+
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include "io_curl.h"
 #include "logging.h"
 #include "common.h"
 #include "io.h"
 
 u64 now_sec();
-#ifndef now_sec
-#include <time.h>
-u64 now_sec() { return time(0); }
-#endif
 
 #include "email.h"
+#include "supervisor.h"
 // TODO: setup gmail to delete old emails
 // LOW_THRESHOLDS: We will start considering sending logs once we have accumulated this much bytes/time
-char const *const supr_email_rcpt = "logging@test.test";
 u32 const SUPR_EMAIL_LOW_THRESHOLD_BYTES = 1 << 14; // 16 KB
 u32 const SUPR_EMAIL_RAPID_THRESHOLD_SECS = 20; // 20 Seconds  Prevent emails from being sent more often than this
 u32 const SUPR_EMAIL_LOW_THRESHOLD_SECS = 60 * 1; // 1 Minute
@@ -48,6 +47,7 @@ static void poke_state_machine() {
   assert(now_epoch_sec > SUPR_EMAIL_TIMEOUT_SECS);
 
   start:
+    DEBUG("state:%d now_sec:%"PRIu64" sent:%"PRIu64, supr_email_state, now_epoch_sec, supr_email_sent_epoch_sec);
     switch (supr_email_state) {
       SWITCH_DEFAULT_IS_UNEXPECTED;
     case SUPR_LOG_EMAIL_STATE_NO_DATA: {
@@ -86,7 +86,7 @@ static void poke_state_machine() {
       if (supr_email_sent_epoch_sec + SUPR_EMAIL_TIMEOUT_SECS <=
           now_epoch_sec) {
         DEBUG("If our email is timing out, lets abort it");
-        fprintf(stderr, "Error: log email took too long, aborting\n");
+        ERROR("log email took too long, aborting");
         email_free(&supr_email_ctx);
         supr_email_sent_bytes = 0;
         IO_TIMER_MS(logging_send) = -1;
@@ -116,6 +116,7 @@ static void poke_state_machine() {
 }
 
 void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct SupervisorEmailCtx * ctx) {
+  DEBUG("easy:%p result:%d", easy, result);
   if (result == CURLE_OK) {
     memmove(supr_email_buf, supr_email_buf + supr_email_sent_bytes,
             supr_email_sent_bytes);
@@ -130,7 +131,10 @@ void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct Super
 
 }
 
-void logging_send_timeout() { poke_state_machine(); }
+void logging_send_timeout() {
+  DEBUG();
+  poke_state_machine();
+}
 
 void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
   *buf_ = supr_email_buf + supr_email_buf_used;
@@ -138,6 +142,7 @@ void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
 }
 void supr_email_add_data_finish(usz new_space_used) {
   assert(new_space_used <= supr_email_buf_SIZE - supr_email_buf_used);
+  // TODO save everything after newline for next send,  make sure we still send if its too much after ? maybe not
   if (memchr(supr_email_buf + supr_email_buf_used, '\n', new_space_used)) {
     supr_email_buf_used += new_space_used;
     poke_state_machine();

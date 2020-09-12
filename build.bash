@@ -25,6 +25,7 @@ rm -f /build/build.ninja
 cat << 'EOF' >> /build/build.ninja
 builddir = /build/
 
+# -Wmissing-prototypes
 rule cc
  command = clang -Wno-writable-strings -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
@@ -36,7 +37,7 @@ rule link_exec
  description = LINK $out
 
 rule cc_br
- command = ${pi0w_host_prefix}-gcc -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
+ command = ${pi0w_host_prefix}-gcc -Werror -Wshadow-Wall $in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CCBR $out
@@ -152,7 +153,6 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-FLAVOR=test depends_on email
 compile    misc
 compile    io_core
 compile    io_curl
@@ -188,6 +188,16 @@ depends_on  misc
 link_exec   supervisor_io_test
 do_test supervisor_io_test /build/supervisor_io_test.dbg.exec
 
+reset
+depends_on  logging
+depends_on  io_core
+depends_on  io_curl
+depends_on  supervisor_io
+depends_on  misc
+compile     email
+compile     supervisor_email
+compile     supervisor
+link_exec   supervisor -l curl
 
 reset
 depends_on logging

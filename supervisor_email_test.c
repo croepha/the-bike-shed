@@ -7,11 +7,12 @@
 #include <stdio.h>
 
 #include "logging.h"
+#include "supervisor.h"
 #include <inttypes.h>
 
 
 u64 now_sec_value;
-
+char * supr_email_rcpt = "logging@test.test";
 
 extern u32 supr_email_buf_used;
 extern u64 supr_email_sent_epoch_sec;
@@ -177,11 +178,12 @@ int main () {
     log_usage( TEST_INFO("line 6"); );
     log_usage( TEST_INFO("line 7"); );
 
-    DEBUG("Expect cooldown finish");
+    INFO("Expect cooldown finish");
     log_usage( timer_skip(); );
-    DEBUG("Expect email send");
+    INFO("Expect email send");
     log_usage( timer_skip(); );
-    DEBUG("Expect email timeout");
+    log_allowed_fails = 1;
+    INFO("Expect email timeout");
     log_usage( timer_skip(); );
 
   }

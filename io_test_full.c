@@ -49,13 +49,13 @@ void logging_io_curl_complete(CURL* easy, CURLcode result, EmailCtx * ctx) {
 DLCtx dl_ctx[10];
 EmailCtx email_ctx[10];
 
+char * email_from = "from@longlonglonglonglonglonglonglonghost.com";
+char * email_host = "smtp://127.0.0.1:8025";
+char * email_user_pass = "username:password";
+
 void test_main() {
   io_initialize();
   io_curl_initialize();
-  email_setup(
-    "from@longlonglonglonglonglonglonglonghost.com",
-    "smtp://127.0.0.1:8025",
-    "username:password");
 
   system("rm -f /build/io_test_full_* /build/email_mock_io_test_full*");
 

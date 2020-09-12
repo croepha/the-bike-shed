@@ -11,14 +11,13 @@
 
 u64 now_sec() { return 0; }
 
+char * email_from = "from@longlonglonglonglonglonglonglonghost.com";
+char * email_host = "smtp://127.0.0.1:8025";
+char * email_user_pass = "username:password";
+
 void io_curl_abort(CURL* easy) {}
 int main() {
   system("rm -f /build/email_mock_email_test_to@longlonglonglonglonglonglonglonghost.com");
-
-  email_setup(
-    "from@longlonglonglonglonglonglonglonghost.com",
-    "smtp://127.0.0.1:8025",
-    "username:password");
 
   char* body_ =
     "this is a long body\n"

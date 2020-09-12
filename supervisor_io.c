@@ -8,19 +8,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "io.h"
+#include "io_curl.h"
 #include "logging.h"
+#include "supervisor.h"
 
 int   supr_read_from_child_fd = -1;
 int   supr_child_write_to_fd = -1;
 int   supr_signal_fd = -1;
 pid_t supr_child_pid;
-
-void supr_exec_child();
-void supr_email_add_data_start(char**buf_, usz*buf_space_left);
-void supr_email_add_data_finish(usz new_space_used);
-void supr_test_hook_pre_restart();
-void supr_test_hook_pre_wait();
-
 
 void supr_start_child() { int r;
   r = fflush(stdout);                                            error_check(r);
@@ -35,6 +30,8 @@ void supr_start_child() { int r;
   }
   INFO("Child:%d forked", supr_child_pid);
 }
+
+// TODO: Add a signal handler to force a flush of logs
 
 void supr_signal_fd_io_event(struct epoll_event epe) { int r;
     struct signalfd_siginfo siginfo;
@@ -103,6 +100,7 @@ void supr_main () { int r;
   for (;;) {
     supr_test_hook_pre_wait();
     io_process_events();
+    io_curl_process_events();
   }
 }
 

@@ -34,8 +34,10 @@ Usage: TEST_INFO("line 6");
  INFO: now:100065 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:30 sent_bytes:0	(supervisor_email_test.c dump_email_state)
 Usage: TEST_INFO("line 7");
  INFO: now:100066 email_state:3 IO_TIMER_MS(logging_send):100080 sent_epoch_sec:100060 buf_used:37 sent_bytes:0	(supervisor_email_test.c dump_email_state)
+ INFO: Expect cooldown finish	(supervisor_email_test.c main)
 Usage: timer_skip();
  INFO: now:100081 email_state:1 IO_TIMER_MS(logging_send):100120 sent_epoch_sec:100060 buf_used:37 sent_bytes:0	(supervisor_email_test.c dump_email_state)
+ INFO: Expect email send	(supervisor_email_test.c main)
 Usage: timer_skip();
  INFO: email_init: to:logging@test.test subject:Logs body_len:37 body:	(supervisor_email_test.c email_init)
  INFO: Third line	(supervisor_email_test.c email_init)
@@ -44,8 +46,9 @@ Usage: timer_skip();
  INFO: line 7	(supervisor_email_test.c email_init)
  INFO: email_init end	(supervisor_email_test.c email_init)
  INFO: now:100121 email_state:2 IO_TIMER_MS(logging_send):100240 sent_epoch_sec:100120 buf_used:37 sent_bytes:37	(supervisor_email_test.c dump_email_state)
+ INFO: Expect email timeout	(supervisor_email_test.c main)
 Usage: timer_skip();
-Error: log email took too long, aborting
+ERROR: log email took too long, aborting	(supervisor_email.c poke_state_machine)
  INFO: email_free	(supervisor_email_test.c email_free)
  INFO: email_init: to:logging@test.test subject:Logs body_len:37 body:	(supervisor_email_test.c email_init)
  INFO: Third line	(supervisor_email_test.c email_init)

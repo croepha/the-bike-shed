@@ -11,23 +11,6 @@
 #define MIN(a,b) (a < b ? a : b)
 
 u64 now_sec();
-#ifndef now_sec
-#include <time.h>
-u64 now_sec() { return time(0); }
-#endif
-
-
-static char *from_addr;
-static char *smtp_server;
-static char *user_pass;
-
-
-void email_setup(char* from_addr_, char* smtp_server_, char* user_pass_) {
-  from_addr = from_addr_;
-  smtp_server = smtp_server_;
-  user_pass = user_pass_;
-}
-
 
 // This could really be generalized out, like it would be nice to have a read_callback that can take
 //   io_vec[]
@@ -66,9 +49,9 @@ static size_t email_read_callback(void *ptr, size_t size, size_t nmemb,
 void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char const * body_,
                 size_t body_len_, char const * subject) {
   assert(!ctx->easy);
-  assert(from_addr && strlen(from_addr));
-  assert(smtp_server && strlen(smtp_server));
-  assert(user_pass && strlen(user_pass));
+  assert(email_from && strlen(email_from));
+  assert(email_host && strlen(email_host));
+  assert(email_user_pass && strlen(email_user_pass));
 
   memset(ctx, 0, sizeof(struct email_Send));
 
@@ -81,12 +64,12 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   ssize_t sr = strftime(now_string, sizeof now_string, "%a, %d %b %Y %T %z",
                         &now_tmstruct); error_check(sr);
   int r = snprintf(ctx->header, sizeof ctx->header,
-    "Date: %s\n"
-    "From: <%s>\n"
-    "To: <%s>\n"
-    "Subject: %s\n"
-    "\n",
-    now_string, from_addr, to_addr, subject);
+                   "Date: %s\n"
+                   "From: <%s>\n"
+                   "To: <%s>\n"
+                   "Subject: %s\n"
+                   "\n",
+                   now_string, email_from, to_addr, subject);
   error_check(r);
   assert(r < sizeof ctx->header);
   if (r >= sizeof ctx->header) {
@@ -107,16 +90,16 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   CURLESET(READDATA, ctx);
 
   CURLESET(BUFFERSIZE, 102400L);
-  CURLESET(URL, smtp_server);
+  CURLESET(URL, email_host);
   CURLESET(UPLOAD, 1L);
-  CURLESET(USERPWD, user_pass);
+  CURLESET(USERPWD, email_user_pass);
   CURLESET(USERAGENT, "curl/7.68.0");
   CURLESET(MAXREDIRS, 50L);
   CURLESET(HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
   CURLESET(SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
   //CURLESET(VERBOSE, 1L);
   CURLESET(TCP_KEEPALIVE, 1L);
-  CURLESET(MAIL_FROM, from_addr);
+  CURLESET(MAIL_FROM, email_from);
   CURLESET(MAIL_RCPT, ctx->rcpt_list);
   CURLESET(INFILESIZE_LARGE, (curl_off_t)(ctx->body_len+ctx->header_len));
 }
