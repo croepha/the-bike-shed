@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include <ctype.h>
 #include "logging.h"
 
 char * email_from;
@@ -32,10 +33,65 @@ char* config_push_string(char * str) {
 }
 
 
+
+#include "/build/config.re.c"
+
+    // for (char * c=buf; *c; c++) { *c=tolower(*c); }
+
+char*   valid_email_address0 = "EmailAddress: tmp-from@testtest.test";
+char*   valid_email_server[] = {
+    "EmailServer:  smtps://smtp.gmail.com",
+    "EmailServer:  smtps://smtp.gmail.com:465",
+    "EmailServer:  smtp://127.0.0.1",
+    "EmailServer:  smtp://127.0.0.1:8025",
+    "EmailServer:  smtps://127.0.0.1:8025",
+};
+char* invalid_email_server[] = {
+    "EmailServer:  smtp.gmail.com",
+    "EmailServer:  smtp://127.0.0.1:",
+    "EmailServer:  smtpss://127.0.0.1:",
+    "EmailServer:  smtpss://:333",
+    "EmailServer:  smtps://127.0.0.1:8ddd025",
+};
+
+
+void _test_set(char**set, usz set_len) {
+    char buf[1024];
+    for (int i=0; i < COUNT(valid_email_server); i++) {
+        email_host = 0;
+        INFO("Trying line: '%s'", valid_email_server[i]);
+        strcpy(buf, valid_email_server[i]);
+        parse_config(buf);
+        log_allowed_fails = 100;
+        parse_config(buf);
+        INFO("Effective: '%s' Failures: %d", email_host, 100 - log_allowed_fails);
+        log_allowed_fails = 0;
+    }
+}
+
 int main () {
 
-    email_from         = config_push_string("tmp-from@testtest.test");
-    email_host         = config_push_string("smtp://127.0.0.1:8025");
+    _test_set(valid_email_server, COUNT(valid_email_server));
+
+    char buf[1024];
+
+    for (int i=0; i < COUNT(valid_email_server); i++) {
+        email_host = 0;
+        INFO("Trying line: '%s'", valid_email_server[i]);
+        strcpy(buf, valid_email_server[i]);
+        parse_config(buf);
+        log_allowed_fails = 100;
+        parse_config(buf);
+        INFO("Effective: '%s' Failures: %d", email_host, 100 - log_allowed_fails);
+    }
+
+
+    strcpy(buf, valid_email_address0);  parse_config(buf);
+
+    char buf3[] = "EmailServer: smasdfadtp://127.0.0.1:8025";
+    parse_config(buf3);
+
+    //email_host         = config_push_string("smtp://127.0.0.1:8025");
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
     char* tmp_array[20];

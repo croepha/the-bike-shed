@@ -247,6 +247,7 @@ link_exec local_config_test
 
 
 re parse_headers
+re config
 
 #  --sysroot=/build/root/pi0_usr_include/output/staging//build/email_test.dbg.exec
 
