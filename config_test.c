@@ -75,21 +75,8 @@ int main () {
 
     char buf[1024];
 
-    for (int i=0; i < COUNT(valid_email_server); i++) {
-        email_host = 0;
-        INFO("Trying line: '%s'", valid_email_server[i]);
-        strcpy(buf, valid_email_server[i]);
-        parse_config(buf);
-        log_allowed_fails = 100;
-        parse_config(buf);
-        INFO("Effective: '%s' Failures: %d", email_host, 100 - log_allowed_fails);
-    }
-
-
     strcpy(buf, valid_email_address0);  parse_config(buf);
 
-    char buf3[] = "EmailServer: smasdfadtp://127.0.0.1:8025";
-    parse_config(buf3);
 
     //email_host         = config_push_string("smtp://127.0.0.1:8025");
     email_user_pass    = config_push_string("user:pass");
