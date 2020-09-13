@@ -1,5 +1,15 @@
 set -eEuo pipefail
 
+/*
+
+mkdir -p /tmp/re2c
+wget  https://github.com/skvadrik/re2c/releases/download/2.0.3/re2c-2.0.3.tar.xz -O /tmp/re2c/re2c.tar.xz
+tar -xvf /tmp/re2c/re2c.tar.xz -C /tmp/re2c --strip=1
+cd /tmp/re2c
+./configure --disable-golang && make -j $(nproc) && make install
+*/
+
+
 source /etc/profile
 if [ ! -v ENV_VER ]; then {
         ENV_VER=0
