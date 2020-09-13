@@ -54,14 +54,12 @@ char* invalid_email_server[] = {
     "EmailServer:  smtps://127.0.0.1:8ddd025",
 };
 
-
 void _test_set(char**set, usz set_len) {
     char buf[1024];
-    for (int i=0; i < COUNT(valid_email_server); i++) {
+    for (int i=0; i < set_len; i++) {
         email_host = 0;
-        INFO("Trying line: '%s'", valid_email_server[i]);
-        strcpy(buf, valid_email_server[i]);
-        parse_config(buf);
+        INFO("Trying line: '%s'", set[i]);
+        strcpy(buf, set[i]);
         log_allowed_fails = 100;
         parse_config(buf);
         INFO("Effective: '%s' Failures: %d", email_host, 100 - log_allowed_fails);
@@ -69,9 +67,11 @@ void _test_set(char**set, usz set_len) {
     }
 }
 
+#define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set)); }
 int main () {
 
-    _test_set(valid_email_server, COUNT(valid_email_server));
+    test_set(  valid_email_server);
+    test_set(invalid_email_server);
 
     char buf[1024];
 
