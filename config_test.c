@@ -33,8 +33,15 @@ char* config_push_string(char * str) {
 }
 
 
-
+static void __set_config(char* var_name, char** var, char* value) {
+    if (*var) {
+        WARN("Config value for '%s' is already set, overwriting", var_name);
+    }
+    *var = value;
+}
+#define set_config(var) *end = 0; __set_config(#var, &var, start); return;
 #include "/build/config.re.c"
+#undef  set_config
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
@@ -57,6 +64,7 @@ char* invalid_email_server[] = {
 void _test_set(char**set, usz set_len) {
     char buf[1024];
     for (int i=0; i < set_len; i++) {
+        config_memory_next = config_memory;
         email_host = 0;
         INFO("Trying line: '%s'", set[i]);
         strcpy(buf, set[i]);
