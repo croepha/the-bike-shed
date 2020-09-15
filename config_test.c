@@ -85,6 +85,15 @@ void append_string_list(struct StringList *** nextp, char * str) {
         s->str = str;
 }
 
+struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
+u16  tmp_arg_count = 0;
+void __config_append(u16 * count, struct StringList *** nextp, char* str) {
+    append_string_list(nextp, config_push_string(str) );
+    (*count)++;
+}
+#define config_append(list, val) __config_append(& list ## _count, & list ## _nextp, val)
+
+
 #define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set)); }
 int main () {
 
@@ -100,15 +109,14 @@ int main () {
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
 
-    struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
-    u16  tmp_arg_count = 0;
-    append_string_list(&tmp_arg_nextp, config_push_string("/bin/sh") ); tmp_arg_count++;
-    append_string_list(&tmp_arg_nextp, config_push_string("-c") ); tmp_arg_count++;
-    append_string_list(&tmp_arg_nextp, config_push_string("/usr/bin/ping 127.0.0.1 | ts") ); tmp_arg_count++;
+    config_append(tmp_arg, "/bin/sh");
+    config_append(tmp_arg, "-c");
+    config_append(tmp_arg, "/usr/bin/ping 127.0.0.1 | ts");
+
     tmp_arg_count++;
     supr_child_args = config_push(tmp_arg_count * sizeof(char*), _Alignof(char*));
     {
-        u16 i = 0;
+        u16  i = 0;
         for (struct StringList * s = tmp_arg_first; s ; s= s->next) {
             assert(i<tmp_arg_count);
             supr_child_args[i++] = s->str;
