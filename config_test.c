@@ -124,16 +124,6 @@ int main () {
         supr_child_args[i] = 0;
     }
 
-    // char* tmp_array[20];
-    // char** t = tmp_array;
-    // *t++ = config_push_string("/bin/sh");
-    // *t++ = config_push_string("-c");
-    // *t++ = config_push_string("/usr/bin/ping 127.0.0.1 | ts");
-    // *t++ = 0;
-    // supr_child_args = config_push((u8*)t - (u8*)tmp_array, _Alignof(u8*));
-    // memcpy(supr_child_args, tmp_array, (u8*)t - (u8*)tmp_array);
-
-
     INFO("email_from: '%s'", email_from);
     INFO("email_host: '%s'", email_host);
     INFO("email_user_pass: '%s'", email_user_pass);
