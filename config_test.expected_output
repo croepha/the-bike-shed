@@ -29,7 +29,7 @@
  INFO: email_host: '(null)'	(config_test.c main)
  INFO: email_user_pass: 'user:pass'	(config_test.c main)
  INFO: supr_email_rcpt: 'logging@tmp-test.test'	(config_test.c main)
- INFO: supr_child_argv:	(config_test.c main)
+ INFO: supr_child_args:	(config_test.c main)
  INFO: 	'/bin/sh'	(config_test.c main)
  INFO: 	'-c'	(config_test.c main)
  INFO: 	'/usr/bin/ping 127.0.0.1 | ts'	(config_test.c main)
