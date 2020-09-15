@@ -81,27 +81,51 @@ char* invalid_email_server[] = {
     "EmailServer:  smtps://127.0.0.1:8ddd025",
 };
 
-void _test_set(char**set, usz set_len) {
-    char buf[1024];
+#define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set), &email_host); }
+void _test_set(char**set, usz set_len, char** var) {
     for (int i=0; i < set_len; i++) {
         config_memory_next = config_memory;
-        email_host = 0;
+        *var = 0;
         INFO("Trying line: '%s'", set[i]);
+        char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
         parse_config(buf);
-        INFO("Effective: '%s' Failures: %d", email_host, 100 - log_allowed_fails);
+        INFO("Effective: '%s' Failures: %d", *var, 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
 }
 
+#define test_set2(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set2( set, COUNT(set)); }
+void _test_set2(char**set, usz set_len) {
+    config_memory_next = config_memory;
+    tmp_arg_first = 0; tmp_arg_nextp = &tmp_arg_first;
+    for (int i=0; i < set_len; i++) {
+        INFO("Trying line: '%s'", set[i]);
+        char buf[1024];
+        strcpy(buf, set[i]);
+        log_allowed_fails = 100;
+        parse_config(buf);
+        INFO("Failures: %d", 100 - log_allowed_fails);
+        log_allowed_fails = 0;
+    }
+    for (struct StringList * s = tmp_arg_first; s ; s= s->next) {
+        INFO("Effective: %s",s->str);
+    }
+}
 
 
-#define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set)); }
 int main () {
 
     test_set(  valid_email_server);
     test_set(invalid_email_server);
+
+    char* valid_argv_config[] = {
+        "DebugSupervisorArg: /bin/sh",
+        "DebugSupervisorArg: -c",
+        "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
+    };
+    test_set2(valid_argv_config);
 
     char buf[1024];
 
@@ -111,10 +135,6 @@ int main () {
     //email_host         = config_push_string("smtp://127.0.0.1:8025");
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
-
-    config_append(tmp_arg, "/bin/sh");
-    config_append(tmp_arg, "-c");
-    config_append(tmp_arg, "/usr/bin/ping 127.0.0.1 | ts");
 
     tmp_arg_count++;
     supr_child_args = config_push(tmp_arg_count * sizeof(char*), _Alignof(char*));
