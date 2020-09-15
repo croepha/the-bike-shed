@@ -37,7 +37,7 @@ static void __set_config(char* var_name, char** var, char* value) {
     if (*var) {
         WARN("Config value for '%s' is already set, overwriting", var_name);
     }
-    *var = value;
+    *var = config_push_string(value);
 }
 #define set_config(var) *end = 0; __set_config(#var, &var, start); return;
 #include "/build/config.re.c"
