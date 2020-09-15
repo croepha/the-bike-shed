@@ -15,21 +15,23 @@ char config_memory[config_memory_SIZE];
 char * const config_memory_end = config_memory + config_memory_SIZE;
 char * config_memory_next = config_memory;
 
-void * config_push(void * mem, usz len) {
-    char* ret = config_memory_next;
-    if (config_memory_next + len < config_memory_end) {
-        memcpy(ret, mem, len);
-        config_memory_next += len;
-    } else {
+
+void * config_push(usz len, usz alignment) {
+    ssz v = (ssz)config_memory_next; v += (-v) & (alignment -1);
+    char* ret = config_memory_next = (char*)v;
+    config_memory_next += len;
+    if (config_memory_next > config_memory_end) {
+        ERROR("Config: Out of memory");
         ret = 0;
-        ERROR("Config out of memory");
     }
     return ret;
 }
 
 char* config_push_string(char * str) {
     usz len = strlen(str) + 1;
-    return config_push(str, len);
+    char* ret = config_push(len, 1);
+    memcpy(ret, str, len);
+    return ret;
 }
 
 
@@ -89,13 +91,23 @@ int main () {
     //email_host         = config_push_string("smtp://127.0.0.1:8025");
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
+
+    struct StringList {
+        struct StringList * next;
+        char * str;
+    };
+//    struct StringList tmp_argv_first;
+
+
+
     char* tmp_array[20];
     char** t = tmp_array;
     *t++ = config_push_string("/bin/sh");
     *t++ = config_push_string("-c");
     *t++ = config_push_string("/usr/bin/ping 127.0.0.1 | ts");
     *t++ = 0;
-    supr_child_argv = config_push(tmp_array, (u8*)t - (u8*)tmp_array);
+    supr_child_argv = config_push((u8*)t - (u8*)tmp_array, _Alignof(u8*));
+    memcpy(supr_child_argv, tmp_array, (u8*)t - (u8*)tmp_array);
 
     INFO("email_from: '%s'", email_from);
     INFO("email_host: '%s'", email_host);
