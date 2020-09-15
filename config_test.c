@@ -34,16 +34,34 @@ char* config_push_string(char * str) {
     return ret;
 }
 
+struct StringList { struct StringList * next; char * str; };
+void append_string_list(struct StringList *** nextp, char * str) {
+        struct StringList * s = **nextp = config_push(sizeof(struct StringList), _Alignof(struct StringList));
+        *nextp = &(**nextp)->next;
+        s->next = 0;
+        s->str = str;
+}
 
+#define set_config(var) *end = 0; __set_config(#var, &var, start); return;
 static void __set_config(char* var_name, char** var, char* value) {
     if (*var) {
         WARN("Config value for '%s' is already set, overwriting", var_name);
     }
     *var = config_push_string(value);
 }
-#define set_config(var) *end = 0; __set_config(#var, &var, start); return;
+
+#define config_append(list, val) __config_append(& list ## _count, & list ## _nextp, val)
+void __config_append(u16 * count, struct StringList *** nextp, char* str) {
+    append_string_list(nextp, config_push_string(str) );
+    (*count)++;
+}
+
+struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
+u16  tmp_arg_count = 0;
+
 #include "/build/config.re.c"
 #undef  set_config
+//#undef config_append
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
@@ -77,21 +95,6 @@ void _test_set(char**set, usz set_len) {
     }
 }
 
-struct StringList { struct StringList * next; char * str; };
-void append_string_list(struct StringList *** nextp, char * str) {
-        struct StringList * s = **nextp = config_push(sizeof(struct StringList), _Alignof(struct StringList));
-        *nextp = &(**nextp)->next;
-        s->next = 0;
-        s->str = str;
-}
-
-struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
-u16  tmp_arg_count = 0;
-void __config_append(u16 * count, struct StringList *** nextp, char* str) {
-    append_string_list(nextp, config_push_string(str) );
-    (*count)++;
-}
-#define config_append(list, val) __config_append(& list ## _count, & list ## _nextp, val)
 
 
 #define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set)); }
