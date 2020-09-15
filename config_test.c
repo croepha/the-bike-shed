@@ -7,7 +7,7 @@ char * email_from;
 char * email_host;
 char * email_user_pass;
 char * supr_email_rcpt;
-char ** supr_child_argv;
+char ** supr_child_args;
 
 
 usz const config_memory_SIZE = 1<<11;
@@ -77,6 +77,14 @@ void _test_set(char**set, usz set_len) {
     }
 }
 
+struct StringList { struct StringList * next; char * str; };
+void append_string_list(struct StringList *** nextp, char * str) {
+        struct StringList * s = **nextp = config_push(sizeof(struct StringList), _Alignof(struct StringList));
+        *nextp = &(**nextp)->next;
+        s->next = 0;
+        s->str = str;
+}
+
 #define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set)); }
 int main () {
 
@@ -92,29 +100,38 @@ int main () {
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
 
-    struct StringList {
-        struct StringList * next;
-        char * str;
-    };
-//    struct StringList tmp_argv_first;
+    struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
+    u16  tmp_arg_count = 0;
+    append_string_list(&tmp_arg_nextp, config_push_string("/bin/sh") ); tmp_arg_count++;
+    append_string_list(&tmp_arg_nextp, config_push_string("-c") ); tmp_arg_count++;
+    append_string_list(&tmp_arg_nextp, config_push_string("/usr/bin/ping 127.0.0.1 | ts") ); tmp_arg_count++;
+    tmp_arg_count++;
+    supr_child_args = config_push(tmp_arg_count * sizeof(char*), _Alignof(char*));
+    {
+        u16 i = 0;
+        for (struct StringList * s = tmp_arg_first; s ; s= s->next) {
+            assert(i<tmp_arg_count);
+            supr_child_args[i++] = s->str;
+        }
+        supr_child_args[i] = 0;
+    }
 
+    // char* tmp_array[20];
+    // char** t = tmp_array;
+    // *t++ = config_push_string("/bin/sh");
+    // *t++ = config_push_string("-c");
+    // *t++ = config_push_string("/usr/bin/ping 127.0.0.1 | ts");
+    // *t++ = 0;
+    // supr_child_args = config_push((u8*)t - (u8*)tmp_array, _Alignof(u8*));
+    // memcpy(supr_child_args, tmp_array, (u8*)t - (u8*)tmp_array);
 
-
-    char* tmp_array[20];
-    char** t = tmp_array;
-    *t++ = config_push_string("/bin/sh");
-    *t++ = config_push_string("-c");
-    *t++ = config_push_string("/usr/bin/ping 127.0.0.1 | ts");
-    *t++ = 0;
-    supr_child_argv = config_push((u8*)t - (u8*)tmp_array, _Alignof(u8*));
-    memcpy(supr_child_argv, tmp_array, (u8*)t - (u8*)tmp_array);
 
     INFO("email_from: '%s'", email_from);
     INFO("email_host: '%s'", email_host);
     INFO("email_user_pass: '%s'", email_user_pass);
     INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
-    INFO("supr_child_argv:");
-    for (char**c = supr_child_argv; *c; c++) {
+    INFO("supr_child_args:");
+    for (char**c = supr_child_args; *c; c++) {
         INFO("\t'%s'", *c);
     }
 
