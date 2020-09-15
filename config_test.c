@@ -65,23 +65,8 @@ u16  tmp_arg_count = 0;
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
-char*   valid_email_address0 = "EmailAddress: tmp-from@testtest.test";
-char*   valid_email_server[] = {
-    "EmailServer:  smtps://smtp.gmail.com",
-    "EmailServer:  smtps://smtp.gmail.com:465",
-    "EmailServer:  smtp://127.0.0.1",
-    "EmailServer:  smtp://127.0.0.1:8025",
-    "EmailServer:  smtps://127.0.0.1:8025",
-};
-char* invalid_email_server[] = {
-    "EmailServer:  smtp.gmail.com",
-    "EmailServer:  smtp://127.0.0.1:",
-    "EmailServer:  smtpss://127.0.0.1:",
-    "EmailServer:  smtpss://:333",
-    "EmailServer:  smtps://127.0.0.1:8ddd025",
-};
 
-#define test_set(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set), &email_host); }
+#define test_set(set, var) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set), &var); }
 void _test_set(char**set, usz set_len, char** var) {
     for (int i=0; i < set_len; i++) {
         config_memory_next = config_memory;
@@ -115,27 +100,52 @@ void _test_set2(char**set, usz set_len) {
 }
 
 
+char*   valid_email_address[] = {
+    "EmailAddress:    asdasdfasdasd32323@gmail.com",
+    "EmailAddress:    yahooyahoo@yahoo.com",
+    "EmailAddress: tmp-from@testtest.test",
+};
+char* invalid_email_address[] = {
+    "EmailAddress:    asdasd@fasdasd32323@mail.com",
+    "EmailAddress:    yahooyahoo@",
+    "EmailAddress: @testtest.test",
+    "EmailAddress: @",
+    "EmailAddress: dasdfasdfasd",
+};
+char*   valid_email_server[] = {
+    "EmailServer:  smtps://smtp.gmail.com",
+    "EmailServer:  smtps://smtp.gmail.com:465",
+    "EmailServer:  smtp://127.0.0.1",
+    "EmailServer:  smtp://127.0.0.1:8025",
+    "EmailServer:  smtps://127.0.0.1:8025",
+};
+char* invalid_email_server[] = {
+    "EmailServer:  smtp.gmail.com",
+    "EmailServer:  smtp://127.0.0.1:",
+    "EmailServer:  smtpss://127.0.0.1:",
+    "EmailServer:  smtpss://:333",
+    "EmailServer:  smtps://127.0.0.1:8ddd025",
+};
+char* valid_argv_config[] = {
+    "DebugSupervisorArg: /bin/sh",
+    "DebugSupervisorArg: -c",
+    "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
+};
+
+
 int main () {
 
-    test_set(  valid_email_server);
-    test_set(invalid_email_server);
+    test_set(valid_email_address, email_from);
 
-    char* valid_argv_config[] = {
-        "DebugSupervisorArg: /bin/sh",
-        "DebugSupervisorArg: -c",
-        "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
-    };
-    test_set2(valid_argv_config);
+    test_set(  valid_email_server, email_host);
+    test_set(invalid_email_server, email_host);
 
-    char buf[1024];
-
-    strcpy(buf, valid_email_address0);  parse_config(buf);
-
-
-    //email_host         = config_push_string("smtp://127.0.0.1:8025");
     email_user_pass    = config_push_string("user:pass");
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
+    INFO("email_user_pass: '%s'", email_user_pass);
+    INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
 
+    test_set2(valid_argv_config);
     tmp_arg_count++;
     supr_child_args = config_push(tmp_arg_count * sizeof(char*), _Alignof(char*));
     {
@@ -146,15 +156,15 @@ int main () {
         }
         supr_child_args[i] = 0;
     }
-
-    INFO("email_from: '%s'", email_from);
-    INFO("email_host: '%s'", email_host);
-    INFO("email_user_pass: '%s'", email_user_pass);
-    INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
     INFO("supr_child_args:");
     for (char**c = supr_child_args; *c; c++) {
         INFO("\t'%s'", *c);
     }
+
+
+
+
+
 
 
 }
