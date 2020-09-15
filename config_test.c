@@ -135,7 +135,8 @@ char* valid_argv_config[] = {
 
 int main () {
 
-    test_set(valid_email_address, email_from);
+    test_set(  valid_email_address, email_from);
+    test_set(invalid_email_address, email_from);
 
     test_set(  valid_email_server, email_host);
     test_set(invalid_email_server, email_host);
