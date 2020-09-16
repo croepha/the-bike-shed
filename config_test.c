@@ -225,7 +225,15 @@ int main () {
         , f); error_check(r);
         r = fclose(f); error_check(r);
     }
+    #define _(v) v = 0
+    _(email_from);
+    _(email_host);
+    _(email_user_pass);
+    _(email_rcpt);
+    #undef  _
+    supr_child_args = (char**){0};
     {
+        string_list_initialize(&tmp_arg);
         int r;
         int line = 1;
         FILE * f = fopen("/tmp/config_test1", "r"); error_check(f?0:-1);
@@ -253,12 +261,19 @@ int main () {
     }
     {
         INFO("Effective configs:");
-        #define _(v) INFO("\t" #v ": `%s'", v);
+        #define _(v) INFO("\t" #v ": `%s'", v)
         _(email_from);
         _(email_host);
         _(email_user_pass);
         _(email_rcpt);
         #undef  _
+        supr_child_args = config_push((tmp_arg.count + 1) * sizeof(char*), _Alignof(char*));
+        string_list_copy_to_array(supr_child_args, &tmp_arg);
+        INFO("\tsupr_child_args:");
+        for (char**c = supr_child_args; *c; c++) {
+            INFO("\t\t'%s'", *c);
+        }
+
 
     }
 //char ** supr_child_args;
