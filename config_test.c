@@ -40,7 +40,9 @@ void * config_push(usz len, usz alignment) {
         ERROR("Config: Out of memory");
         ret = 0;
     }
-    ret = malloc(len);
+#if BUILD_IS_RELEASE == 0
+    ret = malloc(len); // For debugging, enables ASAN
+#endif
     return ret;
 }
 
