@@ -6,7 +6,7 @@
 char * email_from;
 char * email_host;
 char * email_user_pass;
-char * supr_email_rcpt;
+char * email_rcpt;
 char ** supr_child_args;
 
 
@@ -100,48 +100,60 @@ void _test_set2(char**set, usz set_len) {
 }
 
 
-char*   valid_email_address[] = {
+char *   valid_email_address[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
     "EmailAddress:    yahooyahoo@yahoo.com",
     "EmailAddress: tmp-from@testtest.test",
 };
-char* invalid_email_address[] = {
+char * invalid_email_address[] = {
     "EmailAddress:    asdasd@fasdasd32323@mail.com",
     "EmailAddress:    yahooyahoo@",
     "EmailAddress: @testtest.test",
     "EmailAddress: @",
     "EmailAddress: dasdfasdfasd",
 };
-char*   valid_email_server[] = {
+char *   valid_email_server[] = {
     "EmailServer:  smtps://smtp.gmail.com",
     "EmailServer:  smtps://smtp.gmail.com:465",
     "EmailServer:  smtp://127.0.0.1",
     "EmailServer:  smtp://127.0.0.1:8025",
     "EmailServer:  smtps://127.0.0.1:8025",
 };
-char* invalid_email_server[] = {
+char * invalid_email_server[] = {
     "EmailServer:  smtp.gmail.com",
     "EmailServer:  smtp://127.0.0.1:",
     "EmailServer:  smtpss://127.0.0.1:",
     "EmailServer:  smtpss://:333",
     "EmailServer:  smtps://127.0.0.1:8ddd025",
 };
-char* valid_argv_config[] = {
+char *   valid_email_rcpt[] = {
+    "DestinationEmailAddress:    asdasdfasdasd32323@gmail.com",
+    "DestinationEmailAddress:    yahooyahoo@yahoo.com",
+    "DestinationEmailAddress: tmp-from@testtest.test",
+};
+char * invalid_email_rcpt[] = {
+    "DestinationEmailAddress:    asdasd@fasdasd32323@mail.com",
+    "DestinationEmailAddress:    yahooyahoo@",
+    "DestinationEmailAddress: @testtest.test",
+    "DestinationEmailAddress: @",
+    "DestinationEmailAddress: dasdfasdfasd",
+};
+char *   valid_argv_config[] = {
     "DebugSupervisorArg: /bin/sh",
     "DebugSupervisorArg: -c",
     "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
 };
-char*   valid_email_user_pass[] = {
+char *   valid_email_user_pass[] = {
     "EmailUserPass:  user:pass",
     "EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj",
     "EmailUserPass:  :",
 };
-char* invalid_email_user_pass[] = {
+char * invalid_email_user_pass[] = {
     "EmailUserPass: ",
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
 };
-
+//char *
 
 int main () {
 
@@ -154,8 +166,8 @@ int main () {
     test_set(  valid_email_user_pass, email_user_pass);
     test_set(invalid_email_user_pass, email_user_pass);
 
-    supr_email_rcpt    = config_push_string("logging@tmp-test.test");
-    INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
+    test_set(  valid_email_rcpt, email_rcpt);
+    test_set(invalid_email_rcpt, email_rcpt);
 
     test_set2(valid_argv_config);
     tmp_arg_count++;
