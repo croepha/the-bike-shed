@@ -41,8 +41,8 @@ void string_list_initialize(struct StringList * sl) {
     sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
 }
 
-void string_list_append(struct StringList*sl, char * str) {
-        struct StringListLink * s = *sl->nextp = config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink));
+void string_list_append(struct StringList * sl, char * str, struct StringListLink * s) {
+        *sl->nextp = s;
         sl->nextp = &(*sl->nextp)->next;
         sl->count++;
         s->next = 0;
@@ -59,7 +59,7 @@ static void __set_config(char* var_name, char** var, char* value) {
 
 #define config_append(list, val) __config_append(& list, val)
 void __config_append(struct StringList *sl, char* str) {
-    string_list_append(sl, config_push_string(str) );
+    string_list_append(sl, config_push_string(str), config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink)) );
 }
 
 struct StringList tmp_arg;
