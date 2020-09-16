@@ -68,8 +68,9 @@ void __config_append(struct StringList *sl, char* str) {
     );
 }
 
-#define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start); return;
-void __do_diagnostic(char * long_string, char * start) {
+// , valid_ ## short_var
+#define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start, print_diagnostics); return;
+void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics) {
     WARN("Failed to validate: %s: '%s'", long_string, start);
 }
 
