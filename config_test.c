@@ -61,7 +61,7 @@ u16  tmp_arg_count = 0;
 
 #include "/build/config.re.c"
 #undef  set_config
-//#undef config_append
+#undef  config_append
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
