@@ -68,6 +68,11 @@ void __config_append(struct StringList *sl, char* str) {
     );
 }
 
+#define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start); return;
+void __do_diagnostic(char * long_string, char * start) {
+    WARN("Failed to validate: %s: '%s'", long_string, start);
+}
+
 struct StringList tmp_arg;
 
 #include "/build/config.re.c"
@@ -86,7 +91,7 @@ void _test_set(char**set, usz set_len, char** var) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf);
+        parse_config(buf, 0);
         INFO("Effective: '%s' Failures: %d", *var, 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -101,7 +106,7 @@ void _test_set2(char**set, usz set_len) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf);
+        parse_config(buf, 0);
         INFO("Failures: %d", 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -196,6 +201,7 @@ int main () {
     for (char**c = supr_child_args; *c; c++) {
         INFO("\t'%s'", *c);
     }
+
 
 
 
