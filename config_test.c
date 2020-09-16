@@ -41,12 +41,12 @@ void string_list_initialize(struct StringList * sl) {
     sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
 }
 
-void string_list_append(struct StringList * sl, char * str, struct StringListLink * s) {
-        *sl->nextp = s;
+void string_list_append(struct StringList * sl, char * str, struct StringListLink * sll) {
+        *sl->nextp = sll;
         sl->nextp = &(*sl->nextp)->next;
         sl->count++;
-        s->next = 0;
-        s->str = str;
+        sll->next = 0;
+        sll->str = str;
 }
 
 #define set_config(var) *end = 0; __set_config(#var, &var, start); return;
@@ -59,7 +59,9 @@ static void __set_config(char* var_name, char** var, char* value) {
 
 #define config_append(list, val) __config_append(& list, val)
 void __config_append(struct StringList *sl, char* str) {
-    string_list_append(sl, config_push_string(str), config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink)) );
+    string_list_append(sl, config_push_string(str),
+     config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink))
+    );
 }
 
 struct StringList tmp_arg;
@@ -99,8 +101,8 @@ void _test_set2(char**set, usz set_len) {
         INFO("Failures: %d", 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
-    for (struct StringListLink * s = tmp_arg.first; s ; s= s->next) {
-        INFO("Effective: %s",s->str);
+    for (struct StringListLink * sll = tmp_arg.first; sll ; sll= sll->next) {
+        INFO("Effective: %s",sll->str);
     }
 }
 
@@ -183,9 +185,9 @@ int main () {
     supr_child_args = config_push(tmp_arg.count * sizeof(char*), _Alignof(char*));
     {
         u16  i = 0;
-        for (struct StringListLink * s = tmp_arg.first; s ; s= s->next) {
+        for (struct StringListLink * sll = tmp_arg.first; sll ; sll= sll->next) {
             assert(i<tmp_arg.count);
-            supr_child_args[i++] = s->str;
+            supr_child_args[i++] = sll->str;
         }
         supr_child_args[i] = 0;
     }
