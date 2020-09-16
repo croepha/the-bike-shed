@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <errno.h>
 #include "logging.h"
 
 struct StringListLink { struct StringListLink * next; char * str; };
@@ -214,11 +215,53 @@ int main () {
         INFO("\t'%s'", *c);
     }
 
+    INFO("Trying out config_test1");
+    {
+        int r;
+        FILE * f = fopen("/tmp/config_test1", "w"); error_check(f?0:-1);
+        r = fputs(
+            "adfa dfadkl;fa j;lsdkjfa;dj;\n"
+            "EmailAddress:    yahooyahoo@yahoo.com\n"
+        , f); error_check(r);
+        r = fclose(f); error_check(r);
+    }
+    {
+        int r;
+        int line = 1;
+        FILE * f = fopen("/tmp/config_test1", "r"); error_check(f?0:-1);
+        while (!feof(f)) {
+            char buf[1024];
+            char *buf_ptr = buf;
+            usz start_len = sizeof buf;
+            ssz len = getline(&buf_ptr, &start_len, f);
+            if (len == -1) {
+                if (!feof(f)) {
+                    error_check(len);
+                }
+                break;
+            } if (len > start_len - 2) {
+                printf("Error: Config line:%d too long\n", line);
+            } else if (len > 0) {
+                buf[len - 1] = 0; // remove newline
+                log_allowed_fails = 100;
+                parse_config(buf, 1);
+                log_allowed_fails = 0;
+                line++;
+            }
+        }
+        r = fclose(f); error_check(r);
+    }
+    {
+        INFO("Effective configs:");
+        #define _(v) INFO("\t" #v ": `%s'", v);
+        _(email_from);
+        _(email_host);
+        _(email_user_pass);
+        _(email_rcpt);
+        #undef  _
 
-
-
-
-
+    }
+//char ** supr_child_args;
 
 
 }
