@@ -3,6 +3,22 @@
 #include <ctype.h>
 #include "logging.h"
 
+struct StringListLink { struct StringListLink * next; char * str; };
+struct StringList { struct StringListLink *first, **nextp; u32 count; };
+
+void string_list_initialize(struct StringList * sl) {
+    sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
+}
+
+void string_list_append(struct StringList * sl, char * str, struct StringListLink * sll) {
+        *sl->nextp = sll;
+        sl->nextp = &(*sl->nextp)->next;
+        sl->count++;
+        sll->next = 0;
+        sll->str = str;
+}
+
+
 char * email_from;
 char * email_host;
 char * email_user_pass;
@@ -32,21 +48,6 @@ char* config_push_string(char * str) {
     char* ret = config_push(len, 1);
     memcpy(ret, str, len);
     return ret;
-}
-
-struct StringListLink { struct StringListLink * next; char * str; };
-struct StringList { struct StringListLink *first, **nextp; u32 count; };
-
-void string_list_initialize(struct StringList * sl) {
-    sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
-}
-
-void string_list_append(struct StringList * sl, char * str, struct StringListLink * sll) {
-        *sl->nextp = sll;
-        sl->nextp = &(*sl->nextp)->next;
-        sl->count++;
-        sll->next = 0;
-        sll->str = str;
 }
 
 #define set_config(var) *end = 0; __set_config(#var, &var, start); return;
