@@ -14,7 +14,7 @@ function fail() {
     exit -1
 }
 trap fail ERR
-
+export LSAN_OPTIONS=suppressions=suppressions,print_suppressions=0
 $EXEC 2>&1 | tee "$OUT_FILE.raw" |
   sed -E $'s/^([0-9a-f]+[.][0-9]{3}: (DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3/' >/dev/null # Right justify location info
 

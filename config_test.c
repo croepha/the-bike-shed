@@ -40,6 +40,7 @@ void * config_push(usz len, usz alignment) {
         ERROR("Config: Out of memory");
         ret = 0;
     }
+    ret = malloc(len);
     return ret;
 }
 
@@ -161,11 +162,15 @@ char * invalid_email_user_pass[] = {
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
 };
-//char *
 
-// void array_from_string_list() {
-
-// }
+void string_list_copy_to_array(char** str_array, struct StringList * sl) {
+    u32  i = 0;
+    for (struct StringListLink * sll = sl->first; sll ; sll=sll->next) {
+        assert(i<sl->count);
+        supr_child_args[i++] = sll->str;
+    }
+    supr_child_args[i] = 0;
+}
 
 int main () {
 
@@ -182,16 +187,9 @@ int main () {
     test_set(invalid_email_rcpt, email_rcpt);
 
     test_set2(valid_argv_config);
-    tmp_arg.count++;
-    supr_child_args = config_push(tmp_arg.count * sizeof(char*), _Alignof(char*));
-    {
-        u16  i = 0;
-        for (struct StringListLink * sll = tmp_arg.first; sll ; sll= sll->next) {
-            assert(i<tmp_arg.count);
-            supr_child_args[i++] = sll->str;
-        }
-        supr_child_args[i] = 0;
-    }
+
+    supr_child_args = config_push((tmp_arg.count + 1) * sizeof(char*), _Alignof(char*));
+    string_list_copy_to_array(supr_child_args, &tmp_arg);
     INFO("supr_child_args:");
     for (char**c = supr_child_args; *c; c++) {
         INFO("\t'%s'", *c);
