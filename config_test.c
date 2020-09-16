@@ -131,6 +131,16 @@ char* valid_argv_config[] = {
     "DebugSupervisorArg: -c",
     "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
 };
+char*   valid_email_user_pass[] = {
+    "EmailUserPass:  user:pass",
+    "EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj",
+    "EmailUserPass:  :",
+};
+char* invalid_email_user_pass[] = {
+    "EmailUserPass: ",
+    "EmailUserPass: adfasdfasdf",
+    "EmailUserPass: 12341231234",
+};
 
 
 int main () {
@@ -141,9 +151,10 @@ int main () {
     test_set(  valid_email_server, email_host);
     test_set(invalid_email_server, email_host);
 
-    email_user_pass    = config_push_string("user:pass");
+    // test_set(  valid_email_user_pass, email_user_pass);
+    // test_set(invalid_email_user_pass, email_user_pass);
+
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
-    INFO("email_user_pass: '%s'", email_user_pass);
     INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
 
     test_set2(valid_argv_config);
