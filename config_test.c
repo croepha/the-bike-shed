@@ -87,6 +87,7 @@ struct StringList tmp_arg;
 #include "/build/config.re.c"
 #undef  set_config
 #undef  config_append
+#undef  do_diagnostic
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
