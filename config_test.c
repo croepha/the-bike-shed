@@ -1,6 +1,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 #include "logging.h"
 
 struct StringListLink { struct StringListLink * next; char * str; };
@@ -76,10 +77,18 @@ void __config_append(struct StringList *sl, char* str) {
     );
 }
 
-// , valid_ ## short_var
-#define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start, print_diagnostics); return;
-void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics) {
-    WARN("Failed to validate: %s: '%s'", long_string, start);
+#define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
+  __do_diagnostic(long_string, start, print_diagnostics, valid_config_ ## short_var); return;
+void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples) {
+    if (print_diagnostics) {
+        printf("On line:%d config value for %s is invalid:`%s'", 0, long_string, start);
+        printf("here are some valid examples:");
+        for (char**ve = valid_examples; *ve; ve++) {
+            printf("\t%s", *ve);
+        }
+    } else {
+        WARN("Failed to validate: %s: '%s' please run config_validator", long_string, start);
+    }
 }
 
 struct StringList tmp_arg;
@@ -95,6 +104,7 @@ struct StringList tmp_arg;
 #define test_set(set, var) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set), &var); }
 void _test_set(char**set, usz set_len, char** var) {
     for (int i=0; i < set_len; i++) {
+        if (!set[i]) break;
         config_memory_next = config_memory;
         *var = 0;
         INFO("Trying line: '%s'", set[i]);
@@ -112,6 +122,7 @@ void _test_set2(char**set, usz set_len) {
     config_memory_next = config_memory;
     string_list_initialize(&tmp_arg);
     for (int i=0; i < set_len; i++) {
+        if (!set[i]) break;
         INFO("Trying line: '%s'", set[i]);
         char buf[1024];
         strcpy(buf, set[i]);
@@ -130,55 +141,55 @@ char *   valid_config_email_from[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
     "EmailAddress:    yahooyahoo@yahoo.com",
     "EmailAddress: tmp-from@testtest.test",
-};
+0};
 char * invalid_config_email_from[] = {
     "EmailAddress:    asdasd@fasdasd32323@mail.com",
     "EmailAddress:    yahooyahoo@",
     "EmailAddress: @testtest.test",
     "EmailAddress: @",
     "EmailAddress: dasdfasdfasd",
-};
+0};
 char *   valid_config_email_host[] = {
     "EmailServer:  smtps://smtp.gmail.com",
     "EmailServer:  smtps://smtp.gmail.com:465",
     "EmailServer:  smtp://127.0.0.1",
     "EmailServer:  smtp://127.0.0.1:8025",
     "EmailServer:  smtps://127.0.0.1:8025",
-};
+0};
 char * invalid_config_email_host[] = {
     "EmailServer:  smtp.gmail.com",
     "EmailServer:  smtp://127.0.0.1:",
     "EmailServer:  smtpss://127.0.0.1:",
     "EmailServer:  smtpss://:333",
     "EmailServer:  smtps://127.0.0.1:8ddd025",
-};
+0};
 char *   valid_config_email_rcpt[] = {
     "DestinationEmailAddress:    asdasdfasdasd32323@gmail.com",
     "DestinationEmailAddress:    yahooyahoo@yahoo.com",
     "DestinationEmailAddress: tmp-from@testtest.test",
-};
+0};
 char * invalid_config_email_rcpt[] = {
     "DestinationEmailAddress:    asdasd@fasdasd32323@mail.com",
     "DestinationEmailAddress:    yahooyahoo@",
     "DestinationEmailAddress: @testtest.test",
     "DestinationEmailAddress: @",
     "DestinationEmailAddress: dasdfasdfasd",
-};
+0};
 char *   valid_config_argv_config[] = {
     "DebugSupervisorArg: /bin/sh",
     "DebugSupervisorArg: -c",
     "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts",
-};
+0};
 char *   valid_config_email_user_pass[] = {
     "EmailUserPass:  user:pass",
     "EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj",
     "EmailUserPass:  :",
-};
+0};
 char * invalid_config_email_user_pass[] = {
     "EmailUserPass: ",
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
-};
+0};
 
 int main () {
 
