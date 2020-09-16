@@ -34,9 +34,15 @@ char* config_push_string(char * str) {
     return ret;
 }
 
-struct StringList { struct StringList * next; char * str; };
-void append_string_list(struct StringList *** nextp, char * str) {
-        struct StringList * s = **nextp = config_push(sizeof(struct StringList), _Alignof(struct StringList));
+struct StringListLink { struct StringListLink * next; char * str; };
+struct StringList { struct StringListLink *first, **nextp; u32 count; };
+
+void string_list_initialize(struct StringList * sl) {
+    sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
+}
+
+void append_string_list(struct StringListLink *** nextp, char * str) {
+        struct StringListLink * s = **nextp = config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink));
         *nextp = &(**nextp)->next;
         s->next = 0;
         s->str = str;
@@ -50,14 +56,13 @@ static void __set_config(char* var_name, char** var, char* value) {
     *var = config_push_string(value);
 }
 
-#define config_append(list, val) __config_append(& list ## _count, & list ## _nextp, val)
-void __config_append(u16 * count, struct StringList *** nextp, char* str) {
-    append_string_list(nextp, config_push_string(str) );
-    (*count)++;
+#define config_append(list, val) __config_append(& list, val)
+void __config_append(struct StringList *sl, char* str) {
+    append_string_list(&sl->nextp, config_push_string(str) );
+    (sl->count)++;
 }
 
-struct StringList *tmp_arg_first = 0, **tmp_arg_nextp = &tmp_arg_first;
-u16  tmp_arg_count = 0;
+struct StringList tmp_arg;
 
 #include "/build/config.re.c"
 #undef  set_config
@@ -84,7 +89,7 @@ void _test_set(char**set, usz set_len, char** var) {
 #define test_set2(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set2( set, COUNT(set)); }
 void _test_set2(char**set, usz set_len) {
     config_memory_next = config_memory;
-    tmp_arg_first = 0; tmp_arg_nextp = &tmp_arg_first;
+    string_list_initialize(&tmp_arg);
     for (int i=0; i < set_len; i++) {
         INFO("Trying line: '%s'", set[i]);
         char buf[1024];
@@ -94,7 +99,7 @@ void _test_set2(char**set, usz set_len) {
         INFO("Failures: %d", 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
-    for (struct StringList * s = tmp_arg_first; s ; s= s->next) {
+    for (struct StringListLink * s = tmp_arg.first; s ; s= s->next) {
         INFO("Effective: %s",s->str);
     }
 }
@@ -155,6 +160,10 @@ char * invalid_email_user_pass[] = {
 };
 //char *
 
+// void array_from_string_list() {
+
+// }
+
 int main () {
 
     test_set(  valid_email_address, email_from);
@@ -170,12 +179,12 @@ int main () {
     test_set(invalid_email_rcpt, email_rcpt);
 
     test_set2(valid_argv_config);
-    tmp_arg_count++;
-    supr_child_args = config_push(tmp_arg_count * sizeof(char*), _Alignof(char*));
+    tmp_arg.count++;
+    supr_child_args = config_push(tmp_arg.count * sizeof(char*), _Alignof(char*));
     {
         u16  i = 0;
-        for (struct StringList * s = tmp_arg_first; s ; s= s->next) {
-            assert(i<tmp_arg_count);
+        for (struct StringListLink * s = tmp_arg.first; s ; s= s->next) {
+            assert(i<tmp_arg.count);
             supr_child_args[i++] = s->str;
         }
         supr_child_args[i] = 0;
