@@ -151,8 +151,8 @@ int main () {
     test_set(  valid_email_server, email_host);
     test_set(invalid_email_server, email_host);
 
-    // test_set(  valid_email_user_pass, email_user_pass);
-    // test_set(invalid_email_user_pass, email_user_pass);
+    test_set(  valid_email_user_pass, email_user_pass);
+    test_set(invalid_email_user_pass, email_user_pass);
 
     supr_email_rcpt    = config_push_string("logging@tmp-test.test");
     INFO("supr_email_rcpt: '%s'", supr_email_rcpt);
