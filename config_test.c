@@ -18,6 +18,14 @@ void string_list_append(struct StringList * sl, char * str, struct StringListLin
         sll->str = str;
 }
 
+void string_list_copy_to_array(char** str_array, struct StringList * sl) {
+    u32  i = 0;
+    for (struct StringListLink * sll = sl->first; sll ; sll=sll->next) {
+        assert(i<sl->count);
+        str_array[i++] = sll->str;
+    }
+    str_array[i] = 0;
+}
 
 char * email_from;
 char * email_host;
@@ -170,15 +178,6 @@ char * invalid_config_email_user_pass[] = {
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
 };
-
-void string_list_copy_to_array(char** str_array, struct StringList * sl) {
-    u32  i = 0;
-    for (struct StringListLink * sll = sl->first; sll ; sll=sll->next) {
-        assert(i<sl->count);
-        supr_child_args[i++] = sll->str;
-    }
-    supr_child_args[i] = 0;
-}
 
 int main () {
 
