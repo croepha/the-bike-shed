@@ -11,10 +11,10 @@ void parse_config(char *input_str, u8 print_diagnostics) {
   "EmailServer:"             [ ]* @start "smtp" "s"? "://" [-a-z0-9.+_]+ ( ":" [0-9]+ )? @end { set_config(email_host); }
   "EmailUserPass:"           [ ]* @start [^ :\x00]* ":" [^ \x00]*                       @end { set_config(email_user_pass); }
   "DebugSupervisorArg:"      [ ]* @start  [^\x00]*                          @end { *end=0; config_append(tmp_arg, start); return; }
-  "EmailAddress:"            [ ]* @start [^ \x00]* @end { do_diagnostic("EmailAddress" , email_from ); }
-  "DestinationEmailAddress:" [ ]* @start [^ \x00]* @end { do_diagnostic("EmailAddres"  , email_rcpt ); }
-  "EmailServer:"             [ ]* @start [^ \x00]* @end { do_diagnostic("EmailServe"   , email_host ); }
-  "EmailUserPass:"           [ ]* @start [^ \x00]* @end { do_diagnostic("EmailUserPass", email_user_pass ); }
+  "EmailAddress:"            [ ]* @start [^ \x00]* @end { do_diagnostic("EmailAddress"             , email_from ); }
+  "DestinationEmailAddress:" [ ]* @start [^ \x00]* @end { do_diagnostic("DestinationEmailAddress"  , email_rcpt ); }
+  "EmailServer:"             [ ]* @start [^ \x00]* @end { do_diagnostic("EmailServer"              , email_host ); }
+  "EmailUserPass:"           [ ]* @start [^ \x00]* @end { do_diagnostic("EmailUserPass"            , email_user_pass ); }
 
   */
 
