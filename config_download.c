@@ -3,7 +3,7 @@
 #include "common.h"
 #include "logging.h"
 
-void handle_line(char* line);
+void config_parse_line(char* line);
 
 
 const usz leftover_SIZE = 16;
@@ -23,7 +23,7 @@ void handle_data(char* data, usz size) {
         leftover_used = 0;
       } else {
         memcpy(leftover + leftover_used, data, nl - data);
-        handle_line(leftover);
+        config_parse_line(leftover);
         size -= nl - data;
         data += nl - data;
         leftover_used = 0;

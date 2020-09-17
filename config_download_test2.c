@@ -2,12 +2,14 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
-#include "config_download.c"
+#include <string.h>
 #include "logging.h"
+//#include "config.h"
+#include "config_download.c"
 
 void handle_data(char* data, usz size);
 
-void handle_line(char* line) {
+void config_parse_line(char *line) {
   usz len = strlen(line);
   INFO_BUFFER(line, len, "line: len:%zu data:", len);
 }
