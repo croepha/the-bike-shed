@@ -202,6 +202,7 @@ link_exec   supervisor -l curl
 
 reset
 depends_on logging
+compile    config
 compile    config_test
 link_exec  config_test
 do_test    config_test /build/config_test.dbg.exec
