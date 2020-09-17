@@ -4,24 +4,22 @@
 #include <stdio.h>
 #include <string.h>
 #include "logging.h"
-//#include "config.h"
-#include "config_download.c"
+#include "config.h"
 
-void handle_data(char* data, usz size);
 
-void config_parse_line(char *line) {
+void config_parse_line(char *line, u8 print_diagnostics, int line_number) {
   usz len = strlen(line);
   INFO_BUFFER(line, len, "line: len:%zu data:", len);
 }
 
-usz  const  data_LEN = leftover_SIZE * 50;
+usz  const  data_LEN = config_download_leftover_SIZE * 50;
 char  data[data_LEN];
 usz   data_consumed;
 
 void data_send(usz len) {
   assert(data_consumed + len < data_LEN);
   INFO_BUFFER( data, len, "len:%zu data:", len);
-  handle_data(data + data_consumed, len);
+  config_download_write_callback(data + data_consumed, 1, len, 0);
   data_consumed += len;
 }
 
@@ -41,14 +39,14 @@ int main() { int r;
   }
   data_send(0);
   data_send(1);
-  data_send(leftover_SIZE - 1);
-  data_send(leftover_SIZE + 0);
-  data_send(leftover_SIZE + 1);
+  data_send(config_download_leftover_SIZE - 1);
+  data_send(config_download_leftover_SIZE + 0);
+  data_send(config_download_leftover_SIZE + 1);
   data_send(0);
   data_send(1);
-  data_send(leftover_SIZE - 1);
-  data_send(leftover_SIZE + 0);
-  data_send(leftover_SIZE + 1);
+  data_send(config_download_leftover_SIZE - 1);
+  data_send(config_download_leftover_SIZE + 0);
+  data_send(config_download_leftover_SIZE + 1);
 
 }
 

@@ -238,6 +238,7 @@ do_test config_download_test2 /build/config_download_test2.dbg.exec
 
 reset
 depends_on logging
+compile config_download
 compile config_download_test2
 link_exec config_download_test2
 

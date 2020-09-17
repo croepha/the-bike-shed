@@ -2,43 +2,46 @@
 
 #include "common.h"
 #include "logging.h"
+#include "config.h"
 
-void config_parse_line(char* line);
-
-
-const usz leftover_SIZE = 16;
-char leftover[leftover_SIZE];
-usz  leftover_used;
+char config_download_leftover[config_download_leftover_SIZE];
+usz config_download_leftover_used;
 
 // It is likely that size is large, containing many lines
-void handle_data(char* data, usz size) {
+size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
+  size = size * nmemb;
   for (;;) {
     char* nl = memchr(data, '\n', size);
     if (nl) {
       nl++;
-      if (nl - data > leftover_SIZE - leftover_used) {
+      if (nl - data >
+          config_download_leftover_SIZE - config_download_leftover_used) {
         ERROR("Line too long, throwing it out");
-        size -= leftover_SIZE - leftover_used;
+        size -= config_download_leftover_SIZE - config_download_leftover_used;
         data = nl;
-        leftover_used = 0;
+        config_download_leftover_used = 0;
       } else {
-        memcpy(leftover + leftover_used, data, nl - data);
-        config_parse_line(leftover);
+        memcpy(config_download_leftover + config_download_leftover_used, data,
+               nl - data);
+        config_parse_line(config_download_leftover, 0, 0);
         size -= nl - data;
         data += nl - data;
-        leftover_used = 0;
+        config_download_leftover_used = 0;
       }
     } else {
-      if (leftover_used + size < leftover_SIZE) {
-        memcpy(leftover + leftover_used, data, size);
-        leftover_used += size;
+      if (config_download_leftover_used + size <
+          config_download_leftover_SIZE) {
+        memcpy(config_download_leftover + config_download_leftover_used, data,
+               size);
+        config_download_leftover_used += size;
       } else {
         ERROR("Couldn't find end of line, and out of space, throw out continued first line in next data set");
-        leftover_used = leftover_SIZE;
+        config_download_leftover_used = config_download_leftover_SIZE;
       }
       break;
     }
   }
+  return size;
 }
 
 char percon_config_etag[32];
