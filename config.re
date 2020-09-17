@@ -1,5 +1,5 @@
 
-void parse_config(char *input_str, u8 print_diagnostics, int line_number) {
+void config_parse_line(char *input_str, u8 print_diagnostics, int line_number) {
   char * YYMARKER, *YYCURSOR = input_str, * start = 0, * end = 0;
 
   /*!stags:re2c format = 'char *@@;'; */

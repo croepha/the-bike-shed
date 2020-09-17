@@ -104,6 +104,37 @@ struct StringList tmp_arg;
 #undef  config_append
 #undef  do_diagnostic
 
+
+
+void config_load_file(char * file_path) {
+    string_list_initialize(&tmp_arg);
+    int r;
+    int line_number = 1;
+    FILE * f = fopen(file_path, "r"); error_check(f?0:-1);
+    while (!feof(f)) {
+        char buf[1024];
+        char *buf_ptr = buf;
+        usz start_len = sizeof buf;
+        ssz len = getline(&buf_ptr, &start_len, f);
+        if (len == -1) {
+            if (!feof(f)) {
+                error_check(len);
+            }
+            break;
+        } if (len > start_len - 2) {
+            printf("Error: Config line:%d too long\n", line_number);
+        } else if (len > 0) {
+            buf[len - 1] = 0; // remove newline
+            log_allowed_fails = 100;
+            config_parse_line(buf, 1, line_number);
+            log_allowed_fails = 0;
+            line_number++;
+        }
+    }
+    r = fclose(f); error_check(r);
+}
+
+
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
 
@@ -117,7 +148,7 @@ void _test_set(char**set, usz set_len, char** var) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf, 0, 0);
+        config_parse_line(buf, 0, 0);
         INFO("Effective: '%s' Failures: %d", *var, 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -133,7 +164,7 @@ void _test_set2(char**set, usz set_len) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf, 0, 0);
+        config_parse_line(buf, 0, 0);
         INFO("Failures: %d", 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -245,33 +276,7 @@ int main () {
     _(email_rcpt);
     #undef  _
     supr_child_args = (char**){0};
-    {
-        string_list_initialize(&tmp_arg);
-        int r;
-        int line_number = 1;
-        FILE * f = fopen("/tmp/config_test1", "r"); error_check(f?0:-1);
-        while (!feof(f)) {
-            char buf[1024];
-            char *buf_ptr = buf;
-            usz start_len = sizeof buf;
-            ssz len = getline(&buf_ptr, &start_len, f);
-            if (len == -1) {
-                if (!feof(f)) {
-                    error_check(len);
-                }
-                break;
-            } if (len > start_len - 2) {
-                printf("Error: Config line:%d too long\n", line_number);
-            } else if (len > 0) {
-                buf[len - 1] = 0; // remove newline
-                log_allowed_fails = 100;
-                parse_config(buf, 1, line_number);
-                log_allowed_fails = 0;
-                line_number++;
-            }
-        }
-        r = fclose(f); error_check(r);
-    }
+    config_load_file("/tmp/config_test1");
     {
         INFO("Effective configs:");
         #define _(v) INFO("\t" #v ": `%s'", v)
