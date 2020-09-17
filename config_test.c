@@ -63,10 +63,15 @@ char* config_push_string(char * str) {
     return ret;
 }
 
-#define set_config(var) *end = 0; __set_config(#var, &var, start); return;
-static void __set_config(char* var_name, char** var, char* value) {
+#define set_config(var) *end = 0; __set_config(#var, &var, start, line_number, print_diagnostics); return;
+static void __set_config(char* var_name, char** var, char* value, int line_number, u8 print_diagnostics) {
     if (*var) {
-        WARN("Config value for '%s' is already set, overwriting", var_name);
+        if (print_diagnostics) {
+            printf("Line:%d Config value for '%s' is already set, overwriting\n",
+                line_number, var_name);
+        } else {
+            WARN("Config value for '%s' is already set, overwriting", var_name);
+        }
     }
     *var = config_push_string(value);
 }
@@ -79,13 +84,13 @@ void __config_append(struct StringList *sl, char* str) {
 }
 
 #define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
-  __do_diagnostic(long_string, start, print_diagnostics, valid_config_ ## short_var); return;
-void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples) {
+  __do_diagnostic(long_string, start, print_diagnostics, valid_config_ ## short_var, line_number); return;
+void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples, int line_number) {
     if (print_diagnostics) {
-        printf("On line:%d config value for %s is invalid:`%s'", 0, long_string, start);
-        printf("here are some valid examples:");
+        printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
+        printf("here are some valid examples:\n");
         for (char**ve = valid_examples; *ve; ve++) {
-            printf("\t%s", *ve);
+            printf("\t%s\n", *ve);
         }
     } else {
         WARN("Failed to validate: %s: '%s' please run config_validator", long_string, start);
@@ -112,7 +117,7 @@ void _test_set(char**set, usz set_len, char** var) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf, 0);
+        parse_config(buf, 0, 0);
         INFO("Effective: '%s' Failures: %d", *var, 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -128,7 +133,7 @@ void _test_set2(char**set, usz set_len) {
         char buf[1024];
         strcpy(buf, set[i]);
         log_allowed_fails = 100;
-        parse_config(buf, 0);
+        parse_config(buf, 0, 0);
         INFO("Failures: %d", 100 - log_allowed_fails);
         log_allowed_fails = 0;
     }
@@ -193,6 +198,8 @@ char * invalid_config_email_user_pass[] = {
 0};
 
 int main () {
+    setlinebuf(stderr);
+    setlinebuf(stdout);
 
     test_set(  valid_config_email_from, email_from);
     test_set(invalid_config_email_from, email_from);
@@ -222,6 +229,12 @@ int main () {
         r = fputs(
             "adfa dfadkl;fa j;lsdkjfa;dj;\n"
             "EmailAddress:    yahooyahoo@yahoo.com\n"
+            "DestinationEmailAddress: tmp-from@testtest.test\n"
+            "DestinationEmailAddress:    asdasd@fasdasd32323@mail.com\n"
+            "DestinationEmailAddress: tmp-from2@testtest.test\n"
+            "DebugSupervisorArg: /bin/sh\n"
+            "DebugSupervisorArg: -c\n"
+            "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts\n"
         , f); error_check(r);
         r = fclose(f); error_check(r);
     }
@@ -235,7 +248,7 @@ int main () {
     {
         string_list_initialize(&tmp_arg);
         int r;
-        int line = 1;
+        int line_number = 1;
         FILE * f = fopen("/tmp/config_test1", "r"); error_check(f?0:-1);
         while (!feof(f)) {
             char buf[1024];
@@ -248,13 +261,13 @@ int main () {
                 }
                 break;
             } if (len > start_len - 2) {
-                printf("Error: Config line:%d too long\n", line);
+                printf("Error: Config line:%d too long\n", line_number);
             } else if (len > 0) {
                 buf[len - 1] = 0; // remove newline
                 log_allowed_fails = 100;
-                parse_config(buf, 1);
+                parse_config(buf, 1, line_number);
                 log_allowed_fails = 0;
-                line++;
+                line_number++;
             }
         }
         r = fclose(f); error_check(r);
