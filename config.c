@@ -71,7 +71,7 @@ static void __set_config(char* var_name, char** var, char* value, int line_numbe
 }
 
 #define config_append(list, val) __config_append(& list, val)
-void __config_append(struct StringList *sl, char* str) {
+static void __config_append(struct StringList *sl, char* str) {
     string_list_append(sl, config_push_string(str),
      config_push(sizeof(struct StringListLink), _Alignof(struct StringListLink))
     );
@@ -79,7 +79,7 @@ void __config_append(struct StringList *sl, char* str) {
 
 #define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
   __do_diagnostic(long_string, start, print_diagnostics, valid_config_ ## short_var, line_number); return;
-void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples, int line_number) {
+static void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples, int line_number) {
     if (print_diagnostics) {
         printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
         printf("here are some valid examples:\n");
