@@ -242,11 +242,6 @@ compile config_download
 compile config_download_test2
 link_exec config_download_test2
 
-reset
-depends_on logging
-compile local_config
-link_exec local_config_test
-
 
 re parse_headers
 re config
