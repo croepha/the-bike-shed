@@ -61,23 +61,21 @@ char* config_push_string(char * str) {
 #define set_config(var) *end = 0; __set_config(#var, &var, start, line_number); return;
 static void __set_config(char* var_name, char** var, char* value, int line_number) {
 #if CONFIG_DIAGNOSTICS == 1
-    u8 const print_diagnostics = 1;
+    if (*var) {
+        printf("Line:%d Config value for '%s' is already set\n",
+            line_number, var_name);
+    }
+    *var = config_push_string(value);
 #else
-    u8 const print_diagnostics = 0;
-#endif
     if (!var) {
         DEBUG("Ignoring config for variable: %s", var_name);
     } else {
         if (*var) {
-            if (print_diagnostics) {
-                printf("Line:%d Config value for '%s' is already set, overwriting\n",
-                    line_number, var_name);
-            } else {
-                WARN("Config value for '%s' is already set, overwriting", var_name);
-            }
+            WARN("Config value for '%s' is already set, overwriting", var_name);
         }
         *var = config_push_string(value);
     }
+#endif
 }
 
 #define config_append(list, val) __config_append(& list, val)
@@ -88,7 +86,6 @@ static void __config_append(struct StringList *sl, char* str) {
 }
 
 #if CONFIG_DIAGNOSTICS == 1
-#define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
   __do_diagnostic(long_string, start, valid_config_ ## short_var, line_number); return;
 static void __do_diagnostic(char * long_string, char * start, char** valid_examples, int line_number) {
     printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
@@ -98,10 +95,9 @@ static void __do_diagnostic(char * long_string, char * start, char** valid_examp
     }
 }
 #else
-#define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
-  __do_diagnostic(long_string, start, valid_config_ ## short_var); return;
-static void __do_diagnostic(char * long_string, char * start, char** valid_examples) {
-        WARN("Failed to validate: %s: '%s' please run config_validator", long_string, start);
+#define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start, line_number); return;
+static void __do_diagnostic(char * long_string, char * start, int line_number) {
+        WARN("Line:%d Failed to validate: %s: '%s' please run config_validator", line_number, long_string, start);
 }
 #endif
 
