@@ -19,7 +19,7 @@ struct StringList tmp_arg;
 
 
 #define test_set(set, var) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, COUNT(set), &var); }
-void _test_set(char**set, usz set_len, char** var) {
+static void _test_set(char**set, usz set_len, char** var) {
     for (int i=0; i < set_len; i++) {
         if (!set[i]) break;
         config_initialize();
@@ -35,7 +35,7 @@ void _test_set(char**set, usz set_len, char** var) {
 }
 
 #define test_set2(set) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set2( set, COUNT(set)); }
-void _test_set2(char**set, usz set_len) {
+static void _test_set2(char**set, usz set_len) {
     config_initialize();
     string_list_initialize(&tmp_arg);
     for (int i=0; i < set_len; i++) {

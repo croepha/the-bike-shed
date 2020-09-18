@@ -39,6 +39,7 @@ extern __thread int log_allowed_fails;
 #define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string,    __VA_ARGS__)
 #define  INFO_HEXBUFFER(...)  LOG(" INFO", buffer_hex,(char*)__VA_ARGS__)
 #define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
+#define TRACE(          ...)  LOG("TRACE", plain, 0, 0,      __VA_ARGS__)
 #define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
 #define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
 #define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
@@ -47,6 +48,11 @@ extern __thread int log_allowed_fails;
 #ifndef LOG_DEBUG
 #undef DEBUG
 #define DEBUG(...)
+#endif
+
+#ifdef LOG_NO_TRACE
+#undef TRACE
+#define TRACE(...)
 #endif
 
 #define assert(expr)      ({if (!(expr))     { ERROR("Assert failed: (%s)", #expr); } })

@@ -20,7 +20,7 @@ typedef   int64_t s64;
 typedef  ssize_t  ssz;
 typedef   size_t  usz;
 
-long long utc_ms_since_epoch();
+long long now_ms(void);
 void supr_email_add_data_start(char**buf_, usz*buf_space_left);
 void supr_email_add_data_finish(usz new_space_used);
 

@@ -40,7 +40,7 @@ static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
 
 char system_secret[32];
 
-int main2(void)
+static int main2(void)
 {
     uint8_t hash2[HASHLEN];
 

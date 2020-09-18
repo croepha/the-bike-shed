@@ -90,7 +90,7 @@ void test_main() {
     while (events_pending > 0) { io_process_events(); }
   }
 
-  start_time = utc_ms_since_epoch() + 50;
+  start_time = now_ms() + 50;
 
   for (int i = 0; i < socket_COUNT; i++) {
     int type_i = i % COUNT(socket_types);

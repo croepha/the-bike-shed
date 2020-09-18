@@ -437,9 +437,7 @@ map_peripheral(uint32_t base, uint32_t len)
 }
 
 // Returns a pointer to the control block of this channel in DMA memory
-uint8_t*
-get_cb(int channel)
-{
+static uint8_t* get_cb(int channel) {
     return channels[channel].virtbase + (sizeof(uint32_t) * channels[channel].num_samples);
 }
 

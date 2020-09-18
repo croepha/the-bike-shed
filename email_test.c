@@ -9,6 +9,7 @@
 #include "io_curl.h"
 #include "email.h"
 
+u64 now_sec();
 u64 now_sec() { return 0; }
 
 char * email_from = "from@longlonglonglonglonglonglonglonghost.com";

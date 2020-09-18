@@ -56,9 +56,9 @@ static const int True = 1;
 static const int False = 0;
 static const int GPIO_out = 123;
 
-void time_sleep_us(long us) { usleep(us); }
+static void time_sleep_us(long us) { usleep(us); }
 
-void GPIO_output(int pin, int value) {
+static void GPIO_output(int pin, int value) {
     if (value) {
         GPIO_SET = 1<<pin;
     } else {
@@ -97,14 +97,14 @@ void GPIO_output(int pin, int value) {
 // }
 
 
-void GPIO_setup(int pin, int mode) {
+static void GPIO_setup(int pin, int mode) {
     assert(mode == GPIO_out);
     INP_GPIO(pin); // must use INP_GPIO before we can use OUT_GPIO
     OUT_GPIO(pin);
 
 }
 
-void lcd_toggle_enable() {
+static void lcd_toggle_enable() {
   // Toggle enable
   time_sleep_us(E_DELAYus);
   GPIO_output(LCD_E, True);
@@ -117,7 +117,7 @@ static int const data_pins[] = {
   LCD_D4, LCD_D5, LCD_D6, LCD_D7
 };
 
-int abit(int bits2, int n) {
+static int abit(int bits2, int n) {
   int v01 = !!(bits2&(1<<n));
   return v01 << data_pins[n];
 }
@@ -129,7 +129,7 @@ const int bits_mask =
   1 << LCD_D6 |
   1 << LCD_D7;
 
-void send4bits(int bits) {
+static void send4bits(int bits) {
   #define _t(n) bits_values = bits_values | abit(bits, n)
   int bits_values = 0;
   _t(0); _t(1); _t(2); _t(3);
@@ -138,7 +138,7 @@ void send4bits(int bits) {
 }
 
 
-void lcd_byte(int bits, int mode) {
+static void lcd_byte(int bits, int mode) {
   // Send byte to data pins
   // bits = data
   // mode = True  for character
@@ -217,7 +217,7 @@ void lcd_byte(int bits, int mode) {
 
 }
 
-void lcd_init() {
+static void lcd_init() {
   // Initialise display
   lcd_byte(0x33,LCD_CMD); // 0011 0011 Initialise
   lcd_byte(0x32,LCD_CMD); // 0011 0010 Initialise
@@ -228,7 +228,7 @@ void lcd_init() {
   time_sleep_us(E_DELAYus);
 }
 
-void lcd_string(char*message, int line) {
+static void lcd_string(char*message, int line) {
   lcd_byte(line, LCD_CMD);
 
   for (int i=0; i<LCD_WIDTH && message[i]; i++) {

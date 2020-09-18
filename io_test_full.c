@@ -59,7 +59,7 @@ void test_main() {
 
   system("rm -f /build/io_test_full_* /build/email_mock_io_test_full*");
 
-  start_time = utc_ms_since_epoch() + 50;
+  start_time = now_ms() + 50;
   char buf[1024];
 
   for (int i=0; i<COUNT(dl_ctx); i++) {

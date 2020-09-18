@@ -33,7 +33,7 @@ void io_process_events() { start:;
   }
 
   s32 timeout_interval_ms;
-  u64 now_epoch_ms = utc_ms_since_epoch();
+  u64 now_epoch_ms = now_ms();
   if (next_timer_epoch_ms < now_epoch_ms) {
     // next timer is in the past, lets not wait at all
     timeout_interval_ms = 0;
@@ -59,7 +59,7 @@ void io_process_events() { start:;
 
   if (!epoll_ret) {
     switch (running_timer) {
-      #define _(name) case _io_timer_ ## name: { assert(name ## _timeout); name ## _timeout(); } break;
+      #define _(name) case _io_timer_ ## name: { DEBUG(#name "_timeout"); assert(name ## _timeout); name ## _timeout(); } break;
       _IO_TIMERS
       #undef  _
       case _io_timer_NO_TIMER: { WARN("edge case: timer wake up for no timer"); } break;
@@ -72,7 +72,7 @@ void io_process_events() { start:;
       struct epoll_event epe = epes[i];
       io_EPData data = {.data = epe.data};
       switch (data.my_data.event_type) {
-        #define _(name) case _io_socket_type_ ## name: name ## _io_event(epe); break;
+        #define _(name) case _io_socket_type_ ## name: { DEBUG(#name "_io_event"); assert(name ## _io_event); name ## _io_event(epe); } break;
         _IO_SOCKET_TYPES
         #undef  _
         default: ERROR("Unandled switch case: %d", data.my_data.event_type);

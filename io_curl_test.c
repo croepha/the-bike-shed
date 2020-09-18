@@ -39,7 +39,7 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
     size_t realsize = size * nmemb;
     _WriteCtx *c = (_WriteCtx*)userp;
     c->downloaded += realsize;
-    u64 now = utc_ms_since_epoch();
+    u64 now = now_ms();
     if (c->print_time + 500 < now) {
         c->print_time = now;
         double total_size;

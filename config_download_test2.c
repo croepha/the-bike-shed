@@ -16,7 +16,7 @@ usz  const  data_LEN = config_download_leftover_SIZE * 50;
 char  data[data_LEN];
 usz   data_consumed;
 
-void data_send(usz len) {
+static void data_send(usz len) {
   assert(data_consumed + len < data_LEN);
   INFO_BUFFER( data, len, "len:%zu data:", len);
   config_download_write_callback(data + data_consumed, 1, len, 0);

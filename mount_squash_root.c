@@ -43,11 +43,8 @@ switch_root newroot init [arg...]
 #include <sys/mount.h>
 #include <assert.h>
 
-
-int get_errno() {
-  return errno;
-}
-
+int debug_get_errno(void);
+int debug_get_errno(void) { return errno; }
 
 int main(int argc, char**argv) { int r;
   assert(argc == 4);

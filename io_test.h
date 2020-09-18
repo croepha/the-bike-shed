@@ -44,7 +44,7 @@ void echo_test_socket(int i, int type, char const * name) { int r;
     if (!fork_pid) { LOGCTX("\ttest_sort:id:%02d forked", i);
       r = close(sv[0]); error_check(r);
 
-      u64 now = utc_ms_since_epoch();
+      u64 now = now_ms();
       if (start_time > now) {
         r = usleep((start_time - now) * 1000); error_check(r);
       }
