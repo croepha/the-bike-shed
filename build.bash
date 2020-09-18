@@ -21,13 +21,17 @@ if [ ! -v SHOULD_CLEAN ]; then {
 
 mkdir -p /build/
 
+# echo "/tmp/core.%e.%t.%p" > /proc/sys/kernel/core_pattern
+# sudo cat ~/Library/Containers/com.docker.docker/Data/vms/0/tty
+# screen $( sudo cat ~/Library/Containers/com.docker.docker/Data/vms/0/tty )
+
 rm -f /build/build.ninja
 cat << 'EOF' >> /build/build.ninja
 builddir = /build/
 
 # -Wmissing-prototypes
 rule cc
- command = clang  -Wno-writable-strings -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
+ command = clang  -Wno-writable-strings -Werror -Wshadow -Wall ./$in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CC $out
@@ -37,7 +41,7 @@ rule link_exec
  description = LINK $out
 
 rule cc_br
- command = ${pi0w_host_prefix}-gcc -Werror -Wshadow-Wall $in -c -o $out -MF $out.d -MMD $extra
+ command = ${pi0w_host_prefix}-gcc -Werror -Wshadow-Wall ./$in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CCBR $out
