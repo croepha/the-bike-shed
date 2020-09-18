@@ -27,7 +27,7 @@ builddir = /build/
 
 # -Wmissing-prototypes
 rule cc
- command = clang -Wno-writable-strings -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
+ command = clang  -Wno-writable-strings -Werror -Wshadow -Wall $in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CC $out

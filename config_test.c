@@ -15,35 +15,6 @@ struct StringList tmp_arg;
 
 
 
-void config_load_file(char * file_path) {
-    string_list_initialize(&tmp_arg);
-    int r;
-    int line_number = 1;
-    FILE * f = fopen(file_path, "r"); error_check(f?0:-1);
-    while (!feof(f)) {
-        char buf[1024];
-        char *buf_ptr = buf;
-        usz start_len = sizeof buf;
-        ssz len = getline(&buf_ptr, &start_len, f);
-        if (len == -1) {
-            if (!feof(f)) {
-                error_check(len);
-            }
-            break;
-        } if (len > start_len - 2) {
-            printf("Error: Config line:%d too long\n", line_number);
-        } else if (len > 0) {
-            buf[len - 1] = 0; // remove newline
-            log_allowed_fails = 100;
-            config_parse_line(buf, 1, line_number);
-            log_allowed_fails = 0;
-            line_number++;
-        }
-    }
-    r = fclose(f); error_check(r);
-}
-
-
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
 
@@ -200,8 +171,6 @@ int main () {
         for (char**c = supr_child_args; *c; c++) {
             INFO("\t\t'%s'", *c);
         }
-
-
     }
 //char ** supr_child_args;
 
