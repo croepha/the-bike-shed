@@ -174,7 +174,7 @@ compile logging
 
 reset
 depends_on logging
-FLAVOR=logging_test compile supervisor_email -D now_sec=now_sec
+depends_on supervisor_email
 compile supervisor_email_test
 link_exec supervisor_email_test -l curl
 do_test supervisor_email_test /build/supervisor_email_test.dbg.exec
@@ -218,7 +218,7 @@ reset
 depends_on logging
 depends_on io_core
 depends_on io_curl
-FLAVOR=test depends_on email
+depends_on email
 depends_on misc
 compile    io_test_full
 link_exec  io_test_full -l curl
@@ -226,7 +226,7 @@ link_exec  io_test_full -l curl
 
 reset
 depends_on logging
-FLAVOR=test compile   email -D now_sec=now_sec
+depends_on email
 compile   email_test
 link_exec email_test -l curl
 
