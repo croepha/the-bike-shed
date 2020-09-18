@@ -82,19 +82,23 @@ static void __config_append(struct StringList *sl, char* str) {
     );
 }
 
+#if CONFIG_DIAGNOSTICS == 1
 #define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
-  __do_diagnostic(long_string, start, print_diagnostics, valid_config_ ## short_var, line_number); return;
-static void __do_diagnostic(char * long_string, char * start, u8 print_diagnostics, char** valid_examples, int line_number) {
-    if (print_diagnostics) {
-        printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
-        printf("here are some valid examples:\n");
-        for (char**ve = valid_examples; *ve; ve++) {
-            printf("\t%s\n", *ve);
-        }
-    } else {
-        WARN("Failed to validate: %s: '%s' please run config_validator", long_string, start);
+  __do_diagnostic(long_string, start, valid_config_ ## short_var, line_number); return;
+static void __do_diagnostic(char * long_string, char * start, char** valid_examples, int line_number) {
+    printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
+    printf("here are some valid examples:\n");
+    for (char**ve = valid_examples; *ve; ve++) {
+        printf("\t%s\n", *ve);
     }
 }
+#else
+#define do_diagnostic(long_string, short_var) *end=0; extern char * valid_config_ ## short_var[]; \
+  __do_diagnostic(long_string, start, valid_config_ ## short_var); return;
+static void __do_diagnostic(char * long_string, char * start, char** valid_examples) {
+        WARN("Failed to validate: %s: '%s' please run config_validator", long_string, start);
+}
+#endif
 
 #include "/build/config.re.c"
 #undef  set_config
