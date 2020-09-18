@@ -21,7 +21,7 @@ extern int io_epoll_fd;
 #define _(name) _io_timer_ ## name,
 enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) _(NO_TIMER) };
 #undef _
-#define _(name) void name ## _timeout() __attribute__((weak_import));
+#define _(name) void name ## _timeout(void) __attribute__((weak_import));
 _IO_TIMERS
 #undef _
 extern u64 io_timers_epoch_ms[];
@@ -47,8 +47,7 @@ typedef union {
 
 
 
-
-void io_initialize();
-void io_process_events();
+void io_initialize(void);
+void io_process_events(void);
 
 

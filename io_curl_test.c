@@ -85,7 +85,7 @@ IO_CURL_SETUP(test, _WriteCtx, curl_type);
 
 
 int pending_events;
-void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
+static void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   SHA256_Init(&c->sha256);
   c->headers_list = NULL;
@@ -124,13 +124,13 @@ void _dl(_WriteCtx *c, char* url, char* previous_etag, u64 previous_mod_time) {
 
 }
 
-void _dl_free(_WriteCtx *c) {
+static void _dl_free(_WriteCtx *c) {
   curl_slist_free_all(c->headers_list);
   curl_easy_cleanup(c->curl);
 
 }
 
-u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
+static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   if (result == CURLE_OK) {
     long proto;
     cr = curl_easy_getinfo(easy, CURLINFO_PROTOCOL, &proto);
@@ -158,7 +158,7 @@ u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
-void test_io_curl_complete(CURL *easy, CURLcode result, _WriteCtx *c) {
+static void test_io_curl_complete(CURL *easy, CURLcode result, _WriteCtx *c) {
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
   pending_events --;
@@ -173,7 +173,7 @@ void test_io_curl_complete(CURL *easy, CURLcode result, _WriteCtx *c) {
 }
 
 
-void _perform_all() {
+static void _perform_all() {
   while (pending_events > 0) {
     io_process_events();
     io_curl_process_events();
@@ -184,7 +184,7 @@ void _perform_all() {
 
 void logging_send_timeout() { }
 
-void download_test() {
+static void download_test() {
 
   setbuf(stdout, 0);
   setbuf(stderr, 0);

@@ -68,7 +68,7 @@ _OBJ_ONLY=0
 
 function _build() { VARIANT=$1; _O="/build/$SOURCE.c.${FLAVOR}${VARIANT}.o"
 if [ $_OBJ_ONLY = 0 ]; then {
-  echo -e "build $_O: cc ./$SOURCE.c\n    extra = ${@:2} ${ARGS[@]}" >> /build/build.ninja
+  echo -e "build $_O: cc $SOURCE.c\n    extra = ${@:2} ${ARGS[@]}" >> /build/build.ninja
 }; fi
 eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 }
@@ -154,23 +154,23 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 reset
 depends_on logging
 compile    misc     -Wmissing-prototypes
-compile    io_core
-compile    io_curl
-compile    io_curl_test
+compile    io_core -Wmissing-prototypes
+compile    io_curl -Wmissing-prototypes
+compile    io_curl_test -Wmissing-prototypes
 link_exec  io_curl_test -l curl -l crypto
 
 reset
-compile argon2/ref       -Iargon2
-compile argon2/encoding  -Iargon2
-compile argon2/thread    -Iargon2
-compile argon2/blake2b   -Iargon2
-compile argon2/core      -Iargon2
-compile argon2/argon2    -Iargon2
-compile hello_argon2     -Iargon2
+compile argon2/ref       -Iargon2  -Wmissing-prototypes
+compile argon2/encoding  -Iargon2  -Wmissing-prototypes
+compile argon2/thread    -Iargon2 -Wmissing-prototypes
+compile argon2/blake2b   -Iargon2 -Wmissing-prototypes
+compile argon2/core      -Iargon2 -Wmissing-prototypes
+compile argon2/argon2    -Iargon2 -Wmissing-prototypes
+compile hello_argon2     -Iargon2 -Wmissing-prototypes
 link_exec hello_argon2 -l pthread
 
 reset
-compile logging
+compile logging  -Wmissing-prototypes
 
 reset
 depends_on logging

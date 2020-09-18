@@ -23,7 +23,7 @@ typedef   size_t  usz;
 long long now_ms(void);
 void supr_email_add_data_start(char**buf_, usz*buf_space_left);
 void supr_email_add_data_finish(usz new_space_used);
-
+u64 now_sec(void);
 
 
 #if BUILD_IS_RELEASE

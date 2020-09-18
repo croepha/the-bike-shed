@@ -68,7 +68,7 @@ static char const * _error_check_CURLSHcode(CURLSHcode c) {
 #define error_check_curlsh(err) ({ char const * error_check_s = _error_check_CURLSHcode(err); if (error_check_s) { ERROR("Error CURLSHcode:%d:%s", err, error_check_s); } })
 
 void io_curl_abort(CURL* easy);
-CURL* __io_curl_create_handle();
-void io_curl_process_events();
-void io_curl_initialize();
+CURL* __io_curl_create_handle(enum _io_curl_type * private);
+void io_curl_process_events(void);
+void io_curl_initialize(void);
 
