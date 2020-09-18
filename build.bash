@@ -196,12 +196,12 @@ depends_on  logging
 depends_on  io_core
 depends_on  io_curl
 depends_on  supervisor_io
-depends_on  config
+FLAVOR=nodiagnostic depends_on  config
 depends_on  misc
 compile     email
 compile     supervisor_email
 compile     supervisor
-#link_exec   supervisor -l curl
+link_exec   supervisor -l curl
 
 
 reset

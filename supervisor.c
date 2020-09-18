@@ -15,11 +15,17 @@
 
 u64 now_sec() { return time(0); }
 
-char * email_from = "tmp-from@testtest.test";
-char * email_host = "smtp://127.0.0.1:8025";
-char * email_user_pass = "user:pass";
-//char * supr_child_args[] = { "/bin/sh", "-c", "/usr/bin/ping 127.0.0.1 | ts", 0 };
-char * supr_email_rcpt = "logging@tmp-test.test";
+char * email_from;
+char * email_host;
+char * email_user_pass;
+char * email_rcpt;
+char ** supr_child_args;
+struct StringList tmp_arg;
+// char * email_from = "tmp-from@testtest.test";
+// char * email_host = "smtp://127.0.0.1:8025";
+// char * email_user_pass = "user:pass";
+// //char * supr_child_args[] = { "/bin/sh", "-c", "/usr/bin/ping 127.0.0.1 | ts", 0 };
+// char * supr_email_rcpt = "logging@tmp-test.test";
 
 void supr_exec_child() { int r;
     r = execvp(*supr_child_args, supr_child_args);          error_check(r);
@@ -27,9 +33,23 @@ void supr_exec_child() { int r;
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
 
+static void config_validate_or_exit() {
+    log_allowed_fails = 1000;
+    u8 errors = 0;
+    #define _(v) if (&v && !v) { ERROR("config not set for " #v); errors++; }
+    _(email_from)
+    _(email_rcpt)
+    _(email_host)
+    _(email_user_pass)
+    _(supr_child_args)
+    #undef _
+    if (errors) { exit(-1); }
+}
+
 int main (int argc, char ** argv) {
     setlinebuf(stderr);
     config_load_file(*++argv);
+    config_validate_or_exit();
     io_curl_initialize();
     supr_main();
 }

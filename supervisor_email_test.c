@@ -12,7 +12,7 @@
 
 
 u64 now_sec_value;
-char * supr_email_rcpt = "logging@test.test";
+char * email_rcpt = "logging@test.test";
 
 extern u32 supr_email_buf_used;
 extern u64 supr_email_sent_epoch_sec;

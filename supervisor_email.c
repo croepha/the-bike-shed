@@ -6,6 +6,7 @@
 #include "io_curl.h"
 #include "logging.h"
 #include "common.h"
+#include "config.h"
 #include "io.h"
 
 u64 now_sec();
@@ -67,7 +68,7 @@ static void poke_state_machine() {
         usz email_size = supr_email_buf_used;
         email_init(&supr_email_ctx,
                    supervisor_email_io_curl_create_handle(&supr_email_email_ctx),
-                   supr_email_rcpt, supr_email_buf,
+                   email_rcpt, supr_email_buf,
                    email_size, "Logs");
         supr_email_sent_bytes = email_size;
         supr_email_sent_epoch_sec = now_epoch_sec;
