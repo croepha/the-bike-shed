@@ -40,7 +40,7 @@ grep --  'cs8'               /tmp/stty_out
 // }
 
 
-int set_interface_attribs (int fd, int speed, int parity) { int r;
+static int set_interface_attribs (int fd, int speed, int parity) { int r;
   struct termios tty;
   r = tcgetattr (fd, &tty);
   error_check(r);
@@ -73,7 +73,7 @@ int set_interface_attribs (int fd, int speed, int parity) { int r;
   return 0;
 }
 
-void set_blocking (int fd, int should_block) { int r;
+static void set_blocking (int fd, int should_block) { int r;
   struct termios tty;
   memset (&tty, 0, sizeof tty);
   r = tcgetattr (fd, &tty);
@@ -87,31 +87,31 @@ void set_blocking (int fd, int should_block) { int r;
 
 }
 
-int open_serial(char const *dev_path) {
-  int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
-  if (fd < 0) {
-    ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
-  }
-  error_check(fd);
-  return fd;
-}
+// static int open_serial(char const *dev_path) {
+//   int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
+//   if (fd < 0) {
+//     ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
+//   }
+//   error_check(fd);
+//   return fd;
+// }
 
 
 #include <pty.h>
 
 
-void dump_fds() { int r;
-  char cmd[1024];
-  r = snprintf(cmd, sizeof cmd, "lsof -p '%d'", getpid());
-  error_check(r);
-  INFO_BUFFER(cmd, r, "START cmd:");
-  assert(r < sizeof cmd);
-  r = system(cmd);
-  error_check(r);
-  INFO("END");
-}
+// static void dump_fds() { int r;
+//   char cmd[1024];
+//   r = snprintf(cmd, sizeof cmd, "lsof -p '%d'", getpid());
+//   error_check(r);
+//   INFO_BUFFER(cmd, r, "START cmd:");
+//   assert(r < sizeof cmd);
+//   r = system(cmd);
+//   error_check(r);
+//   INFO("END");
+// }
 
-void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
+static void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
   //int fd = open_serial(path);
 
@@ -178,7 +178,7 @@ void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
   *outf = fdopen(fd2, "a");
 }
 
-void test_main() {
+static void test_main() {
   //char*tty_path = *++argv;
   char* tty_path = 0;
   printf("ASDFASDF\n");

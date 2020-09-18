@@ -22,7 +22,7 @@ const int socket_COUNT = 20;
 int sockets[socket_COUNT];
 int events_pending;
 
-void sock_read_line(int fd, char * buf, size_t buf_size) {
+__attribute__((unused)) static void sock_read_line(int fd, char * buf, size_t buf_size) {
   ssize_t r = read(fd, buf, buf_size);
   error_check(r);
   INFO_BUFFER(buf, r);
@@ -33,7 +33,7 @@ void sock_read_line(int fd, char * buf, size_t buf_size) {
 
 u64 start_time;
 
-void echo_test_socket(int i, int type, char const * name) { int r;
+__attribute__((unused)) static void echo_test_socket(int i, int type, char const * name) { int r;
     int sv[2] = {-1,-1};
     r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv); error_check(r);
     sockets[i] = sv[0];
@@ -70,9 +70,9 @@ void echo_test_socket(int i, int type, char const * name) { int r;
 
     INFO("socket id:%02d type:%s:%d", i, name, type);
     events_pending++;
-
 }
-void test_main();
+
+void test_main(void);
 int main() { int r;
   setlinebuf(stderr);
   r = alarm(3); error_check(r);

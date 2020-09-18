@@ -30,7 +30,7 @@ typedef   signed long  s64;
 
 const u16 PEER_PORT = 9162; // TODO: What port number should we use?
 
-u64 time_ms_fast() {
+static u64 time_ms_fast() {
     struct timespec tp;
     int r = clock_gettime(CLOCK_REALTIME_COARSE, &tp);
     assert(r!=-1);
@@ -45,7 +45,7 @@ enum {
 
 int peer_fd;
 
-void send_udp(struct sockaddr_in peer_address, u8*_buf, u32 _buf_size) { int r;
+static void send_udp(struct sockaddr_in peer_address, u8*_buf, u32 _buf_size) { int r;
     r = sendto(peer_fd, _buf, _buf_size, 0, (struct sockaddr*)&peer_address, sizeof peer_address);
     assert(r == _buf_size);
 }

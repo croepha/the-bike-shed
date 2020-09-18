@@ -17,7 +17,7 @@ int   supr_child_write_to_fd = -1;
 int   supr_signal_fd = -1;
 pid_t supr_child_pid;
 
-void supr_start_child() { int r;
+static void supr_start_child() { int r;
   r = fflush(stdout);                                            error_check(r);
   r = fflush(stderr);                                            error_check(r);
   supr_child_pid = fork();                                       error_check(supr_child_pid);

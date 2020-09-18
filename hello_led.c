@@ -31,15 +31,15 @@ volatile unsigned *gpio;
 #define GPIO_PULL *(gpio+37) // Pull up/pull down
 #define GPIO_PULLCLK0 *(gpio+38) // Pull up/pull down clock
 
-void setup_io();
+static void setup_io();
 
-void printButton(int g)
-{
-  if (GET_GPIO(g)) // !=0 <-> bit is 1 <- port is HIGH=3.3V
-    printf("Button pressed!\n");
-  else // port is LOW=0V
-    printf("Button released!\n");
-}
+// static void printButton(int g)
+// {
+//   if (GET_GPIO(g)) // !=0 <-> bit is 1 <- port is HIGH=3.3V
+//     printf("Button pressed!\n");
+//   else // port is LOW=0V
+//     printf("Button released!\n");
+// }
 
 int main(int argc, char **argv)
 {
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 //
 // Set up a memory regions to access GPIO
 //
-void setup_io()
+static void setup_io()
 {
    /* open /dev/mem */
    if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {

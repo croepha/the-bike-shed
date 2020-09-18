@@ -29,9 +29,8 @@ rm -f /build/build.ninja
 cat << 'EOF' >> /build/build.ninja
 builddir = /build/
 
-# -Wmissing-prototypes
 rule cc
- command = clang  -Wno-writable-strings -Werror -Wshadow -Wall ./$in -c -o $out -MF $out.d -MMD $extra
+ command = clang -Wmissing-prototypes -Wno-writable-strings -Werror -Wshadow -Wall ./$in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
  description = CC $out
@@ -79,9 +78,9 @@ eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 
 function compile() { SOURCE="$1"; ARGS=("${@:2}")
   _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
-  # _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
-  # _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
-  # _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
+  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
+  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
+  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
 }
 
 function depends_on() {
@@ -141,40 +140,40 @@ EOF
 # -static
 
 reset
-compile    helloworld -D SOME_DEFINE=234234 -Wmissing-prototypes
+compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
 reset
-compile    mount_squash_root -Wmissing-prototypes
+compile    mount_squash_root
 link_exec  mount_squash_root
 
 reset
 FLAVOR=static
-compile    mount_squash_root -fno-sanitize=address -Wmissing-prototypes
+compile    mount_squash_root -fno-sanitize=address
 link_exec  mount_squash_root -fno-sanitize=address -static
 
 
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-compile    misc     -Wmissing-prototypes
-compile    io_core -Wmissing-prototypes
-compile    io_curl -Wmissing-prototypes
-compile    io_curl_test -Wmissing-prototypes
+compile    misc
+compile    io_core
+compile    io_curl
+compile    io_curl_test
 link_exec  io_curl_test -l curl -l crypto
 
 reset
-compile argon2/ref       -Iargon2  -Wmissing-prototypes
-compile argon2/encoding  -Iargon2  -Wmissing-prototypes
-compile argon2/thread    -Iargon2 -Wmissing-prototypes
-compile argon2/blake2b   -Iargon2 -Wmissing-prototypes
-compile argon2/core      -Iargon2 -Wmissing-prototypes
-compile argon2/argon2    -Iargon2 -Wmissing-prototypes
-compile hello_argon2     -Iargon2 -Wmissing-prototypes
+compile argon2/ref       -Iargon2
+compile argon2/encoding  -Iargon2
+compile argon2/thread    -Iargon2
+compile argon2/blake2b   -Iargon2
+compile argon2/core      -Iargon2
+compile argon2/argon2    -Iargon2
+compile hello_argon2     -Iargon2
 link_exec hello_argon2 -l pthread
 
 reset
-compile logging  -Wmissing-prototypes
+compile logging
 
 reset
 depends_on logging

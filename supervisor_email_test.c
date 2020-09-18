@@ -25,7 +25,7 @@ enum SUPR_LOG_EMAIL_STATE_T {
 };
 extern enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
-void dump_email_state() {
+static void dump_email_state() {
   INFO(  "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
           " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u",
           now_sec_value, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
@@ -33,7 +33,7 @@ void dump_email_state() {
           supr_email_sent_bytes);
 }
 
-void reset_email_state() {
+static void reset_email_state() {
     now_sec_value  = 100000;
     IO_TIMER_MS(logging_send) = -1;
     supr_email_sent_epoch_sec = 0;
@@ -78,7 +78,7 @@ start:
   return 1;
 }
 
-void test_SPLIT_MEM() {
+static void test_SPLIT_MEM() {
   INFO("test_SPLIT_MEM 1:");
   char const * s = "1  2 3 4 5 6 7 8 9 ";
   SPLIT_MEM(s, s + strlen(s), ' ', num) {
@@ -127,7 +127,7 @@ void email_free(struct email_Send *ctx) {
 void dump_email_state();
 void reset_email_state();
 
-void timer_skip() {
+static void timer_skip() {
   now_sec_value = IO_TIMER_MS(logging_send)/1000;
   assert(now_sec_value < 100000000000);
   logging_send_timeout();
@@ -135,7 +135,7 @@ void timer_skip() {
 
 
 __attribute__((__format__ (__printf__, 1, 2)))
-void test_printf(char const * fmt, ...) {
+static void test_printf(char const * fmt, ...) {
   char * buf; usz    space_left;
   supr_email_add_data_start(&buf, &space_left);
   va_list va;

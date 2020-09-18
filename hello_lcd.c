@@ -236,7 +236,7 @@ static void lcd_string(char*message, int line) {
   }
 }
 
-void setup_io();
+static void setup_io(void);
 
 int main() {
   // Main program block

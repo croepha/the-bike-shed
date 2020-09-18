@@ -10,6 +10,7 @@
 #include "email.h"
 #include "logging.h"
 #include "io_curl.h"
+#include "supervisor.h"
 
 u64 now_sec() { return time(0); }
 

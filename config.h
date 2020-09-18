@@ -11,7 +11,7 @@ void string_list_initialize(struct StringList * sl);
 void string_list_copy_to_array(char** str_array, struct StringList * sl);
 void string_list_append(struct StringList * sl, char * str, struct StringListLink * sll);
 
-void config_initialize();
+void config_initialize(void);
 void * config_push(usz len, usz alignment);
 char * config_push_string(char * str);
 void config_load_file(char * file_path);

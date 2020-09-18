@@ -6,6 +6,7 @@
 #include "common.h"
 #include "logging.h"
 #include "io_curl.h"
+#include "supervisor.h"
 
 char buf[1024];
 
