@@ -209,14 +209,14 @@ depends_on logging
 FLAVOR=diagnostic compile    config
 compile    config_diag_test
 link_exec  config_diag_test
-do_test    config_diag_test /build/config_test.dbg.exec
+do_test    config_diag_test /build/config_diag_test.dbg.exec
 
 reset
 depends_on logging
 FLAVOR=nodiagnostic compile    config
 compile    config_nodiag_test
 link_exec  config_nodiag_test
-do_test    config_nodiag_test /build/config_test.dbg.exec
+do_test    config_nodiag_test /build/config_nodiag_test.dbg.exec
 
 reset
 depends_on logging
