@@ -91,12 +91,12 @@ function link_exec() {
 cat << EOF >> /build/build.ninja
 build /build/$1.${FLAVOR}dbg.exec: link_exec $dbg_OBJ_FILES
   extra = -gfull -fuse-ld=lld -fsanitize=address  ${@:2}
-# build /build/$1.${FLAVOR}fast.exec: link_exec $fast_OBJ_FILES
-#   extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
-# build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $pi0wdbg_OBJ_FILES
-#   extra = -ggdb3 -O0 ${@:2}
-# build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $pi0wfast_OBJ_FILES
-#   extra = -ggdb3 -O3 ${@:2}
+build /build/$1.${FLAVOR}fast.exec: link_exec $fast_OBJ_FILES
+  extra = -gfull -fuse-ld=lld -flto=thin -march=native ${@:2}
+build /build/$1.${FLAVOR}pi0wdbg.exec: link_br_exec $pi0wdbg_OBJ_FILES
+  extra = -ggdb3 -O0 ${@:2}
+build /build/$1.${FLAVOR}pi0wfast.exec: link_br_exec $pi0wfast_OBJ_FILES
+  extra = -ggdb3 -O3 ${@:2}
 EOF
 }
 
@@ -196,6 +196,7 @@ depends_on  logging
 depends_on  io_core
 depends_on  io_curl
 depends_on  supervisor_io
+depends_on  config
 depends_on  misc
 compile     email
 compile     supervisor_email

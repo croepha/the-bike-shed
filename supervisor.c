@@ -11,13 +11,14 @@
 #include "logging.h"
 #include "io_curl.h"
 #include "supervisor.h"
+#include "config.h"
 
 u64 now_sec() { return time(0); }
 
 char * email_from = "tmp-from@testtest.test";
 char * email_host = "smtp://127.0.0.1:8025";
 char * email_user_pass = "user:pass";
-char * supr_child_args[] = { "/bin/sh", "-c", "/usr/bin/ping 127.0.0.1 | ts", 0 };
+//char * supr_child_args[] = { "/bin/sh", "-c", "/usr/bin/ping 127.0.0.1 | ts", 0 };
 char * supr_email_rcpt = "logging@tmp-test.test";
 
 void supr_exec_child() { int r;
@@ -26,9 +27,9 @@ void supr_exec_child() { int r;
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
 
-void supr_main();
-int main () {
+int main (int argc, char ** argv) {
     setlinebuf(stderr);
+    config_load_file(*++argv);
     io_curl_initialize();
     supr_main();
 }

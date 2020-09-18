@@ -60,15 +60,19 @@ char* config_push_string(char * str) {
 
 #define set_config(var) *end = 0; __set_config(#var, &var, start, line_number, print_diagnostics); return;
 static void __set_config(char* var_name, char** var, char* value, int line_number, u8 print_diagnostics) {
-    if (*var) {
-        if (print_diagnostics) {
-            printf("Line:%d Config value for '%s' is already set, overwriting\n",
-                line_number, var_name);
-         } else {
-            WARN("Config value for '%s' is already set, overwriting", var_name);
+    if (!var) {
+        DEBUG("Ignoring config for variable: %s", var_name);
+    } else {
+        if (*var) {
+            if (print_diagnostics) {
+                printf("Line:%d Config value for '%s' is already set, overwriting\n",
+                    line_number, var_name);
+            } else {
+                WARN("Config value for '%s' is already set, overwriting", var_name);
+            }
         }
+        *var = config_push_string(value);
     }
-    *var = config_push_string(value);
 }
 
 #define config_append(list, val) __config_append(& list, val)
