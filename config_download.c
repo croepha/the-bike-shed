@@ -23,7 +23,7 @@ size_t config_download_write_callback(char *data, size_t size, size_t nmemb, voi
       } else {
         memcpy(config_download_leftover + config_download_leftover_used, data,
                nl - data);
-        config_parse_line(config_download_leftover, 0, 0);
+        config_parse_line(config_download_leftover, 0);
         size -= nl - data;
         data += nl - data;
         config_download_leftover_used = 0;

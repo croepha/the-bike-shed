@@ -58,8 +58,13 @@ char* config_push_string(char * str) {
     return ret;
 }
 
-#define set_config(var) *end = 0; __set_config(#var, &var, start, line_number, print_diagnostics); return;
-static void __set_config(char* var_name, char** var, char* value, int line_number, u8 print_diagnostics) {
+#define set_config(var) *end = 0; __set_config(#var, &var, start, line_number); return;
+static void __set_config(char* var_name, char** var, char* value, int line_number) {
+#if CONFIG_DIAGNOSTICS == 1
+    u8 const print_diagnostics = 1;
+#else
+    u8 const print_diagnostics = 0;
+#endif
     if (!var) {
         DEBUG("Ignoring config for variable: %s", var_name);
     } else {
@@ -126,7 +131,7 @@ void config_load_file(char * file_path) {
         } else if (len > 0) {
             buf[len - 1] = 0; // remove newline
             log_allowed_fails = 100;
-            config_parse_line(buf, 1, line_number);
+            config_parse_line(buf, line_number);
             log_allowed_fails = 0;
             line_number++;
         }

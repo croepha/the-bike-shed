@@ -21,11 +21,8 @@ void config_load_file(char * file_path);
 #else
 #endif
 
-#if CONFIG_DIAGNOSTICS == 1
+
 void config_parse_line(char *input_str, int line_number);
-#else
-void config_parse_line(char *input_str);
-#endif
 
 
 size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata);

@@ -1,10 +1,6 @@
 
 
-#if CONFIG_DIAGNOSTICS == 1
 void config_parse_line(char *input_str, int line_number) {
-#else
-void config_parse_line(char *input_str) {
-#endif
 
   char * YYMARKER, *YYCURSOR = input_str, * start = 0, * end = 0;
 

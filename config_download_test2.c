@@ -7,7 +7,7 @@
 #include "config.h"
 
 
-void config_parse_line(char *line, u8 print_diagnostics, int line_number) {
+void config_parse_line(char *line, int line_number) {
   usz len = strlen(line);
   INFO_BUFFER(line, len, "line: len:%zu data:", len);
 }
