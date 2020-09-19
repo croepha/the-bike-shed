@@ -1,4 +1,4 @@
-
+#define LOG_DEBUG
 
 //#include "config.h"
 
@@ -28,7 +28,16 @@ struct StringList tmp_arg;
 // char * supr_email_rcpt = "logging@tmp-test.test";
 
 void supr_exec_child() { int r;
-    r = execvp(*supr_child_args, supr_child_args);          error_check(r);
+    INFO("count:%d", tmp_arg.count);
+    assert(tmp_arg.count > 0);
+    char * argv[32] = {}; // TODO...
+    assert( tmp_arg.count + 1 <= COUNT(argv) );
+    string_list_copy_to_array(argv, &tmp_arg);
+    DEBUG("ARGV START:");
+    for (char ** c = argv; *c; c++) {
+        DEBUG("\tARGV:%s", *c);
+    }
+    r = execvp(*argv, argv);  error_check(r);
 }
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
@@ -41,7 +50,6 @@ static void config_validate_or_exit() {
     _(email_rcpt)
     _(email_host)
     _(email_user_pass)
-    _(supr_child_args)
     #undef _
     if (errors) { exit(-1); }
 }
