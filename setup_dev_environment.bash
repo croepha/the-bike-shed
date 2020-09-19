@@ -1,13 +1,13 @@
 set -eEuo pipefail
 
-/*
+# /*
 
-mkdir -p /tmp/re2c
-wget  https://github.com/skvadrik/re2c/releases/download/2.0.3/re2c-2.0.3.tar.xz -O /tmp/re2c/re2c.tar.xz
-tar -xvf /tmp/re2c/re2c.tar.xz -C /tmp/re2c --strip=1
-cd /tmp/re2c
-./configure --disable-golang && make -j $(nproc) && make install
-*/
+# mkdir -p /tmp/re2c
+# wget  https://github.com/skvadrik/re2c/releases/download/2.0.3/re2c-2.0.3.tar.xz -O /tmp/re2c/re2c.tar.xz
+# tar -xvf /tmp/re2c/re2c.tar.xz -C /tmp/re2c --strip=1
+# cd /tmp/re2c
+# ./configure --disable-golang && make -j $(nproc) && make install
+# */
 
 
 source /etc/profile
@@ -150,7 +150,7 @@ if false; then {
 if false; then {
   yes | unminimize
   apt install -y man apt-file errno \
-    iproute2 iputils-ping telnet socat
+    iproute2 iputils-ping telnet socat tmux
   apt-file update
 }; fi
 

@@ -10,7 +10,7 @@ function make() ($_F
 )
 
 function full_build() ($_F
-    apt install -y cpio rsync sudo ccache build-essential unzip bc
+    apt install -y cpio rsync sudo ccache build-essential unzip bc locales
     locale-gen en_US.UTF-8
     update-locale
 
@@ -90,12 +90,12 @@ function remote_pull() ( $_F
     [[ ! "$VARIANT" =~ "host" ]] &&
     unxz -fv $_o/$VARIANT-sdcard.img.xz
 
-    _h=/build/$VARIANT-host/
+    _h=/build/root$VARIANT/host/
     rm -rvf    $_h
     mkdir -p   $_h
     tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
 
-    _h=/build/$VARIANT-staging/
+    _h=/build/root$VARIANT/staging/
     rm -rvf    $_h
     mkdir -p   $_h
     tar xJv -C $_h -f $_o/$VARIANT-staging.tar.xz

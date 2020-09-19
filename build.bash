@@ -9,6 +9,9 @@ source /etc/profile
 #     '
 # }
 
+mkdir -p /build/
+
+
 # Start up services used for testing
 # pkill email_mock
 ./email_test_server.py
@@ -19,7 +22,6 @@ if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0
 }; fi
 
-mkdir -p /build/
 
 # echo "/tmp/core.%e.%t.%p" > /proc/sys/kernel/core_pattern
 # sudo cat ~/Library/Containers/com.docker.docker/Data/vms/0/tty
@@ -60,7 +62,7 @@ EOF
 
 pi0w_target_flags="-target arm-linux-gnueabihf -mfloat-abi=hard -mcpu=arm1176jzf-s -mfpu=vfpv2"
 # PI0W Debug version
-pi0w_host_dir="/build/pi0w-dev-host/"
+pi0w_host_dir="/build/rootpi0w-dev/host/"
 pi0w_host_lib="$pi0w_host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
 pi0w_sysroot="$pi0w_host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
 pi0w_common="--sysroot=$pi0w_sysroot $pi0w_target_flags"
