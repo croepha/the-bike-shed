@@ -255,6 +255,12 @@ compile config_download
 compile config_download_test2
 link_exec config_download_test2
 
+reset
+depends_on logging
+FLAVOR=diagnostic depends_on    config
+compile    config_validator
+link_exec  config_validator
+
 
 re parse_headers
 re config

@@ -55,6 +55,7 @@ static void config_validate_or_exit() {
 }
 
 int main (int argc, char ** argv) {
+    assert(argc == 2);
     setlinebuf(stderr);
     config_load_file(*++argv);
     config_validate_or_exit();
