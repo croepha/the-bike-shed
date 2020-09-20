@@ -52,8 +52,6 @@ static void _test_set2(char**set, usz set_len) {
         INFO("Effective: %s",sll->str);
     }
 }
-
-
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
     "EmailAddress:    yahooyahoo@yahoo.com",
@@ -107,6 +105,9 @@ char * invalid_config_email_user_pass[] = {
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
 0};
+
+
+
 
 int main () {
     setlinebuf(stderr);

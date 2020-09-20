@@ -36,3 +36,12 @@ extern char ** supr_child_args;
 extern struct StringList tmp_arg;
 // __attribute__((weak_import))
 
+extern char *   valid_config_email_from[];
+extern char * invalid_config_email_from[];
+extern char *   valid_config_email_host[];
+extern char * invalid_config_email_host[];
+extern char *   valid_config_email_rcpt[];
+extern char * invalid_config_email_rcpt[];
+extern char *   valid_config_argv_config[];
+extern char *   valid_config_email_user_pass[];
+extern char * invalid_config_email_user_pass[];

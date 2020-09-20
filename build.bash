@@ -210,14 +210,14 @@ link_exec   supervisor -l curl
 
 reset
 depends_on logging
-FLAVOR=diagnostic compile    config
+FLAVOR=diagnostic compile    config -D CONFIG_DIAGNOSTICS=1
 compile    config_diag_test
 link_exec  config_diag_test
 do_test    config_diag_test /build/config_diag_test.dbg.exec
 
 reset
 depends_on logging
-FLAVOR=nodiagnostic compile    config
+FLAVOR=nodiagnostic compile    config -D CONFIG_DIAGNOSTICS=0
 compile    config_nodiag_test
 link_exec  config_nodiag_test
 do_test    config_nodiag_test /build/config_nodiag_test.dbg.exec

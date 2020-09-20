@@ -66,7 +66,7 @@ static void __set_config(char* var_name, char** var, char* value, int line_numbe
             line_number, var_name);
     }
     *var = config_push_string(value);
-#else
+#elif CONFIG_DIAGNOSTICS == 0
     if (!var) {
         DEBUG("Ignoring config for variable: %s", var_name);
     } else {
@@ -75,6 +75,8 @@ static void __set_config(char* var_name, char** var, char* value, int line_numbe
         }
         *var = config_push_string(value);
     }
+#else
+#error CONFIG_DIAGNOSTICS not set
 #endif
 }
 
@@ -86,6 +88,7 @@ static void __config_append(struct StringList *sl, char* str) {
 }
 
 #if CONFIG_DIAGNOSTICS == 1
+#define do_diagnostic(long_string, short_var) *end=0; \
   __do_diagnostic(long_string, start, valid_config_ ## short_var, line_number); return;
 static void __do_diagnostic(char * long_string, char * start, char** valid_examples, int line_number) {
     printf("On line:%d config value for %s is invalid:`%s'\n", line_number, long_string, start);
@@ -94,11 +97,13 @@ static void __do_diagnostic(char * long_string, char * start, char** valid_examp
         printf("\t%s\n", *ve);
     }
 }
-#else
+#elif CONFIG_DIAGNOSTICS == 0
 #define do_diagnostic(long_string, short_var) *end=0; __do_diagnostic(long_string, start, line_number); return;
 static void __do_diagnostic(char * long_string, char * start, int line_number) {
         WARN("Line:%d Failed to validate: %s: '%s' please run config_validator", line_number, long_string, start);
 }
+#else
+#error CONFIG_DIAGNOSTICS not set
 #endif
 
 #include "/build/config.re.c"

@@ -7,20 +7,40 @@
  INFO:	 Effective: 'tmp-from@testtest.test' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: invalid_config_email_from	(./config_diag_test.c main)
  INFO:	 Trying line: 'EmailAddress:    asdasd@fasdasd32323@mail.com'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailAddress: 'asdasd@fasdasd32323@mail.com' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailAddress is invalid:`asdasd@fasdasd32323@mail.com'
+here are some valid examples:
+	EmailAddress:    asdasdfasdasd32323@gmail.com
+	EmailAddress:    yahooyahoo@yahoo.com
+	EmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress:    yahooyahoo@'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailAddress: 'yahooyahoo@' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailAddress is invalid:`yahooyahoo@'
+here are some valid examples:
+	EmailAddress:    asdasdfasdasd32323@gmail.com
+	EmailAddress:    yahooyahoo@yahoo.com
+	EmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress: @testtest.test'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailAddress: '@testtest.test' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailAddress is invalid:`@testtest.test'
+here are some valid examples:
+	EmailAddress:    asdasdfasdasd32323@gmail.com
+	EmailAddress:    yahooyahoo@yahoo.com
+	EmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress: @'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailAddress: '@' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailAddress is invalid:`@'
+here are some valid examples:
+	EmailAddress:    asdasdfasdasd32323@gmail.com
+	EmailAddress:    yahooyahoo@yahoo.com
+	EmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress: dasdfasdfasd'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailAddress: 'dasdfasdfasd' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailAddress is invalid:`dasdfasdfasd'
+here are some valid examples:
+	EmailAddress:    asdasdfasdasd32323@gmail.com
+	EmailAddress:    yahooyahoo@yahoo.com
+	EmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: valid_config_email_host	(./config_diag_test.c main)
  INFO:	 Trying line: 'EmailServer:  smtps://smtp.gmail.com'	(./config_diag_test.c _test_set)
  INFO:	 Effective: 'smtps://smtp.gmail.com' Failures: 0	(./config_diag_test.c _test_set)
@@ -34,20 +54,50 @@
  INFO:	 Effective: 'smtps://127.0.0.1:8025' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: invalid_config_email_host	(./config_diag_test.c main)
  INFO:	 Trying line: 'EmailServer:  smtp.gmail.com'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailServer: 'smtp.gmail.com' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailServer is invalid:`smtp.gmail.com'
+here are some valid examples:
+	EmailServer:  smtps://smtp.gmail.com
+	EmailServer:  smtps://smtp.gmail.com:465
+	EmailServer:  smtp://127.0.0.1
+	EmailServer:  smtp://127.0.0.1:8025
+	EmailServer:  smtps://127.0.0.1:8025
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailServer:  smtp://127.0.0.1:'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailServer: 'smtp://127.0.0.1:' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailServer is invalid:`smtp://127.0.0.1:'
+here are some valid examples:
+	EmailServer:  smtps://smtp.gmail.com
+	EmailServer:  smtps://smtp.gmail.com:465
+	EmailServer:  smtp://127.0.0.1
+	EmailServer:  smtp://127.0.0.1:8025
+	EmailServer:  smtps://127.0.0.1:8025
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailServer:  smtpss://127.0.0.1:'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailServer: 'smtpss://127.0.0.1:' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailServer is invalid:`smtpss://127.0.0.1:'
+here are some valid examples:
+	EmailServer:  smtps://smtp.gmail.com
+	EmailServer:  smtps://smtp.gmail.com:465
+	EmailServer:  smtp://127.0.0.1
+	EmailServer:  smtp://127.0.0.1:8025
+	EmailServer:  smtps://127.0.0.1:8025
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailServer:  smtpss://:333'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailServer: 'smtpss://:333' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailServer is invalid:`smtpss://:333'
+here are some valid examples:
+	EmailServer:  smtps://smtp.gmail.com
+	EmailServer:  smtps://smtp.gmail.com:465
+	EmailServer:  smtp://127.0.0.1
+	EmailServer:  smtp://127.0.0.1:8025
+	EmailServer:  smtps://127.0.0.1:8025
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailServer:  smtps://127.0.0.1:8ddd025'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailServer: 'smtps://127.0.0.1:8ddd025' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailServer is invalid:`smtps://127.0.0.1:8ddd025'
+here are some valid examples:
+	EmailServer:  smtps://smtp.gmail.com
+	EmailServer:  smtps://smtp.gmail.com:465
+	EmailServer:  smtp://127.0.0.1
+	EmailServer:  smtp://127.0.0.1:8025
+	EmailServer:  smtps://127.0.0.1:8025
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: valid_config_email_user_pass	(./config_diag_test.c main)
  INFO:	 Trying line: 'EmailUserPass:  user:pass'	(./config_diag_test.c _test_set)
  INFO:	 Effective: 'user:pass' Failures: 0	(./config_diag_test.c _test_set)
@@ -57,14 +107,26 @@
  INFO:	 Effective: ':' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: invalid_config_email_user_pass	(./config_diag_test.c main)
  INFO:	 Trying line: 'EmailUserPass: '	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailUserPass: '' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailUserPass is invalid:`'
+here are some valid examples:
+	EmailUserPass:  user:pass
+	EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj
+	EmailUserPass:  :
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailUserPass: adfasdfasdf'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailUserPass: 'adfasdfasdf' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailUserPass is invalid:`adfasdfasdf'
+here are some valid examples:
+	EmailUserPass:  user:pass
+	EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj
+	EmailUserPass:  :
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'EmailUserPass: 12341231234'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: EmailUserPass: '12341231234' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for EmailUserPass is invalid:`12341231234'
+here are some valid examples:
+	EmailUserPass:  user:pass
+	EmailUserPass:  314234123klj;k;asdfasd!~!@:@!#@#$%@#&^&!~8709870asdfaklj
+	EmailUserPass:  :
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: valid_config_email_rcpt	(./config_diag_test.c main)
  INFO:	 Trying line: 'DestinationEmailAddress:    asdasdfasdasd32323@gmail.com'	(./config_diag_test.c _test_set)
  INFO:	 Effective: 'asdasdfasdasd32323@gmail.com' Failures: 0	(./config_diag_test.c _test_set)
@@ -74,20 +136,40 @@
  INFO:	 Effective: 'tmp-from@testtest.test' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: invalid_config_email_rcpt	(./config_diag_test.c main)
  INFO:	 Trying line: 'DestinationEmailAddress:    asdasd@fasdasd32323@mail.com'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: DestinationEmailAddress: 'asdasd@fasdasd32323@mail.com' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for DestinationEmailAddress is invalid:`asdasd@fasdasd32323@mail.com'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'DestinationEmailAddress:    yahooyahoo@'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: DestinationEmailAddress: 'yahooyahoo@' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for DestinationEmailAddress is invalid:`yahooyahoo@'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'DestinationEmailAddress: @testtest.test'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: DestinationEmailAddress: '@testtest.test' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for DestinationEmailAddress is invalid:`@testtest.test'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'DestinationEmailAddress: @'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: DestinationEmailAddress: '@' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for DestinationEmailAddress is invalid:`@'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO:	 Trying line: 'DestinationEmailAddress: dasdfasdfasd'	(./config_diag_test.c _test_set)
- WARN:	 Line:0 Failed to validate: DestinationEmailAddress: 'dasdfasdfasd' please run config_validator	(./config.c __do_diagnostic)
- INFO:	 Effective: '(null)' Failures: 1	(./config_diag_test.c _test_set)
+On line:0 config value for DestinationEmailAddress is invalid:`dasdfasdfasd'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+ INFO:	 Effective: '(null)' Failures: 0	(./config_diag_test.c _test_set)
  INFO: Testing set: valid_config_argv_config	(./config_diag_test.c main)
  INFO:	 Trying line: 'DebugSupervisorArg: /bin/sh'	(./config_diag_test.c _test_set2)
  INFO:	 Failures: 0	(./config_diag_test.c _test_set2)
@@ -104,8 +186,12 @@
  INFO: 	'/usr/bin/ping 127.0.0.1 | ts'	(./config_diag_test.c main)
  INFO: Trying out config_test1	(./config_diag_test.c main)
  WARN: ignoring unknown config line: 'adfa dfadkl;fa j;lsdkjfa;dj;'	(config.re config_parse_line)
- WARN: Line:4 Failed to validate: DestinationEmailAddress: 'asdasd@fasdasd32323@mail.com' please run config_validator	(./config.c __do_diagnostic)
- WARN: Config value for 'email_rcpt' is already set, overwriting	(./config.c __set_config)
+On line:4 config value for DestinationEmailAddress is invalid:`asdasd@fasdasd32323@mail.com'
+here are some valid examples:
+	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
+	DestinationEmailAddress:    yahooyahoo@yahoo.com
+	DestinationEmailAddress: tmp-from@testtest.test
+Line:5 Config value for 'email_rcpt' is already set
  INFO: Effective configs:	(./config_diag_test.c main)
  INFO: 	email_from: `yahooyahoo@yahoo.com'	(./config_diag_test.c main)
  INFO: 	email_host: `(null)'	(./config_diag_test.c main)
