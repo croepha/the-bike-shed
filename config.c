@@ -59,9 +59,9 @@ char* config_push_string(char * str) {
 }
 
 #if CONFIG_DIAGNOSTICS == 1
-#define DIAG printf
+#define DIAG(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
 #elif CONFIG_DIAGNOSTICS == 0
-#define DIAG WARN
+#define DIAG(fmt, ...) WARN(fmt, ##__VA_ARGS__)
 #else
 #error CONFIG_DIAGNOSTICS not set
 #endif
