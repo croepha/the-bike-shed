@@ -185,8 +185,7 @@ here are some valid examples:
  INFO: 	'-c'	(./config_diag_test.c main)
  INFO: 	'/usr/bin/ping 127.0.0.1 | ts'	(./config_diag_test.c main)
  INFO: Trying out config_test1	(./config_diag_test.c main)
- WARN: ignoring unknown config line: 'adfa dfadkl;fa j;lsdkjfa;dj;'	(config.re config_parse_line)
-On line:4 config value for DestinationEmailAddress is invalid:`asdasd@fasdasd32323@mail.com'
+ignoring unknown config line: 'adfa dfadkl;fa j;lsdkjfa;dj;'On line:4 config value for DestinationEmailAddress is invalid:`asdasd@fasdasd32323@mail.com'
 here are some valid examples:
 	DestinationEmailAddress:    asdasdfasdasd32323@gmail.com
 	DestinationEmailAddress:    yahooyahoo@yahoo.com

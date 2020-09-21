@@ -7,7 +7,7 @@ void config_parse_line(char *input_str, int line_number) {
   /*!stags:re2c format = 'char *@@;'; */
   /*!re2c re2c:define:YYCTYPE = char; re2c:yyfill:enable = 0;
 
-  *      { WARN("ignoring unknown config line: '%s'", input_str); return; }
+  *      { DIAG("ignoring unknown config line: '%s'", input_str); return; }
   "EmailAddress:"            [ ]* @start [-a-z0-9.+_]+ "@" [-a-z0-9.+_]+                 @end { set_config(email_from); }
   "DestinationEmailAddress:" [ ]* @start [-a-z0-9.+_]+ "@" [-a-z0-9.+_]+                 @end { set_config(email_rcpt); }
   "EmailServer:"             [ ]* @start "smtp" "s"? "://" [-a-z0-9.+_]+ ( ":" [0-9]+ )? @end { set_config(email_host); }

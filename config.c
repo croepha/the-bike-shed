@@ -58,6 +58,15 @@ char* config_push_string(char * str) {
     return ret;
 }
 
+#if CONFIG_DIAGNOSTICS == 1
+#define DIAG printf
+#elif CONFIG_DIAGNOSTICS == 0
+#define DIAG WARN
+#else
+#error CONFIG_DIAGNOSTICS not set
+#endif
+
+
 #define set_config(var) *end = 0; __set_config(#var, &var, start, line_number); return;
 static void __set_config(char* var_name, char** var, char* value, int line_number) {
 #if CONFIG_DIAGNOSTICS == 1
