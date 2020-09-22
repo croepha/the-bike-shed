@@ -8,12 +8,6 @@ static usz const SALT_BUF_LEN = 64;
 static usz const RFID_BUF_LEN = 24;
 static usz const PIN_BUF_LEN = 10;
 
-struct HashPayload {
-  char salt[SALT_BUF_LEN];
-  char rfid[RFID_BUF_LEN];
-  char pin[PIN_BUF_LEN];
-};
-
 char const salt[SALT_BUF_LEN] = "asdfaew";
 
 u8 access_requested(char * rfid, char * pin);
@@ -26,6 +20,12 @@ void hash(HashResult * result, void* data, usz data_len) {
     INFO_HEXBUFFER(data, data_len, "data:");
     memset(result, 0x69, sizeof * result);
 }
+
+struct HashPayload {
+  char salt[SALT_BUF_LEN];
+  char rfid[RFID_BUF_LEN];
+  char pin[PIN_BUF_LEN];
+};
 
 u8 access_requested(char * rfid, char * pin) {
   struct HashPayload payload = {};

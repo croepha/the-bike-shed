@@ -171,8 +171,9 @@ compile argon2/thread    -Iargon2
 compile argon2/blake2b   -Iargon2
 compile argon2/core      -Iargon2
 compile argon2/argon2    -Iargon2
-compile hello_argon2     -Iargon2
-link_exec hello_argon2 -l pthread
+compile argon2_test      -Iargon2
+depends_on logging
+link_exec argon2_test    -l pthread
 
 reset
 compile logging
