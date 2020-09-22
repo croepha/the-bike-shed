@@ -261,6 +261,12 @@ FLAVOR=diagnostic depends_on    config
 compile    config_validator
 link_exec  config_validator
 
+reset
+depends_on logging
+compile access_test
+link_exec access_test
+
+
 
 re parse_headers
 re config
