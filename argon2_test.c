@@ -1,6 +1,4 @@
 
-#define LOG_DEBUG
-
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,14 +7,13 @@
 #include "common.h"
 #include "logging.h"
 #include "argon2.h"
-
-#define HASHLEN 32
+#include "access.h"
 
 
 // The point of all this is to try to make argon2 not use any dynamic memory
-static const uint32_t m_cost = (1<<17);
-uint8_t static_memory_buf[m_cost << 10];
-uint8_t static_memory_buf_in_use_debug;
+static u32 const m_cost = (1<<17);
+static u8 static_memory_buf[m_cost << 10];
+static u8 static_memory_buf_in_use_debug;
 
 static int allocate_memory(uint8_t **memory, size_t bytes_to_allocate) {
     if (bytes_to_allocate == sizeof static_memory_buf && !static_memory_buf_in_use_debug) {
@@ -41,27 +38,17 @@ static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
     DEBUG("deallocate_memory: %p bytes:%zu", memory, bytes_to_allocate);
 }
 
-char system_secret[32];
-
-struct access_HashPayload {
-  u8 salt[64];
-  u8 rfid[24];
-  u8 pin[10];
-};
-typedef u8 access_HashResult[64];
 
 
-#define PWD "password"
-
-static void access_hash(access_HashResult * result, struct access_HashPayload * payload) {
+void access_hash(access_HashResult * result, struct access_HashPayload * payload) {
     u32 const t_cost = 1;
     u32 const parallelism = 1;
 
     argon2_context context = {     // low-level API
         *result,  /* output array, at least HASHLEN in size */
-        sizeof *result, /* digest length */
+        sizeof * result, /* digest length */
         (u8*)payload, /* password array */
-        sizeof payload, /* password length */
+        sizeof * payload, /* password length */
         payload->salt,  /* salt array */
         sizeof payload->salt, /* salt length */
         NULL, 0, /* optional secret data */
@@ -100,9 +87,9 @@ static void access_hash_test(char * salt, char * rfid, char *  pin) {
 
 int main () {
     setbuf(stdout, 0);
-    access_hash_test("000000000001", "0000000000001", "0000001");
-    access_hash_test("000000000002", "0000000000001", "0000001");
-    access_hash_test("000000000001", "0000000000002", "0000001");
-    access_hash_test("000000000001", "0000000000001", "0000002");
+    access_hash_test("00000000000001", "000000000000001", "0000000001");
+    access_hash_test("00000000000002", "000000000000001", "0000000001");
+    access_hash_test("00000000000001", "000000000000002", "0000000001");
+    access_hash_test("00000000000001", "000000000000001", "0000000002");
 
 }

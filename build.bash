@@ -174,6 +174,7 @@ compile argon2/argon2    -Iargon2
 compile argon2_test      -Iargon2
 depends_on logging
 link_exec argon2_test    -l pthread
+do_test argon2_test /build/argon2_test.fast.exec
 
 reset
 compile logging
