@@ -267,7 +267,7 @@ reset
 depends_on logging
 compile access_test
 link_exec access_test
-
+do_test access_test /build/access_test.dbg.exec
 
 
 re parse_headers

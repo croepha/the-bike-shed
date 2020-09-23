@@ -3,6 +3,7 @@
 
 #include "logging.h"
 #include "common.h"
+#include "access.h"
 
 static usz const SALT_BUF_LEN = 64;
 static usz const RFID_BUF_LEN = 24;
