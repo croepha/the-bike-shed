@@ -171,10 +171,10 @@ compile argon2/thread    -Iargon2
 compile argon2/blake2b   -Iargon2
 compile argon2/core      -Iargon2
 compile argon2/argon2    -Iargon2
-compile argon2_test      -Iargon2
+compile access_hash_test -Iargon2
 depends_on logging
-link_exec argon2_test    -l pthread
-do_test argon2_test /build/argon2_test.fast.exec
+link_exec access_hash_test    -l pthread
+do_test access_hash_test /build/access_hash_test.fast.exec
 
 reset
 compile logging
