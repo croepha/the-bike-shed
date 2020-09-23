@@ -17,7 +17,7 @@ typedef u8 access_HashResult[64];
 
 
 void access_hash(access_HashResult * result, struct access_HashPayload * payload) {
-    INFO_HEXBUFFER(payload, sizeof * payload, "payload:");
+    INFO_BUFFER((char*)payload, sizeof * payload, "payload:");
     memset(result, 0x69, sizeof * result);
 }
 
