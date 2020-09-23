@@ -9,12 +9,9 @@ static usz const SALT_BUF_LEN = 64;
 static usz const RFID_BUF_LEN = 24;
 static usz const PIN_BUF_LEN = 10;
 
-char const salt[SALT_BUF_LEN] = "asdfaew";
+char const salt[SALT_BUF_LEN] = "saltysalt";
 
 u8 access_requested(char * rfid, char * pin);
-
-typedef u8 access_HashResult[64];
-
 
 void access_hash(access_HashResult * result, struct access_HashPayload * payload) {
     INFO_BUFFER((char*)payload, sizeof * payload, "payload:");
@@ -33,5 +30,5 @@ u8 access_requested(char * rfid, char * pin) {
 }
 
 int main() {
-    access_requested("sdal;asdfasdfasdfadfasdfasdfsskdf;laksdl;fasdf", "12aas'dkfa';dfkl'a123");
+    access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
 }
