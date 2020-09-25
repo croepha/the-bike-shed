@@ -20,16 +20,51 @@ static usz const HASH_MAP_LEN  = 1 << 18; // 256Ki
 static usz const USER_TABLE_LEN = 1 << 13; // 8192
 
 struct accessUser {
-  u8 is_free;
+  u8 debug_is_free;
   union {
     struct {
         access_HashResult hash;
         u16 expire_day;
     };
-    u16 free_next;
+    u16 free_next_idx;
   };
 } access_users[USER_TABLE_LEN];
 u16 access_map[HASH_MAP_LEN];
+
+
+void access_user_add(access_HashResult * hash);
+void access_user_list_init(void);
+
+
+u16 access_users_free_idx;
+
+void access_user_list_init(void) {
+
+  // Initialize the free list
+  access_users_free_idx = -1;
+  for (u16 i = 0; i < USER_TABLE_LEN; i++) {
+    access_users[i].debug_is_free = 1;
+    access_users[i].free_next_idx = access_users_free_idx;
+    access_users_free_idx = i;
+  }
+}
+
+void access_user_add(access_HashResult * hash) {
+
+  if (access_users_free_idx == (u16)-1) {
+    ERROR("User list full");
+    return;
+  }
+
+  // pop off the free list
+  u16 idx = access_users_free_idx;
+  access_users_free_idx = access_users[idx].free_next_idx;
+  assert(access_users[idx].debug_is_free);
+  access_users[idx].debug_is_free = 0;
+
+  access_user[access_users_free_idx]
+
+}
 
 #include <time.h>
 u8 access_requested(char * rfid, char * pin) {
@@ -60,7 +95,7 @@ u8 access_requested(char * rfid, char * pin) {
         } else {
           return 0; // Expired
         }
-      } // else loop
+      } // else continue
     } else {
       return 0; // Hash not in our map
     }

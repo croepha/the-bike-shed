@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 
+
 struct access_HashPayload {
   u8 salt[64];
   u8 rfid[24];
