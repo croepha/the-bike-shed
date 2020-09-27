@@ -34,6 +34,27 @@ extern __thread int log_allowed_fails;
 #define FLOG(...) LOG(__VA_ARGS__)
 #endif
 
+/*
+
+INFO    General information that we want to convey examples: Health info, tracking siginificant events
+
+ERROR   Something is wrong, a condition that we shouldn't see during normal operation has occurred,
+        but the programmer has accounted for this and the system should be able to carry on.
+        Examples: We cant connect to a server.  We got a corrupted configuration value.  We ran out of some
+          resource
+        On Debug builds, ERRORS will cause aborts, unless log_allowed_fails is greater than zero, every error
+        will decrement the number of allowed fails
+
+WARN    Just like ERROR, but slightly less severe.  Also things that might be ERRORs but we aren't certain
+        Example: We got a config value we didn't recognize
+
+FATAL   Something really unexpected has happened, execution cannot continue... Process will abort and restart
+
+DEBUG   An internal dump of an algorithms state or event tracing, these are turned of in production builds
+
+
+*/
+
 
 #define  INFO(          ...)  LOG(" INFO", plain, 0, 0,      __VA_ARGS__)
 #define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string,    __VA_ARGS__)
@@ -41,6 +62,7 @@ extern __thread int log_allowed_fails;
 #define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
 #define TRACE(          ...)  LOG("TRACE", plain, 0, 0,      __VA_ARGS__)
 #define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
+#define DEBUG_HEXBUFFER(...)  LOG("DEBUG", buffer_hex,(char*)__VA_ARGS__)
 #define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
 #define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
 #define FATAL(          ...) FLOG("FATAL", plain, 0, 0,      __VA_ARGS__)
@@ -48,6 +70,10 @@ extern __thread int log_allowed_fails;
 #ifndef LOG_DEBUG
 #undef DEBUG
 #define DEBUG(...)
+#undef DEBUG_BUFFER
+#define DEBUG_BUFFER(...)
+#undef DEBUG_HEXBUFFER
+#define DEBUG_HEXBUFFER(...)
 #endif
 
 #ifdef LOG_NO_TRACE

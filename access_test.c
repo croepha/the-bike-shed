@@ -126,7 +126,7 @@ void access_idle_maintenance(void) {
 
 void access_user_add(access_HashResult hash, u16 expire_day) {
 
-  INFO_HEXBUFFER(hash, sizeof(access_HashResult), "hash:");
+  DEBUG_HEXBUFFER(hash, sizeof(access_HashResult), "hash:");
 
   if (access_users_first_free_idx == (u16)-1) {
     ERROR("User list full");
@@ -140,21 +140,22 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    DEBUG("MAP_idx: %u", MAP_idx);
     if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("Hit tombstone");
+      DEBUG("Hit first tombstone MAP_idx:%u", MAP_idx);
       map_first_tombstone = MAP_idx;
     } else if (MAP == 0) {
-      DEBUG("Found empty space, make new");
-      if (map_first_tombstone != (u32)-1) {
-        // If we had hit a tombstone, lets fill that slot instead
-        MAP_idx = map_first_tombstone;
-      }
-
       // pop off the free list
       u16 USER_idx = access_users_first_free_idx;
       access_users_first_free_idx = USER.next_idx;
       assert(USER.debug_is_free);
+
+      if (map_first_tombstone != (u32)-1) {
+        DEBUG("MAP_idx:%u USER_idx:%hu Adding new, replacing tombstone instead of making new slot, got to %u ", map_first_tombstone, USER_idx, MAP_idx);
+        MAP_idx = map_first_tombstone;
+      } else {
+        DEBUG("MAP_idx:%u USER_idx:%hu Adding new, in new slot", map_first_tombstone, USER_idx);
+      }
+
 
 
       USER.debug_is_free = 0;
@@ -165,14 +166,17 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
       memcpy(USER.hash, hash, sizeof USER.hash);
 
       USER.expire_day = expire_day;
+
       break;
     } else {
-      DEBUG("Update existing");
       u16 USER_idx = MAP - 1;
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
+        DEBUG("MAP_idx:%u USER_idx:%hu Update existing", MAP_idx, USER_idx);
         USER.expire_day = expire_day;
         break;
-      } // else continue
+      } else {
+        DEBUG("MAP_idx:%u USER_idx:%hu Update existing", MAP_idx, USER_idx);
+      }
     }
   }
 }
@@ -283,18 +287,31 @@ int main() {
 
   access_user_list_init();
 
-  hash_from_string(hash, "01000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
-  hash_from_string(hash, "01000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
-  hash_from_string(hash, "01000000ff00ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ff00ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
-  hash_from_string(hash, "01000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
-  hash_from_string(hash, "01000000ff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
-  hash_from_string(hash, "01000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  hash_from_string(hash, "02000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
+
+  hash_from_string(hash, "ffffffffff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  access_user_add(hash, 100);
+  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  access_user_add(hash, 100);
+  hash_from_string(hash, "ffffffffff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  access_user_add(hash, 100);
+  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  access_user_add(hash, 100);
+  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
+  access_user_add(hash, 100);
+
+
   u8 result;
   set_mock_salt(0x01, 0xffffffff);
   result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
