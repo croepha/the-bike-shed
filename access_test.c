@@ -14,7 +14,6 @@ char salt[SALT_BUF_LEN] = "saltysalt";
 u8 access_requested(char * rfid, char * pin);
 
 void access_hash(access_HashResult result, struct access_HashPayload * payload) {
-    INFO_BUFFER((char*)payload, sizeof * payload, "payload:");
     memset(result, 0x69, sizeof(access_HashResult));
     *(u64*)result = *(u64*)payload->salt;
 }
@@ -171,21 +170,23 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   }
 }
 
-void __access_requested_hash(access_HashResult hash, char * rfid, char * pin);
+void __access_requested_payload(struct access_HashPayload * payload, char * rfid, char * pin);
 
-void __access_requested_hash(access_HashResult hash, char * rfid, char * pin) {
-  struct access_HashPayload payload = {};
-  memcpy(payload.salt, salt, sizeof payload.salt);
-  memcpy(payload.rfid, rfid, sizeof payload.rfid);
-  memcpy(payload.pin , pin , sizeof payload.pin );
-  access_hash(hash, &payload);
-  INFO_HEXBUFFER(hash, sizeof(access_HashResult), "hash_result:");
+void __access_requested_payload(struct access_HashPayload * payload, char * rfid, char * pin) {
+  memcpy(payload->salt, salt, sizeof payload->salt);
+  memcpy(payload->rfid, rfid, sizeof payload->rfid);
+  memcpy(payload->pin , pin , sizeof payload->pin );
 }
 
 u8 access_requested(char * rfid, char * pin) {
 
+  struct access_HashPayload payload = {};
+  __access_requested_payload(&payload, rfid, pin);
+  INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
   access_HashResult hash;
-  __access_requested_hash(hash, rfid, pin);
+  access_hash(hash, &payload);
+  INFO_HEXBUFFER(hash, sizeof(access_HashResult), "hash_result:");
+
 
   assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
   assert( HASH_MAP_LEN >= USER_TABLE_LEN);
@@ -226,8 +227,12 @@ u8 access_requested(char * rfid, char * pin) {
 
 
 int main() {
-  *(u64*)salt = (u64)0x0000000000000000;
-  *(u32*)salt = (u32)0xff000001;
+  // *(u64*)salt = (u64)0x0000000000000000;
+  // *(u32*)salt = (u32)0xff000001;
+
+  // access_HashResult hash;
+  // __access_requested_hash(hash, rfid, pin);
+
   access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
 
 }
