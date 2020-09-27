@@ -40,13 +40,13 @@ static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
 
 
 
-void access_hash(access_HashResult * result, struct access_HashPayload * payload) {
+void access_hash(access_HashResult result, struct access_HashPayload * payload) {
     u32 const t_cost = 1;
     u32 const parallelism = 1;
 
     argon2_context context = {     // low-level API
-        *result,  /* output array, at least HASHLEN in size */
-        sizeof * result, /* digest length */
+        result,  /* output array, at least HASHLEN in size */
+        sizeof(access_HashResult), /* digest length */
         (u8*)payload, /* password array */
         sizeof * payload, /* password length */
         payload->salt,  /* salt array */
@@ -62,7 +62,7 @@ void access_hash(access_HashResult * result, struct access_HashPayload * payload
     int rc = argon2d_ctx( &context );
     if (rc != ARGON2_OK) {
         ERROR("argon2 error:%s", argon2_error_message(rc));
-        memset(*result, 0, sizeof * result);
+        memset(result, 0, sizeof(access_HashResult));
     }
 }
 
@@ -81,7 +81,7 @@ static void access_hash_test(char * salt, char * rfid, char *  pin) {
 
     access_HashResult result = {};
     INFO_HEXBUFFER(&payload, sizeof payload, "payload:");
-    access_hash(&result, &payload);
+    access_hash(result, &payload);
     INFO_HEXBUFFER(&result, sizeof result, "result:");
 }
 
