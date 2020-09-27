@@ -90,7 +90,7 @@ void access_idle_maintenance(void) {
   u32 map_range_end = map_rage_start_idx;
 
   for (u32 MAP_idx = map_rage_start_idx;; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    DEBUG("MAP_idx: %u", MAP_idx);
+    DEBUG("MAP_idx: %x", MAP_idx);
     if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
       DEBUG("Hit tombstone");
       map_first_tombstone = MAP_idx;
@@ -126,7 +126,7 @@ void access_idle_maintenance(void) {
 
 void access_user_add(access_HashResult hash, u16 expire_day) {
 
-  DEBUG_HEXBUFFER(hash, sizeof(access_HashResult), "hash:");
+  DEBUG_HEXBUFFER(hash, 64 / 8, "hash:");
 
   if (access_users_first_free_idx == (u16)-1) {
     ERROR("User list full");
@@ -141,7 +141,7 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
     if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("Hit first tombstone MAP_idx:%u", MAP_idx);
+      DEBUG("MAP_idx:%u Hit first tombstone ", MAP_idx);
       map_first_tombstone = MAP_idx;
     } else if (MAP == 0) {
       // pop off the free list
@@ -150,13 +150,11 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
       assert(USER.debug_is_free);
 
       if (map_first_tombstone != (u32)-1) {
-        DEBUG("MAP_idx:%u USER_idx:%hu Adding new, replacing tombstone instead of making new slot, got to %u ", map_first_tombstone, USER_idx, MAP_idx);
+        DEBUG("MAP_idx:%x USER_idx:%x Adding new, replacing tombstone instead of making new slot, got to %x ", map_first_tombstone, USER_idx, MAP_idx);
         MAP_idx = map_first_tombstone;
       } else {
-        DEBUG("MAP_idx:%u USER_idx:%hu Adding new, in new slot", map_first_tombstone, USER_idx);
+        DEBUG("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
       }
-
-
 
       USER.debug_is_free = 0;
       USER.next_idx = access_users_first_idx;
@@ -168,14 +166,16 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
       USER.expire_day = expire_day;
 
       break;
+
     } else {
       u16 USER_idx = MAP - 1;
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
-        DEBUG("MAP_idx:%u USER_idx:%hu Update existing", MAP_idx, USER_idx);
+        DEBUG("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
         USER.expire_day = expire_day;
         break;
       } else {
-        DEBUG("MAP_idx:%u USER_idx:%hu Update existing", MAP_idx, USER_idx);
+        // TODO, should this really be a warning? or at-least an INFO?
+        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
       }
     }
   }
@@ -193,11 +193,11 @@ u8 access_requested(char * rfid, char * pin) {
 
   struct access_HashPayload payload = {};
   __access_requested_payload(&payload, rfid, pin);
-  INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
+  // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
   access_HashResult hash;
   access_hash(hash, &payload);
-  INFO_HEXBUFFER(hash, sizeof(access_HashResult), "hash:");
 
+  DEBUG_HEXBUFFER(hash, 64 / 8, "hash:");
 
   assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
   assert( HASH_MAP_LEN >= USER_TABLE_LEN);
@@ -209,23 +209,22 @@ u8 access_requested(char * rfid, char * pin) {
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    DEBUG("MAP_idx: %u", MAP_idx);
     if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("Hit tombstone");
+      DEBUG("MAP_idx:%u Hit first tombstone ", MAP_idx);
       map_first_tombstone = MAP_idx;
     } else if (MAP == 0) {
-      DEBUG("Hash not in our map");
+      DEBUG("MAP_idx:%u Hash not in our map ", MAP_idx);
       return 0;
     } else {
       u16 USER_idx = MAP - 1;
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
         if (map_first_tombstone != (u32)-1) {
-          DEBUG("We hit a tombstone on the way, lets go ahead and swap this entry with that one");
+          DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
           MAP = (u16)-1;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         }
-        DEBUG("expire: %u %u", pt_day, USER.expire_day);
+        DEBUG("MAP_idx:%x USER_idx:%x expires: %u %u ", MAP_idx, USER_idx, pt_day, USER.expire_day);
         if (pt_day >= USER.expire_day) {
           return 1; // Valid
         } else {
@@ -263,29 +262,41 @@ static void hash_from_string(access_HashResult hash, char * str) {
   }
 }
 
-int main() {
+
+static void test_add(u32 hash_i, u32 extra) {
   struct access_HashPayload payload = {};
   access_HashResult hash;
-
-  set_mock_salt(0x01, 0xffffffff);
+  INFO("Add: %x %x", hash_i, extra);
+  set_mock_salt(hash_i, extra);
   __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
   access_hash(hash, &payload);
-  INFO_HEXBUFFER(hash, sizeof hash, "hash:");
-  INFO("hash_i: %x", get_hash_i(hash));
+  access_user_add(hash, 100);
+}
 
-  set_mock_salt(0x02, 0xffffffff);
-  __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  access_hash(hash, &payload);
-  INFO_HEXBUFFER(hash, sizeof hash, "hash:");
-  INFO("hash_i: %x", get_hash_i(hash));
+int main() {
+  access_HashResult hash;
 
-  set_mock_salt(0x01, 0xffffffff);
-  __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  access_hash(hash, &payload);
-  INFO_HEXBUFFER(hash, sizeof hash, "hash:");
-  INFO("hash_i: %x", get_hash_i(hash));
+  // set_mock_salt(0x01, 0xffffffff);
+  // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  // access_hash(hash, &payload);
+  // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
+  // INFO("hash_i: %x", get_hash_i(hash));
+
+  // set_mock_salt(0x02, 0xffffffff);
+  // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  // access_hash(hash, &payload);
+  // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
+  // INFO("hash_i: %x", get_hash_i(hash));
+
+  // set_mock_salt(0x01, 0xffffffff);
+  // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  // access_hash(hash, &payload);
+  // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
+  // INFO("hash_i: %x", get_hash_i(hash));
 
   access_user_list_init();
+
+  test_add(0x01, 0xffffffff);
 
   hash_from_string(hash, "02000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
   access_user_add(hash, 100);
