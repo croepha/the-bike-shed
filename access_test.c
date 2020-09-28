@@ -40,6 +40,8 @@ void access_user_list_init(void);
 
 u16 access_users_first_free_idx;
 u16 access_users_first_idx;
+u16 * idle_maintenance_prev;
+
 
 #define USER (access_users_space[USER_idx])
 #define MAP (access_map[MAP_idx])
@@ -56,6 +58,7 @@ void access_user_list_init(void) {
     access_users_first_free_idx = USER_idx;
 
   }
+  idle_maintenance_prev = &access_users_first_idx;
 }
 
 static u8 user_is_expired(u16 USER_idx) {
@@ -78,19 +81,16 @@ static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u3
 // void access_user_remove_i(u32 MAP_idx) {
 // }
 void access_idle_maintenance(void);
+
 void access_idle_maintenance(void) {
 
   // Scan for users that need to be pruned
-
-  u16 * prev = &access_users_first_idx;
-
-  if (*prev == (u16)-1) {
-    prev = &access_users_first_idx;
+  if (*idle_maintenance_prev == (u16)-1) {
+    idle_maintenance_prev = &access_users_first_idx;
     return;
   }
 
-  u16 USER_idx = *prev;
-
+  u16 USER_idx = *idle_maintenance_prev + 1;
 
   assert(!USER.debug_is_free);
 
@@ -110,28 +110,30 @@ void access_idle_maintenance(void) {
       break; // Hash not in our map
     } else {
       map_range_end = MAP_idx;
-      assert(USER_idx == MAP - 1);
-      {
-        LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-
-      }
-
-      if (user_is_expired(USER_idx)) { // This entry is expired lets remove it
-        USER.debug_is_free = 1;
-        USER.next_idx = access_users_first_free_idx;
-        access_users_first_free_idx = USER_idx;
-        MAP = -1;
-        *prev = USER.next_idx;
-      } else {
-        if (map_first_tombstone != (u32)-1) {
-          DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
-          MAP = (u16)-1;
-          MAP_idx = map_first_tombstone;
-          MAP = USER_idx + 1;
+      if(USER_idx == MAP - 1) {
+        u8 is_expired;
+        {
+          LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
+          is_expired = user_is_expired(USER_idx);
         }
-        prev = &USER.next_idx;
+        if (is_expired) { // This entry is expired lets remove it
+          USER.debug_is_free = 1;
+          USER.next_idx = access_users_first_free_idx;
+          access_users_first_free_idx = USER_idx;
+          MAP = -1;
+          *idle_maintenance_prev = USER.next_idx;
+        } else {
+          if (map_first_tombstone != (u32)-1) {
+            DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+            MAP = (u16)-1;
+            MAP_idx = map_first_tombstone;
+            MAP = USER_idx + 1;
+          }
+          idle_maintenance_prev = &USER.next_idx;
+        }
+        break;
+
       }
-      break;
     }
   }
 
@@ -331,6 +333,11 @@ int main() {
 
   test_request(0x01, 0xffffffff);
   test_request(0x01, 0xffff00ff);
+
+  access_idle_maintenance();
+  while (idle_maintenance_prev != &access_users_first_idx) {
+    access_idle_maintenance();
+  }
 
 
 
