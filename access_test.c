@@ -189,6 +189,18 @@ void __access_requested_payload(struct access_HashPayload * payload, char * rfid
   memcpy(payload->pin , pin , sizeof payload->pin );
 }
 
+static u8 user_is_expired(u16 USER_idx) {
+  // Lets put the cutoff at 1pm Pacific Time, that ensures that fresh
+  //  expirations happen when there are likely to be most noisebridgers around
+  u64  utc_sec = now_sec();
+  u64  utc_hour = utc_sec / (60*60);
+  u16  pt_hour = utc_hour - 7 /* 7 hours */ ;
+  u16  pt_day = pt_hour / 24;
+
+  DEBUG("expires: %u %u ", pt_day, USER.expire_day);
+  return pt_day < USER.expire_day;
+}
+
 u8 access_requested(char * rfid, char * pin) {
 
   struct access_HashPayload payload = {};
@@ -201,11 +213,6 @@ u8 access_requested(char * rfid, char * pin) {
 
   assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
   assert( HASH_MAP_LEN >= USER_TABLE_LEN);
-
-  // Lets put the cutoff at 1pm Pacific Time, that ensures that fresh
-  //  expirations happen when there are likely to be most noisebridgers around
-  u64  utc_sec = time(0);
-  u16  pt_day = (utc_sec - 60*60*7 /* 7 hours */ ) / 60*60*24;
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
@@ -224,12 +231,8 @@ u8 access_requested(char * rfid, char * pin) {
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         }
-        DEBUG("MAP_idx:%x USER_idx:%x expires: %u %u ", MAP_idx, USER_idx, pt_day, USER.expire_day);
-        if (pt_day >= USER.expire_day) {
-          return 1; // Valid
-        } else {
-          return 0; // Expired
-        }
+        LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
+        return !user_is_expired(USER_idx);
       } // else continue
     }
   }
@@ -271,6 +274,18 @@ static void test_add(u32 hash_i, u32 extra) {
   __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
   access_hash(hash, &payload);
   access_user_add(hash, 100);
+}
+
+static void test_request(u32 hash_i, u32 extra) {
+  u8 result;
+  set_mock_salt(hash_i, extra);
+  result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  INFO("Request: %x %x result: %d", hash_i, extra, result);
+}
+
+u64 now_day = 90;
+u64 now_sec() {
+  return now_day * 24 * 60 * 60;
 }
 
 int main() {
@@ -323,10 +338,7 @@ int main() {
   access_user_add(hash, 100);
 
 
-  u8 result;
-  set_mock_salt(0x01, 0xffffffff);
-  result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  INFO("result: %d", result);
+  test_request(0x01, 0xffffffff);
 
 
 
