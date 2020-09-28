@@ -50,6 +50,7 @@ u16 * idle_maintenance_prev;
 void access_user_list_init(void) {
 
   // Initialize the free list
+  access_users_first_idx = -1;
   access_users_first_free_idx = -1;
   for (u16 USER_idx = 0; USER_idx < USER_TABLE_LEN; USER_idx++) {
 
@@ -86,11 +87,11 @@ void access_idle_maintenance(void) {
 
   // Scan for users that need to be pruned
   if (*idle_maintenance_prev == (u16)-1) {
-    idle_maintenance_prev = &access_users_first_idx;
     return;
   }
 
-  u16 USER_idx = *idle_maintenance_prev + 1;
+  u16 USER_idx = *idle_maintenance_prev;
+  //DEBUG("USER_idx:%hu", USER_idx);
 
   assert(!USER.debug_is_free);
 
@@ -100,9 +101,11 @@ void access_idle_maintenance(void) {
   u32 map_range_end = map_rage_start_idx;
 
   for (u32 MAP_idx = map_rage_start_idx;; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
-      map_first_tombstone = MAP_idx;
+    if (MAP == (u16)-1) {
+      if (map_first_tombstone == (u32)-1) {
+        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        map_first_tombstone = MAP_idx;
+      }
     } else if (MAP == 0) {
       DEBUG("MAP_idx:%x Hash not in our map ", MAP_idx);
       assert(0);
@@ -117,11 +120,12 @@ void access_idle_maintenance(void) {
           is_expired = user_is_expired(USER_idx);
         }
         if (is_expired) { // This entry is expired lets remove it
+          DEBUG("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP_idx);
           USER.debug_is_free = 1;
+          *idle_maintenance_prev = USER.next_idx;
           USER.next_idx = access_users_first_free_idx;
           access_users_first_free_idx = USER_idx;
-          MAP = -1;
-          *idle_maintenance_prev = USER.next_idx;
+          MAP = (u16)-1;
         } else {
           if (map_first_tombstone != (u32)-1) {
             DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
@@ -129,10 +133,13 @@ void access_idle_maintenance(void) {
             MAP_idx = map_first_tombstone;
             MAP = USER_idx + 1;
           }
+          DEBUG("MAP_idx:%x USER_idx:%x Not expired, doing nothing", USER_idx, MAP_idx);
           idle_maintenance_prev = &USER.next_idx;
         }
         break;
-
+      } else {
+        // TODO, should this really be a warning? or at-least an INFO?
+        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
       }
     }
   }
@@ -157,9 +164,11 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
-      map_first_tombstone = MAP_idx;
+    if (MAP == (u16)-1) {
+      if(  map_first_tombstone == (u32)-1) {
+        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        map_first_tombstone = MAP_idx;
+      }
     } else if (MAP == 0) {
       // pop off the free list
       u16 USER_idx = access_users_first_free_idx;
@@ -186,7 +195,18 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
 
     } else {
       u16 USER_idx = MAP - 1;
+      assert(!USER.debug_is_free);
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
+
+        if (map_first_tombstone != (u32)-1) {
+          DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+          MAP = (u16)-1;
+          MAP_idx = map_first_tombstone;
+          MAP = USER_idx + 1;
+        } else {
+          DEBUG("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
+        }
+
         DEBUG("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
         USER.expire_day = expire_day;
         break;
@@ -222,14 +242,17 @@ u8 access_requested(char * rfid, char * pin) {
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1 && map_first_tombstone == (u32)-1) {
-      DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
-      map_first_tombstone = MAP_idx;
+    if (MAP == (u16)-1) {
+      if(map_first_tombstone == (u32)-1) {
+        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        map_first_tombstone = MAP_idx;
+      }
     } else if (MAP == 0) {
       DEBUG("MAP_idx:%x Hash not in our map ", MAP_idx);
       return 0;
     } else {
       u16 USER_idx = MAP - 1;
+      assert(!USER.debug_is_free);
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
         if (map_first_tombstone != (u32)-1) {
           DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
@@ -239,7 +262,10 @@ u8 access_requested(char * rfid, char * pin) {
         }
         LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
         return !user_is_expired(USER_idx);
-      } // else continue
+      } else {
+        // TODO, should this really be a warning? or at-least an INFO?
+        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+      }
     }
   }
   __builtin_unreachable();
@@ -282,7 +308,7 @@ static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
   access_user_add(hash, expire_day);
 }
 
-static void test_request(u32 hash_i, u32 extra) {
+static void test_req(u32 hash_i, u32 extra) {
   u8 result;
   set_mock_salt(hash_i, extra);
   result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
@@ -316,29 +342,61 @@ int main() {
 
   access_user_list_init();
 
-  test_add(0x01, 0xffffffff, 100);
-  test_add(0x02, 0xffffffff, 100);
-  test_add(0x02, 0xffffffff, 100);
-  test_add(0x02, 0xffff00ff, 100);
-  test_add(0x02, 0xffff01ff, 100);
-  test_add(0x02, 0xffff02ff, 100);
-  test_add(0x02, 0xffff01ff, 100);
+  test_add(0x00000001, 0xffffffff, 110);
+  test_add(0x00000002, 0xffffffff, 110);
+  test_add(0x00000002, 0xffffffff, 110);
+  test_add(0x00000002, 0xffff00ff, 110);
+  test_add(0x00000002, 0xffff01ff, 110);
+  test_add(0x00000002, 0xffff02ff, 110);
+  test_add(0x00000002, 0xffff01ff, 100);
+  test_add(0xffffffff, 0xffff01ff, 110);
+  test_add(0xffffffff, 0xffff02ff, 110);
+  test_add(0xffffffff, 0xffff03ff, 100);
+  test_add(0xffffffff, 0xffff01ff, 110);
+  test_add(0xffffffff, 0xffff02ff, 110);
+  test_add(0xffffffff, 0xffff02ff, 110);
 
-  test_add(0xffffffff, 0xffff01ff, 100);
-  test_add(0xffffffff, 0xffff02ff, 100);
-  test_add(0xffffffff, 0xffff01ff, 100);
-  test_add(0xffffffff, 0xffff02ff, 100);
-  test_add(0xffffffff, 0xffff02ff, 100);
+  test_req(0x00000001, 0xffffffff);
+  test_req(0x00000002, 0xffffffff);
+  test_req(0x00000002, 0xffff00ff);
+  test_req(0x00000002, 0xffff01ff);
+  test_req(0x00000002, 0xffff02ff);
+  test_req(0xffffffff, 0xffff01ff);
+  test_req(0xffffffff, 0xffff02ff);
+  test_req(0xffffffff, 0xffff03ff);
 
 
-  test_request(0x01, 0xffffffff);
-  test_request(0x01, 0xffff00ff);
 
-  access_idle_maintenance();
-  while (idle_maintenance_prev != &access_users_first_idx) {
+  INFO("First pass of maintenance, expect no frees");
+  idle_maintenance_prev = &access_users_first_idx;
+  while (*idle_maintenance_prev != (u16)-1) {
     access_idle_maintenance();
   }
 
+  test_req(0x00000001, 0xffffffff);
+  test_req(0x00000002, 0xffffffff);
+  test_req(0x00000002, 0xffff00ff);
+  test_req(0x00000002, 0xffff01ff);
+  test_req(0x00000002, 0xffff02ff);
+  test_req(0xffffffff, 0xffff01ff);
+  test_req(0xffffffff, 0xffff02ff);
+  test_req(0xffffffff, 0xffff03ff);
+
+  now_day = 105;
+  INFO("First pass of maintenance, expect frees");
+  idle_maintenance_prev = &access_users_first_idx;
+  while (*idle_maintenance_prev != (u16)-1) {
+    access_idle_maintenance();
+  }
+
+  test_req(0x00000001, 0xffffffff);
+  test_req(0x00000002, 0xffffffff);
+  test_req(0x00000002, 0xffff00ff);
+  test_req(0x00000002, 0xffff01ff);
+  test_req(0x00000002, 0xffff02ff);
+  test_req(0xffffffff, 0xffff01ff);
+  test_req(0xffffffff, 0xffff02ff);
+  test_req(0xffffffff, 0xffff03ff);
 
 
   memset(salt, 0, SALT_BUF_LEN);
