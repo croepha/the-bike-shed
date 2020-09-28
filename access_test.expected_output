@@ -47,7 +47,7 @@ DEBUG: MAP_idx:3ffff USER_idx:1ffa Collision, continuing	(./access_test.c access
 DEBUG: MAP_idx:0 USER_idx:1ff9 Update existing	(./access_test.c access_user_add)
 DEBUG: hash: [01000000ffffffff]	(./access_test.c access_requested)
 DEBUG: MAP_idx:1 USER_idx:1fff  expires: 89 100 	(./access_test.c user_is_expired)
- INFO: Request: 1 ffffffff result: 0	(./access_test.c test_request)
+ INFO: Request: 1 ffffffff result: 1	(./access_test.c test_request)
 DEBUG: hash: [01000000ff00ffff]	(./access_test.c access_requested)
 DEBUG: MAP_idx:6 Hash not in our map 	(./access_test.c access_requested)
  INFO: Request: 1 ffff00ff result: 0	(./access_test.c test_request)

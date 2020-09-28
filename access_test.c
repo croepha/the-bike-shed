@@ -198,7 +198,7 @@ static u8 user_is_expired(u16 USER_idx) {
   u16  pt_day = pt_hour / 24;
 
   DEBUG("expires: %u %u ", pt_day, USER.expire_day);
-  return pt_day < USER.expire_day;
+  return pt_day > USER.expire_day;
 }
 
 u8 access_requested(char * rfid, char * pin) {
