@@ -246,24 +246,24 @@ static void set_mock_salt(u32 hash_i, u32 extra) {
   *(u64*)salt = (u64)extra << 32ULL | hash_i;
 }
 
-static u8 hex_to_int(char c) {
-  if ('0' <= c && c <= '9') {
-    return c - '0';
-  } else if ('a' <= c && c <= 'f') {
-    return 10 + c - 'a';
-  } else if ('A' <= c && c <= 'F') {
-    return 10 + c - 'A';
-  } else {
-    assert(0);
-    __builtin_unreachable();
-  }
-}
+// static u8 hex_to_int(char c) {
+//   if ('0' <= c && c <= '9') {
+//     return c - '0';
+//   } else if ('a' <= c && c <= 'f') {
+//     return 10 + c - 'a';
+//   } else if ('A' <= c && c <= 'F') {
+//     return 10 + c - 'A';
+//   } else {
+//     assert(0);
+//     __builtin_unreachable();
+//   }
+// }
 
-static void hash_from_string(access_HashResult hash, char * str) {
-  for (int i = 0; i < sizeof(access_HashResult); i++) {
-    hash[i] = (hex_to_int(str[i*2+0]) << 4) | hex_to_int(str[i*2+1]);
-  }
-}
+// static void hash_from_string(access_HashResult hash, char * str) {
+//   for (int i = 0; i < sizeof(access_HashResult); i++) {
+//     hash[i] = (hex_to_int(str[i*2+0]) << 4) | hex_to_int(str[i*2+1]);
+//   }
+// }
 
 
 static void test_add(u32 hash_i, u32 extra) {
@@ -289,7 +289,6 @@ u64 now_sec() {
 }
 
 int main() {
-  access_HashResult hash;
 
   // set_mock_salt(0x01, 0xffffffff);
   // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
@@ -312,33 +311,22 @@ int main() {
   access_user_list_init();
 
   test_add(0x01, 0xffffffff);
+  test_add(0x02, 0xffffffff);
+  test_add(0x02, 0xffffffff);
+  test_add(0x02, 0xffff00ff);
+  test_add(0x02, 0xffff01ff);
+  test_add(0x02, 0xffff02ff);
+  test_add(0x02, 0xffff01ff);
 
-  hash_from_string(hash, "02000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "02000000ffffffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "02000000ff00ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "02000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "02000000ff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "02000000ff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-
-  hash_from_string(hash, "ffffffffff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "ffffffffff01ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
-  hash_from_string(hash, "ffffffffff02ffff6969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969696969");
-  access_user_add(hash, 100);
+  test_add(0xffffffff, 0xffff01ff);
+  test_add(0xffffffff, 0xffff02ff);
+  test_add(0xffffffff, 0xffff01ff);
+  test_add(0xffffffff, 0xffff02ff);
+  test_add(0xffffffff, 0xffff02ff);
 
 
   test_request(0x01, 0xffffffff);
+  test_request(0x01, 0xffff00ff);
 
 
 
