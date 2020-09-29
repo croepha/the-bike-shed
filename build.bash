@@ -266,9 +266,9 @@ link_exec  config_validator
 reset
 depends_on logging
 compile access_data
-compile access_test
-link_exec access_test
-do_test access_test /build/access_test.dbg.exec
+compile access_data_test
+link_exec access_data_test
+do_test access_data_test /build/access_data_test.dbg.exec
 
 
 re parse_headers
