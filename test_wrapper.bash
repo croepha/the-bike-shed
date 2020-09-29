@@ -19,13 +19,8 @@ $EXEC 2>&1 | tee "$OUT_FILE.raw" |
   sed -E $'s/^([0-9a-f]+[.][0-9]{3}: (DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3/' >/dev/null # Right justify location info
 
 # remove timestamp, and also line number and addresses, if they shift around, we dont want the test to fail...
-if [ "$EXEC" = "/build/access_data_test.dbg.exec" ]; then {
-sed -E $'s/^[0-9a-f]+[.][0-9]{3}: ((DEBUG| INFO| WARN|ERROR|FATAL):.*\t)\((.*):.* .*:(.*)\)$/\\1(\\3 \\4)/' < "$OUT_FILE.raw" |
-  sed -E 's/Child:[0-9]+/Child:XXXX/' > "$OUT_FILE.cleaned1"
-} else {
-sed -E $'s/^[0-9a-f]+[.][0-9]{3}: ((DEBUG| INFO| WARN|ERROR|FATAL):.*\t)\((.*):.* .*:(.*)\)$/\\1(\\3 \\4)/' < "$OUT_FILE.raw" |
+sed -E $'s/^[0-9a-f]+[.][0-9]{3}: ((DEBUG|TRACE| INFO| WARN|ERROR|FATAL):.*\t)\((.*):.* .*:(.*)\)$/\\1(\\3 \\4)/' < "$OUT_FILE.raw" |
   sed -E 's/Child:[0-9]+/Child:XXXX/' | sed '/^DEBUG:.*$/d' > "$OUT_FILE.cleaned1"
-}; fi
 
 sed '/^.*test_sort.*$/d' < "$OUT_FILE.cleaned1" >>  "$OUT_FILE.cleaned"
 sed -En 's/^(.*(test_sort:[^ ]*) .*)$/\2 \1/p' < "$OUT_FILE.cleaned1" |

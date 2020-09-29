@@ -40,7 +40,7 @@ static u8 user_is_expired(u16 USER_idx) {
   u16  pt_hour = utc_hour - 7 /* 7 hours */ ;
   u16  pt_day = pt_hour / 24;
 
-  DEBUG("expires: %u %u ", pt_day, USER.expire_day);
+  TRACE("expires: %u %u ", pt_day, USER.expire_day);
   return pt_day > USER.expire_day;
 }
 
@@ -85,11 +85,11 @@ void access_idle_maintenance(void) {
   for (u32 MAP_idx = map_rage_start_idx;; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
     if (MAP == (u16)-1) {
       if (map_first_tombstone == (u32)-1) {
-        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
     } else if (MAP == 0) {
-      DEBUG("MAP_idx:%x Hash not in our map ", MAP_idx);
+      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
       assert(0);
       map_range_end = MAP_idx;
       break; // Hash not in our map
@@ -102,7 +102,7 @@ void access_idle_maintenance(void) {
           is_expired = user_is_expired(USER_idx);
         }
         if (is_expired) { // This entry is expired lets remove it
-          DEBUG("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP_idx);
+          TRACE("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP_idx);
           USER.debug_is_free = 1;
           *access_idle_maintenance_prev = USER.next_idx;
           USER.next_idx = access_users_first_free_idx;
@@ -110,18 +110,18 @@ void access_idle_maintenance(void) {
           MAP = (u16)-1;
         } else {
           if (map_first_tombstone != (u32)-1) {
-            DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+            TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
             MAP = (u16)-1;
             MAP_idx = map_first_tombstone;
             MAP = USER_idx + 1;
           }
-          DEBUG("MAP_idx:%x USER_idx:%x Not expired, doing nothing", USER_idx, MAP_idx);
+          TRACE("MAP_idx:%x USER_idx:%x Not expired, doing nothing", USER_idx, MAP_idx);
           access_idle_maintenance_prev = &USER.next_idx;
         }
         break;
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
-        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
       }
     }
   }
@@ -132,7 +132,7 @@ void access_idle_maintenance(void) {
 
 void access_user_add(access_HashResult hash, u16 expire_day) {
 
-  DEBUG_HEXBUFFER(hash, 64 / 8, "hash:");
+  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
   if (access_users_first_free_idx == (u16)-1) {
     ERROR("User list full");
@@ -148,7 +148,7 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
     if (MAP == (u16)-1) {
       if(  map_first_tombstone == (u32)-1) {
-        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
     } else if (MAP == 0) {
@@ -158,10 +158,10 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
       assert(USER.debug_is_free);
 
       if (map_first_tombstone != (u32)-1) {
-        DEBUG("MAP_idx:%x USER_idx:%x Adding new, replacing tombstone instead of making new slot, got to %x ", map_first_tombstone, USER_idx, MAP_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Adding new, replacing tombstone instead of making new slot, got to %x ", map_first_tombstone, USER_idx, MAP_idx);
         MAP_idx = map_first_tombstone;
       } else {
-        DEBUG("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
       }
 
       USER.debug_is_free = 0;
@@ -181,20 +181,20 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
 
         if (map_first_tombstone != (u32)-1) {
-          DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
           MAP = (u16)-1;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         } else {
-          DEBUG("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
+          TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
         }
 
-        DEBUG("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
         USER.expire_day = expire_day;
         break;
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
-        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
       }
     }
   }
@@ -208,7 +208,7 @@ u8 access_requested(char * rfid, char * pin) {
   access_HashResult hash;
   access_hash(hash, &payload);
 
-  DEBUG_HEXBUFFER(hash, 64 / 8, "hash:");
+  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
   assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
   assert( HASH_MAP_LEN >= USER_TABLE_LEN);
@@ -217,18 +217,18 @@ u8 access_requested(char * rfid, char * pin) {
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
     if (MAP == (u16)-1) {
       if(map_first_tombstone == (u32)-1) {
-        DEBUG("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
     } else if (MAP == 0) {
-      DEBUG("MAP_idx:%x Hash not in our map ", MAP_idx);
+      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
       return 0;
     } else {
       u16 USER_idx = MAP - 1;
       assert(!USER.debug_is_free);
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
         if (map_first_tombstone != (u32)-1) {
-          DEBUG("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
           MAP = (u16)-1;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
@@ -237,7 +237,7 @@ u8 access_requested(char * rfid, char * pin) {
         return !user_is_expired(USER_idx);
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
-        DEBUG("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
       }
     }
   }

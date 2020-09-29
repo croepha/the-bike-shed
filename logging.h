@@ -55,14 +55,15 @@ DEBUG   An internal dump of an algorithms state or event tracing, these are turn
 
 */
 
-
 #define  INFO(          ...)  LOG(" INFO", plain, 0, 0,      __VA_ARGS__)
 #define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string,    __VA_ARGS__)
 #define  INFO_HEXBUFFER(...)  LOG(" INFO", buffer_hex,(char*)__VA_ARGS__)
 #define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
-#define TRACE(          ...)  LOG("TRACE", plain, 0, 0,      __VA_ARGS__)
 #define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
 #define DEBUG_HEXBUFFER(...)  LOG("DEBUG", buffer_hex,(char*)__VA_ARGS__)
+#define TRACE(          ...)  LOG("TRACE", plain, 0, 0,      __VA_ARGS__)
+#define TRACE_BUFFER(   ...)  LOG("TRACE", buffer_string,    __VA_ARGS__)
+#define TRACE_HEXBUFFER(...)  LOG("TRACE", buffer_hex,(char*)__VA_ARGS__)
 #define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
 #define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
 #define FATAL(          ...) FLOG("FATAL", plain, 0, 0,      __VA_ARGS__)
