@@ -28,7 +28,7 @@ u16 access_users_first_idx;
 u16 * access_idle_maintenance_prev;
 
 #define USER (access_users_space[USER_idx])
-#define MAP (access_map[MAP_idx])
+#define MAP  (        access_map[MAP_idx ])
 
 static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
 static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
