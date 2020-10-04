@@ -4,43 +4,63 @@
 #include "logging.h"
 #include "config.h"
 
-char config_download_leftover[config_download_leftover_SIZE];
-usz config_download_leftover_used;
 
-// It is likely that size is large, containing many lines
-size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
-  size = size * nmemb;
+
+static const u32 line_accumulator_Data_SIZE = config_download_leftover_SIZE;
+
+struct line_accumulator_Data {
+  usz used;
+  char data[line_accumulator_Data_SIZE];
+};
+
+
+void line_accumulator(struct line_accumulator_Data * leftover, char* data, usz data_len, void(*line_handler)(char*));
+void line_accumulator(struct line_accumulator_Data * leftover, char* data, usz data_len, void(*line_handler)(char*)) {
   for (;;) {
-    char* nl = memchr(data, '\n', size);
+    char* nl = memchr(data, '\n', data_len);
     if (nl) {
+      *nl = 0;
       nl++;
       if (nl - data >
-          config_download_leftover_SIZE - config_download_leftover_used) {
+          line_accumulator_Data_SIZE - leftover->used) {
         ERROR("Line too long, throwing it out");
-        size -= config_download_leftover_SIZE - config_download_leftover_used;
+        data_len -= line_accumulator_Data_SIZE - leftover->used;
         data = nl;
-        config_download_leftover_used = 0;
+        leftover->used = 0;
       } else {
-        memcpy(config_download_leftover + config_download_leftover_used, data,
+        memcpy(leftover->data + leftover->used, data,
                nl - data);
-        config_parse_line(config_download_leftover, 0);
-        size -= nl - data;
+        line_handler(leftover->data);
+        data_len -= nl - data;
         data += nl - data;
-        config_download_leftover_used = 0;
+        leftover->used = 0;
       }
     } else {
-      if (config_download_leftover_used + size <
-          config_download_leftover_SIZE) {
-        memcpy(config_download_leftover + config_download_leftover_used, data,
-               size);
-        config_download_leftover_used += size;
+      if (leftover->used + data_len <
+          line_accumulator_Data_SIZE) {
+        memcpy(leftover->data + leftover->used, data,
+               data_len);
+        leftover->used += data_len;
       } else {
         ERROR("Couldn't find end of line, and out of space, throw out continued first line in next data set");
-        config_download_leftover_used = config_download_leftover_SIZE;
+        leftover->used = line_accumulator_Data_SIZE;
       }
       break;
     }
   }
+}
+
+static void __line_handler(char* line) {
+  config_parse_line(line, 0);
+}
+
+
+struct line_accumulator_Data leftover_d;
+
+// It is likely that size is large, containing many lines
+size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
+  size = size * nmemb;
+  line_accumulator(&leftover_d, data, size, __line_handler);
   return size;
 }
 
