@@ -64,14 +64,6 @@ static int open_serial_115200_8n1(char const * path) { int r;
 
 }
 
-static void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
-
-  int fd = open_serial_115200_8n1(path);
-  *inf = fdopen(fd, "r");
-  int fd2= dup(fd);
-  assert(fd2 != -1);
-  *outf = fdopen(fd2, "a");
-}
 
 
 
@@ -79,10 +71,22 @@ static void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
 int main() { int r;
   setlinebuf(stderr);
+  setlinebuf(stdout);
   r = alarm(3); error_check(r);
 
   // Clean out the pipes
   system("timeout .1 cat /build/exterior_mock.pts2 > /dev/null; timeout .1 cat /build/exterior_mock.pts > /dev/null");
+
+  char* tty_path = "/build/exterior_mock.pts";
+  printf("ASDFASDF\n");
+
+  int fd = open_serial_115200_8n1(tty_path);
+  FILE * inf = fdopen(fd, "r");
+  int fd2= dup(fd);
+  assert(fd2 != -1);
+  FILE * outf = fdopen(fd2, "a");
+
+//  read()
 
   {
     pid_t child = fork();
@@ -130,13 +134,6 @@ int main() { int r;
     }
   }
 
-
-  char* tty_path = "/build/exterior_mock.pts";
-  printf("ASDFASDF\n");
-
-  FILE*inf = 0, *outf = 0;
-
-  fopen_serial_115200_8n1(tty_path, &inf, &outf);
 
   for (int i=0;i<5;i++) {
     static char *buf = 0;
