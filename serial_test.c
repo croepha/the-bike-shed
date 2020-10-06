@@ -1,19 +1,4 @@
 
-/*
-
-socat PTY,link=test_pty STDIO &
-
-
-/build/hello_serial.exec test_pty
-
-stty -aF test_pty > /tmp/stty_out
-grep --  'speed 115200 baud' /tmp/stty_out
-grep --  '-cstopb'            /tmp/stty_out
-grep --  '-parenb'           /tmp/stty_out
-grep --  'cs8'               /tmp/stty_out
-
-*/
-
 #include <curl/curl.h>
 #include <stddef.h>
 #include <errno.h>
@@ -26,24 +11,25 @@ grep --  'cs8'               /tmp/stty_out
 
 #include "logging.h"
 
-//#define error_message(...) ({ printf("ERROR:"); printf(__VA_ARGS__); printf("\n"); fflush(stdout); assert(0); })
-
-// void error_message(const char* fmt, ...) {
-//   fprintf(stdout, "ERROR:");
-//   va_list va;
-//   va_start(va, fmt);
-//   vfprintf(stdout, fmt, va);
-//   va_end(va);
-//   fprintf(stdout, "\n");
-//   fflush(stdout);
-//   assert(0);
-// }
+#define CRTSCTS       020000000000  /* flow control */
 
 
-static int set_interface_attribs (int fd, int speed, int parity) { int r;
+
+
+static int open_serial_115200_8n1(char const * path) { int r;
+  int fd = open(path, O_RDWR | O_NOCTTY | O_SYNC);
+  if (fd < 0) {
+    ERROR("error %d opening %s: %s", errno, path, strerror(errno));
+  }
+  error_check(fd);
+
   struct termios tty;
   r = tcgetattr (fd, &tty);
   error_check(r);
+
+  // set speed to 115,200 bps, 8n1 (no parity)
+  int const speed = B115200;
+  int const parity = 0;
 
   cfsetospeed (&tty, speed);
   cfsetispeed (&tty, speed);
@@ -67,106 +53,26 @@ static int set_interface_attribs (int fd, int speed, int parity) { int r;
   tty.c_cflag &= ~CSTOPB;
   tty.c_cflag &= ~CRTSCTS;
 
-  r = tcsetattr (fd, TCSANOW, &tty);
-  error_check(r);
-
-  return 0;
-}
-
-static void set_blocking (int fd, int should_block) { int r;
-  struct termios tty;
-  memset (&tty, 0, sizeof tty);
-  r = tcgetattr (fd, &tty);
-  error_check(r);
-
+  int should_block = 0;
   tty.c_cc[VMIN]  = should_block ? 1 : 0;
   tty.c_cc[VTIME] = 5;      // 0.5 seconds read timeout
 
   r = tcsetattr (fd, TCSANOW, &tty);
   error_check(r);
 
-}
-
-int open_serial(char const *dev_path);
-int open_serial(char const *dev_path) {
-  int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
-  if (fd < 0) {
-    ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
-  }
-  error_check(fd);
   return fd;
+
 }
-
-
-#include <pty.h>
-
-
-// static void dump_fds() { int r;
-//   char cmd[1024];
-//   r = snprintf(cmd, sizeof cmd, "lsof -p '%d'", getpid());
-//   error_check(r);
-//   INFO_BUFFER(cmd, r, "START cmd:");
-//   assert(r < sizeof cmd);
-//   r = system(cmd);
-//   error_check(r);
-//   INFO("END");
-// }
 
 static void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
-  //int fd = open_serial(path);
-
-  int fd = open_serial("/build/exterior_mock.pts");
-
-
-
-  //dump_fds();
-
-  //int fd, follower;
-  //int r = openpty(&fd, &follower, 0,0,0);
-  //error_check(r);
-
-  //DEBUG("fd:%d follower:%d", fd, follower);
-  //dump_fds();
-
-
-
-  error_check(fd);
-  set_interface_attribs (fd, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-  set_blocking (fd, 1);
+  int fd = open_serial_115200_8n1(path);
   *inf = fdopen(fd, "r");
   int fd2= dup(fd);
   assert(fd2 != -1);
   *outf = fdopen(fd2, "a");
 }
 
-static void test_main() {
-  //char*tty_path = *++argv;
-  char* tty_path = 0;
-  printf("ASDFASDF\n");
-
-  FILE*inf = 0, *outf = 0;
-
-  fopen_serial_115200_8n1(tty_path, &inf, &outf);
-
-  for (int i=0;i<5;i++) {
-    static char *buf = 0;
-    static size_t n = 0;
-    size_t r1 = getline(&buf, &n, inf);
-    error_check(r1);
-    //if (buf[n-2] == '\n') buf[n-2] = 0;
-    size_t len = strlen(buf);
-
-    INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
-
-    int r = fprintf(outf, "Message %d:", i);
-    error_check(r);
-    r = fflush(outf);
-    error_check(r);
-
-  }
-
-}
 
 
 #include <sys/wait.h>
@@ -225,7 +131,29 @@ int main() { int r;
   }
 
 
-  test_main();
+  char* tty_path = "/build/exterior_mock.pts";
+  printf("ASDFASDF\n");
+
+  FILE*inf = 0, *outf = 0;
+
+  fopen_serial_115200_8n1(tty_path, &inf, &outf);
+
+  for (int i=0;i<5;i++) {
+    static char *buf = 0;
+    static size_t n = 0;
+    size_t r1 = getline(&buf, &n, inf);
+    error_check(r1);
+    //if (buf[n-2] == '\n') buf[n-2] = 0;
+    size_t len = strlen(buf);
+
+    INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
+
+    r = fprintf(outf, "Message %d:", i);
+    error_check(r);
+    r = fflush(outf);
+    error_check(r);
+
+  }
 
   INFO("Reaping child procs");
   u8 had_error = 0;
