@@ -43,7 +43,7 @@ u64 * const timers[] = { _IO_TIMERS };
 char const * const socket_type_names[] = { _IO_SOCKET_TYPES };
 # undef  _
 
-# define _(name) _io_socket_type_ ## name,
+# define _(name) _io_socket_type_ ## name ## _fd,
 enum _io_socket_types const socket_types[] = { _IO_SOCKET_TYPES };
 # undef  _
 

@@ -72,7 +72,7 @@ void io_process_events() { start:;
       struct epoll_event epe = epes[i];
       io_EPData data = {.data = epe.data};
       switch (data.my_data.event_type) {
-        #define _(name) case _io_socket_type_ ## name: { DEBUG(#name "_io_event"); assert(name ## _io_event); name ## _io_event(epe); } break;
+        #define _(name) case _io_socket_type_ ## name ## _fd: { DEBUG(#name "_io_event"); assert(name ## _io_event); name ## _io_event(epe); } break;
         _IO_SOCKET_TYPES
         #undef  _
         default: ERROR("Unandled switch case: %d", data.my_data.event_type);

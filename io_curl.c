@@ -42,7 +42,7 @@ void io_curl_io_event(struct epoll_event epe) {
 
 static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, void* s) {
 
-    io_EPData data = {.my_data = {.id = fd, .event_type = _io_socket_type_io_curl}};
+    io_EPData data = {.my_data = {.id = fd, .event_type = _io_socket_type_io_curl_fd}};
     struct epoll_event epe = {.data = data.data};
 
     switch (action) { SWITCH_DEFAULT_IS_UNEXPECTED;

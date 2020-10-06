@@ -1,73 +1,19 @@
 
-#include <curl/curl.h>
-#include <stddef.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
-#include <termios.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdarg.h>
+#include <sys/wait.h>
+
+
 
 #include "logging.h"
-
-#define CRTSCTS       020000000000  /* flow control */
-
+#include "serial.h"
 
 
 
-static int open_serial_115200_8n1(char const * path) { int r;
-  int fd = open(path, O_RDWR | O_NOCTTY | O_SYNC);
-  if (fd < 0) {
-    ERROR("error %d opening %s: %s", errno, path, strerror(errno));
-  }
-  error_check(fd);
-
-  struct termios tty;
-  r = tcgetattr (fd, &tty);
-  error_check(r);
-
-  // set speed to 115,200 bps, 8n1 (no parity)
-  int const speed = B115200;
-  int const parity = 0;
-
-  cfsetospeed (&tty, speed);
-  cfsetispeed (&tty, speed);
-
-  tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-  // disable IGNBRK for mismatched speed tests; otherwise receive break
-  // as \000 chars
-  tty.c_iflag &= ~IGNBRK;   // disable break processing
-  tty.c_lflag = 0;    // no signaling chars, no echo,
-    // no canonical processing
-  tty.c_oflag = 0;    // no remapping, no delays
-  tty.c_cc[VMIN]  = 0;      // read doesn't block
-  tty.c_cc[VTIME] = 5;      // 0.5 seconds read timeout
-
-  tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-
-  tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
-    // enable reading
-  tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
-  tty.c_cflag |= parity;
-  tty.c_cflag &= ~CSTOPB;
-  tty.c_cflag &= ~CRTSCTS;
-
-  int should_block = 0;
-  tty.c_cc[VMIN]  = should_block ? 1 : 0;
-  tty.c_cc[VTIME] = 5;      // 0.5 seconds read timeout
-
-  r = tcsetattr (fd, TCSANOW, &tty);
-  error_check(r);
-
-  return fd;
-
-}
-
-
-
-
-#include <sys/wait.h>
 
 int main() { int r;
   setlinebuf(stderr);
@@ -80,13 +26,22 @@ int main() { int r;
   char* tty_path = "/build/exterior_mock.pts";
   printf("ASDFASDF\n");
 
-  int fd = open_serial_115200_8n1(tty_path);
+  int fd = serial_open_115200_8n1(tty_path);
   FILE * inf = fdopen(fd, "r");
   int fd2= dup(fd);
   assert(fd2 != -1);
   FILE * outf = fdopen(fd2, "a");
 
-//  read()
+
+  int epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  error_check(epoll_fd);
+  struct epoll_event epe = { .events = EPOLLIN};
+  r = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &epe);
+  error_check(r);
+  r = epoll_wait(epoll_fd, &epe, 1, 0);
+  error_check(r);
+
+
 
   {
     pid_t child = fork();
