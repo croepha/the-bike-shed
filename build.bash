@@ -1,6 +1,5 @@
 set -eEuo pipefail
 source /etc/profile
-
 # function _default() {_varname=$1; _default_value=$2;
 #     eval '
 #     if [ ! -v '$_varname' ]; then {
@@ -20,6 +19,10 @@ pgrep nginx > /dev/null || nginx
 
 if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0
+}; fi
+
+if ! pgrep -f exterior_mock.pts > /dev/null; then {
+tmux new -d 'nohup socat -d -d -v PTY,link=/build/exterior_mock.pts2,raw,echo=0 PTY,link=/build/exterior_mock.pts,raw,echo=0 0<&- >> /build/exterior_mock.log 2>&1 '
 }; fi
 
 

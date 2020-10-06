@@ -87,14 +87,15 @@ static void set_blocking (int fd, int should_block) { int r;
 
 }
 
-// static int open_serial(char const *dev_path) {
-//   int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
-//   if (fd < 0) {
-//     ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
-//   }
-//   error_check(fd);
-//   return fd;
-// }
+int open_serial(char const *dev_path);
+int open_serial(char const *dev_path) {
+  int fd = open(dev_path, O_RDWR | O_NOCTTY | O_SYNC);
+  if (fd < 0) {
+    ERROR("error %d opening %s: %s", errno, dev_path, strerror(errno));
+  }
+  error_check(fd);
+  return fd;
+}
 
 
 #include <pty.h>
@@ -115,58 +116,19 @@ static void fopen_serial_115200_8n1(char const * path, FILE**inf, FILE**outf) {
 
   //int fd = open_serial(path);
 
-  int fd, follower;
+  int fd = open_serial("/build/exterior_mock.pts");
+
+
 
   //dump_fds();
 
-  int r = openpty(&fd, &follower, 0,0,0);
-  error_check(r);
+  //int fd, follower;
+  //int r = openpty(&fd, &follower, 0,0,0);
+  //error_check(r);
 
-  DEBUG("fd:%d follower:%d", fd, follower);
+  //DEBUG("fd:%d follower:%d", fd, follower);
   //dump_fds();
 
-  pid_t child = fork();
-  error_check(child);
-  if (!child) {
-    r = alarm(10); error_check(r);
-
-    DEBUG("fd:%d follower:%d", fd, follower);
-    //dump_fds();
-
-    r = close(fd);
-    error_check(r);
-
-    set_interface_attribs (follower, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-    set_blocking (follower, 1);
-    char sbuf[1024];
-    int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
-    error_check(sbuf_len);
-    assert(sbuf_len < sizeof sbuf);
-    ssz sb = write(follower, sbuf, sbuf_len);
-    error_check(sb);
-    assert(sb == sbuf_len);
-
-    for (int i = 0; i<5; i++) { LOGCTX("forked:");
-      char rbuf[512];
-      DEBUG("follower:%d", follower);
-      //dump_fds();
-
-      ssz read_count = read(follower, rbuf, sizeof rbuf -1);
-      error_check(read_count);
-      INFO_BUFFER(rbuf, read_count, "Child did read: len:%zd rbuf:", read_count);
-      rbuf[read_count] = 0;
-      sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
-      error_check(sbuf_len);
-      assert(sbuf_len < sizeof sbuf);
-      sb = write(follower, sbuf, sbuf_len);
-      error_check(sb);
-      assert(sb == sbuf_len);
-    }
-
-    exit(0);
-  }
-  r = close(follower);
-  error_check(r);
 
 
   error_check(fd);
@@ -213,6 +175,56 @@ int main() { int r;
   setlinebuf(stderr);
   r = alarm(3); error_check(r);
 
+  // Clean out the pipes
+  system("timeout .1 cat /build/exterior_mock.pts2 > /dev/null; timeout .1 cat /build/exterior_mock.pts > /dev/null");
+
+  {
+    pid_t child = fork();
+    error_check(child);
+    if (!child) {
+      int follower = open("/build/exterior_mock.pts2", O_RDWR);
+
+      r = alarm(10); error_check(r);
+
+      DEBUG("fd:%d follower:%d", fd, follower);
+      //dump_fds();
+
+      //r = close(fd);
+      //error_check(r);
+
+      //set_interface_attribs (follower, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
+      //set_blocking (follower, 1);
+      char sbuf[1024];
+      int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
+      error_check(sbuf_len);
+      assert(sbuf_len < sizeof sbuf);
+      ssz sb = write(follower, sbuf, sbuf_len);
+      error_check(sb);
+      assert(sb == sbuf_len);
+
+      for (int i = 0; i<5; i++) { LOGCTX("forked:");
+        char rbuf[512];
+        DEBUG("follower:%d", follower);
+        //dump_fds();
+
+        ssz read_count = read(follower, rbuf, sizeof rbuf -1);
+        error_check(read_count);
+        INFO_BUFFER(rbuf, read_count, "Child did read: len:%zd rbuf:", read_count);
+        rbuf[read_count] = 0;
+        sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
+        error_check(sbuf_len);
+        assert(sbuf_len < sizeof sbuf);
+        sb = write(follower, sbuf, sbuf_len);
+        error_check(sb);
+        assert(sb == sbuf_len);
+      }
+      r = close(follower);
+      error_check(r);
+      exit(0);
+    }
+  }
+
+
   test_main();
 
   INFO("Reaping child procs");
@@ -233,4 +245,5 @@ int main() { int r;
   if (had_error) {
     ERROR("Atleast one child process had an error");
   }
+
 }

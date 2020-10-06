@@ -1,13 +1,12 @@
  INFO: READ: len:8 buf: `INITIAL\x0a`	(./serial_test.c test_main)
- INFO:forked: Child did read: len:10 rbuf: `Message 0:`	(./serial_test.c fopen_serial_115200_8n1)
+ INFO:forked: Child did read: len:10 rbuf: `Message 0:`	(./serial_test.c main)
  INFO: READ: len:18 buf: `REPLY: Message 0:\x0a`	(./serial_test.c test_main)
- INFO:forked: Child did read: len:10 rbuf: `Message 1:`	(./serial_test.c fopen_serial_115200_8n1)
+ INFO:forked: Child did read: len:10 rbuf: `Message 1:`	(./serial_test.c main)
  INFO: READ: len:18 buf: `REPLY: Message 1:\x0a`	(./serial_test.c test_main)
- INFO:forked: Child did read: len:10 rbuf: `Message 2:`	(./serial_test.c fopen_serial_115200_8n1)
+ INFO:forked: Child did read: len:10 rbuf: `Message 2:`	(./serial_test.c main)
  INFO: READ: len:18 buf: `REPLY: Message 2:\x0a`	(./serial_test.c test_main)
- INFO:forked: Child did read: len:10 rbuf: `Message 3:`	(./serial_test.c fopen_serial_115200_8n1)
+ INFO:forked: Child did read: len:10 rbuf: `Message 3:`	(./serial_test.c main)
  INFO: READ: len:18 buf: `REPLY: Message 3:\x0a`	(./serial_test.c test_main)
  INFO: Reaping child procs	(./serial_test.c main)
- INFO:forked: Child did read: len:10 rbuf: `Message 4:`	(./serial_test.c fopen_serial_115200_8n1)
-ASDFASDF
+ INFO:forked: Child did read: len:10 rbuf: `Message 4:`	(./serial_test.c main)
 ASDFASDF

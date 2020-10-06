@@ -17,4 +17,3 @@ int main (int argc, char ** argv) {
     config_load_file(*++argv);
 }
 
-
