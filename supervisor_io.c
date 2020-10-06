@@ -100,4 +100,3 @@ void supr_main () { int r;
     io_curl_process_events();
   }
 }
-
