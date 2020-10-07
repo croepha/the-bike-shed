@@ -17,15 +17,15 @@
 u8 lines_seen;
 int fd = -1;
 
-static void handle_line(char* buf) { int r;
-  size_t len = strlen(buf);
+// static void handle_line(char* buf) { int r;
+//   size_t len = strlen(buf);
 
-  INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
+//   INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
 
-  r = dprintf(fd, "Message %d:", lines_seen);
-  error_check(r);
-  lines_seen++;
-}
+//   r = dprintf(fd, "Message %d:", lines_seen);
+//   error_check(r);
+//   lines_seen++;
+// }
 
 
 int main() { int r;
@@ -99,19 +99,15 @@ int main() { int r;
     }
   }
 
-  struct line_accumulator_Data line_data = {};
+  // struct line_accumulator_Data line_data = {};
 
-  while(lines_seen < 5) {
-    char buf[line_accumulator_Data_SIZE/2];
-    ssz len = read(fd, buf, sizeof buf);
-    error_check(len);
-    line_accumulator(&line_data, buf, len, handle_line);
-  }
-
-  // for (;;) {
-
-
+  // while(lines_seen < 5) {
+  //   char buf[line_accumulator_Data_SIZE/2];
+  //   ssz len = read(fd, buf, sizeof buf);
+  //   error_check(len);
+  //   line_accumulator(&line_data, buf, len, handle_line);
   // }
+
 
 
   for (int i=0;i<5;i++) {
@@ -120,8 +116,15 @@ int main() { int r;
     size_t r1 = getline(&buf, &n, inf);
     error_check(r1);
     //if (buf[n-2] == '\n') buf[n-2] = 0;
+    size_t len = strlen(buf);
+
+    INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
+
+    r = dprintf(fd, "Message %d:", i);
+    error_check(r);
 
   }
+
 
   INFO("Reaping child procs");
   u8 had_error = 0;
