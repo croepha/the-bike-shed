@@ -2,5 +2,8 @@
     "clangd.path": "clangd",
     "lldb.displayFormat": "auto",
     "lldb.showDisassembly": "auto",
-    "lldb.dereferencePointers": true
+    "lldb.dereferencePointers": true,
+    "files.associations": {
+        "cstring": "c"
+    }
 }

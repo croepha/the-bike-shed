@@ -2,6 +2,8 @@
 
 #include "common.h"
 
+#include "line_accumulator.h"
+
 
 struct StringListLink { struct StringListLink * next; char * str; };
 struct StringList { struct StringListLink *first, **nextp; u32 count; };
@@ -26,7 +28,7 @@ void config_parse_line(char *input_str, int line_number);
 
 
 size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata);
-static const usz config_download_leftover_SIZE = 16;
+static const usz config_download_leftover_SIZE = line_accumulator_Data_SIZE;
 
 extern char * email_from;
 extern char * email_host;

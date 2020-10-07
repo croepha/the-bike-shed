@@ -258,6 +258,7 @@ reset
 depends_on logging
 compile config_download
 compile config_download_test2
+compile line_accumulator
 link_exec config_download_test2
 
 reset
