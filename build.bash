@@ -291,6 +291,7 @@ re config
 reset
 depends_on logging
 compile serial_test
+depends_on line_accumulator
 compile serial_open
 link_exec serial_test -l util
 do_test serial_test /build/serial_test.dbg.exec

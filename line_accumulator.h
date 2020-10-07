@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-static const u32 line_accumulator_Data_SIZE = 16;
+static const u32 line_accumulator_Data_SIZE = 64;
 
 struct line_accumulator_Data {
   usz used;

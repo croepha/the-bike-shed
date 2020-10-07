@@ -9,10 +9,23 @@
 
 
 
+#include "line_accumulator.h"
 #include "logging.h"
 #include "serial.h"
 
 
+u8 lines_seen;
+int fd = -1;
+
+static void handle_line(char* buf) { int r;
+  size_t len = strlen(buf);
+
+  INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
+
+  r = dprintf(fd, "Message %d:", lines_seen);
+  error_check(r);
+  lines_seen++;
+}
 
 
 int main() { int r;
@@ -26,11 +39,8 @@ int main() { int r;
   char* tty_path = "/build/exterior_mock.pts";
   printf("ASDFASDF\n");
 
-  int fd = serial_open_115200_8n1(tty_path);
+  fd = serial_open_115200_8n1(tty_path);
   FILE * inf = fdopen(fd, "r");
-  int fd2= dup(fd);
-  assert(fd2 != -1);
-  FILE * outf = fdopen(fd2, "a");
 
 
   int epoll_fd = epoll_create1(EPOLL_CLOEXEC);
@@ -89,6 +99,20 @@ int main() { int r;
     }
   }
 
+  struct line_accumulator_Data line_data = {};
+
+  while(lines_seen < 5) {
+    char buf[line_accumulator_Data_SIZE/2];
+    ssz len = read(fd, buf, sizeof buf);
+    error_check(len);
+    line_accumulator(&line_data, buf, len, handle_line);
+  }
+
+  // for (;;) {
+
+
+  // }
+
 
   for (int i=0;i<5;i++) {
     static char *buf = 0;
@@ -96,14 +120,6 @@ int main() { int r;
     size_t r1 = getline(&buf, &n, inf);
     error_check(r1);
     //if (buf[n-2] == '\n') buf[n-2] = 0;
-    size_t len = strlen(buf);
-
-    INFO_BUFFER(buf, len, "READ: len:%zd buf:", len);
-
-    r = fprintf(outf, "Message %d:", i);
-    error_check(r);
-    r = fflush(outf);
-    error_check(r);
 
   }
 
