@@ -10,6 +10,8 @@
 
 char buf[1024];
 
+u64 now_ms() { return real_now_ms(); }
+
 void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
     *buf_ = buf;
     *buf_space_left = sizeof buf - 1;

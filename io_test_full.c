@@ -7,7 +7,14 @@
 #include "io_test.h"
 #include "logging.h"
 
-u64 now_sec() { return 0; }
+u8 starting_email = 0;
+u64 now_ms() {
+  if (starting_email) {
+    return 0;
+  } else {
+    return real_now_ms();
+  }
+}
 
 void logging_send_timeout() {
   INFO();
@@ -62,6 +69,8 @@ void test_main() {
   start_time = now_ms() + 50;
   char buf[1024];
 
+  starting_email = 1;
+
   for (int i=0; i<COUNT(dl_ctx); i++) {
     CURL*easy = test_io_curl_create_handle(&dl_ctx[i]);
     snprintf(buf, sizeof buf, "/build/io_test_full_%02d", i);
@@ -84,6 +93,8 @@ void test_main() {
     // CURLESET(VERBOSE, 1);
     events_pending++;
   }
+
+  starting_email = 0;
 
   IO_TIMER_MS(logging_send) = start_time;
   events_pending++;

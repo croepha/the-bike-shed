@@ -51,9 +51,10 @@ static void test_req(u32 hash_i, u32 extra) {
 }
 
 u64 now_day = 90;
-u64 now_sec() {
-  return now_day * 24 * 60 * 60;
+u64 now_ms(void) {
+  return now_day * 24 * 60 * 60 * 1000;
 }
+
 
 void access_hash(access_HashResult result, struct access_HashPayload * payload) {
     memset(result, 0x69, sizeof(access_HashResult));

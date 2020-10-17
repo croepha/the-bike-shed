@@ -4,6 +4,7 @@
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true,
     "files.associations": {
-        "cstring": "c"
+        "cstring": "c",
+        "typeinfo": "c"
     }
 }

@@ -1,6 +1,9 @@
 
 #include "io_test.h"
 
+u64 now_ms() { return real_now_ms(); }
+
+
 static void log_ep_event(struct epoll_event event) {
 #define EP_TYPES _(EPOLLIN) _(EPOLLOUT) _(EPOLLRDHUP) _(EPOLLPRI) _(EPOLLERR) _(EPOLLHUP) _(EPOLLET) _(EPOLLONESHOT)
 // _(EPOLLWAKEUP)

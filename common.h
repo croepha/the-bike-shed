@@ -1,6 +1,9 @@
 
 #pragma once
 
+#ifndef WEAK_NOW_MS
+#define WEAK_NOW_MS
+#endif
 
 #define STRINGIFY2(a) #a
 #define STRINGIFY(a) STRINGIFY(a)
@@ -20,10 +23,13 @@ typedef   int64_t s64;
 typedef  ssize_t  ssz;
 typedef   size_t  usz;
 
-long long now_ms(void);
+u64 now_ms(void) WEAK_NOW_MS;
+u64 real_now_ms(void);
 void supr_email_add_data_start(char**buf_, usz*buf_space_left);
 void supr_email_add_data_finish(usz new_space_used);
-u64 now_sec(void);
+
+__attribute__((unused))
+static u64 now_sec() { return now_ms() / 1000; } ;
 
 
 #if BUILD_IS_RELEASE

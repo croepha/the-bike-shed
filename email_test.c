@@ -9,8 +9,7 @@
 #include "io_curl.h"
 #include "email.h"
 
-u64 now_sec();
-u64 now_sec() { return 0; }
+u64 now_ms() { return 0; }
 
 char * email_from = "from@longlonglonglonglonglonglonglonghost.com";
 char * email_host = "smtp://127.0.0.1:8025";

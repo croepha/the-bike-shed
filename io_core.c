@@ -1,3 +1,5 @@
+#define LOG_DEBUG
+#include <inttypes.h>
 #include <sys/epoll.h>
 #include <errno.h>
 #include <limits.h>
@@ -28,7 +30,7 @@ void io_process_events() { start:;
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
   for (int i=1; i < _io_timer_COUNT; i++) {
-    DEBUG("timer:%d next:%ld timers[i]:%ld", i, next_timer_epoch_ms, io_timers_epoch_ms[i]);
+    DEBUG("timer:%d next:%"PRIu64" timers[i]:%"PRIu64, i, next_timer_epoch_ms, io_timers_epoch_ms[i]);
     if (next_timer_epoch_ms > io_timers_epoch_ms[i]) {
       next_timer_epoch_ms = io_timers_epoch_ms[i];
       running_timer = i;

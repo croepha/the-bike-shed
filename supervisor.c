@@ -13,7 +13,7 @@
 #include "supervisor.h"
 #include "config.h"
 
-u64 now_sec() { return time(0); }
+u64 now_ms() { return real_now_ms(); }
 
 char * email_from;
 char * email_host;

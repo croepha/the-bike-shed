@@ -9,8 +9,6 @@
 #include "config.h"
 #include "io.h"
 
-u64 now_sec();
-
 #include "email.h"
 #include "supervisor.h"
 // TODO: setup gmail to delete old emails

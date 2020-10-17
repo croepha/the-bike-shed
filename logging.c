@@ -1,9 +1,12 @@
+#define WEAK_NOW_MS __attribute__((weak_import))
 
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <inttypes.h>
+#include <sys/time.h>
 #include "common.h"
 #include "io.h"
 #include "io_curl.h"
@@ -17,18 +20,25 @@ __thread s32 log_allowed_fails;
 #define VLOGF(fmt, va)  vfprintf(stderr, fmt, va)
 #define  LOGF(fmt, ...)  fprintf(stderr, fmt, ##__VA_ARGS__)
 
+u64 real_now_ms(void) {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (long long)(tv.tv_sec) * 1000 + (long long)(tv.tv_usec) / 1000;
+}
+
 void _log(const char* severity, const char*file, const char*func, int line,
           enum _log_options options, char* buf, usz buf_size, char* fmt, ...) {
-  struct timespec tp;
-  int r = clock_gettime(CLOCK_MONOTONIC_COARSE, &tp);
-  if (r != 0) {
-    tp.tv_sec  = 0;
-    tp.tv_nsec = 0;
-    assert(0);
+
+  u64 now_ms_;
+  if (now_ms) {
+    now_ms_ = now_ms();
+  } else {
+    now_ms_ = real_now_ms();
   }
 
   void * return_address = __builtin_extract_return_addr(__builtin_return_address (0));
-  LOGF("%06lx.%03ld: %s:%s ", tp.tv_sec, tp.tv_nsec / 1000000, severity, _log_ctx_buffer);
+  //LOGF("%06lx.%03ld: %s:%s ", now_ms_ / 1000, now_ms_ % 1000, severity, _log_ctx_buffer);
+  LOGF("%"PRIu64".%03"PRIu64": %s:%s ", now_ms_ / 1000, now_ms_ % 1000, severity, _log_ctx_buffer);
   va_list va; va_start(va, fmt); VLOGF(fmt, va); va_end(va);
 
   switch (options) { SWITCH_DEFAULT_IS_UNEXPECTED;

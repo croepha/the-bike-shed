@@ -10,7 +10,6 @@ char * email_rcpt;
 char ** supr_child_args;
 struct StringList tmp_arg;
 
-
 int main (int argc, char ** argv) {
     assert(argc == 2);
     setlinebuf(stderr);

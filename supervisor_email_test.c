@@ -3,7 +3,6 @@
 #include "io.h"
 #include <unistd.h>
 #define LOGGING_USE_EMAIL 1
-#define now_sec now_sec
 #include <stdio.h>
 
 #include "logging.h"
@@ -11,7 +10,7 @@
 #include <inttypes.h>
 
 
-u64 now_sec_value;
+u64 now_ms_value;
 char * email_rcpt = "logging@test.test";
 
 extern u32 supr_email_buf_used;
@@ -28,13 +27,13 @@ extern enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 static void dump_email_state() {
   INFO(  "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
           " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u",
-          now_sec_value, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
+          now_ms_value / 1000, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
           supr_email_sent_epoch_sec, supr_email_buf_used,
           supr_email_sent_bytes);
 }
 
 static void reset_email_state() {
-    now_sec_value  = 100000;
+    now_ms_value  = 100000000;
     IO_TIMER_MS(logging_send) = -1;
     supr_email_sent_epoch_sec = 0;
     supr_email_buf_used = 0;
@@ -44,8 +43,8 @@ static void reset_email_state() {
 
 
 
-u64 now_sec() {
-  return now_sec_value++;
+u64 now_ms() {
+  return now_ms_value;
 }
 
 //#include "logging.c"
@@ -128,9 +127,10 @@ void dump_email_state();
 void reset_email_state();
 
 static void timer_skip() {
-  now_sec_value = IO_TIMER_MS(logging_send)/1000;
-  assert(now_sec_value < 100000000000);
+  now_ms_value = IO_TIMER_MS(logging_send);
+  assert(now_ms_value < 1000000000000);
   logging_send_timeout();
+  now_ms_value += 1000;
 }
 
 
@@ -147,6 +147,8 @@ static void test_printf(char const * fmt, ...) {
     abort();
   }
   supr_email_add_data_finish(r);
+  now_ms_value += 1000;
+
 }
 
 #define TEST_INFO(fmt, ...) test_printf(fmt "\n" , ##__VA_ARGS__)
@@ -173,10 +175,12 @@ int main () {
     log_usage( TEST_INFO("Third line"); );
     log_usage( TEST_INFO("Fourth Line"); );
 
+    now_ms_value += 1000;
     log_usage( __supervisor_email_io_curl_complete(0, CURLE_OK, &supr_email_email_ctx.curl_type) );
 
     log_usage( TEST_INFO("line 6"); );
     log_usage( TEST_INFO("line 7"); );
+    now_ms_value += 1000;
 
     INFO("Expect cooldown finish");
     log_usage( timer_skip(); );

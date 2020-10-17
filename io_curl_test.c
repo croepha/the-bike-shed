@@ -33,7 +33,7 @@ typedef struct {
     enum _io_curl_type curl_type;
 } _WriteCtx;
 
-u64 now_sec() { return 0; }
+u64 now_ms() { return real_now_ms(); }
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
     size_t realsize = size * nmemb;
