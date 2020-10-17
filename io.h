@@ -52,6 +52,14 @@ static void __io_set(int flags, int op, enum _io_socket_types type, int fd) { in
     r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
 }
 
+__attribute__((unused))
+static void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
+    io_EPData data = {.my_data = { .event_type = type }};
+    struct epoll_event epe = {.data = data.data, .events = flags};
+    r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
+}
+
+
 #define io_ADD_R(fd) __io_set(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, fd)
 
 

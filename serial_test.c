@@ -62,13 +62,7 @@ int main() { int r;
       r = alarm(10); error_check(r);
 
       DEBUG("fd:%d follower:%d", fd, follower);
-      //dump_fds();
 
-      //r = close(fd);
-      //error_check(r);
-
-      //set_interface_attribs (follower, B115200, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-      //set_blocking (follower, 1);
       char sbuf[1024];
       int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
       error_check(sbuf_len);
