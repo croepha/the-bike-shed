@@ -5,10 +5,19 @@
 
 
 int main (int argc, char ** argv) {
-    char * tty_path = *++argv;
-    assert(tty_path);
+    char * dev_path = *++argv;
+    assert(dev_path);
 
     io_initialize();
+
+    int serial_fd = serial_open_115200_8n1(dev_path);
+
+    io_ADD_R(serial_fd);
+
+
+
+
+
 
 
 

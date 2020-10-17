@@ -16,6 +16,13 @@ void io_initialize() {
   io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 }
 
+void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
+    io_EPData data = {.my_data = { .event_type = type }};
+    struct epoll_event epe = {.data = data.data, .events = flags};
+    r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
+}
+
+
 
 void io_process_events() { start:;
   enum _io_timers running_timer;

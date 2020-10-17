@@ -16,6 +16,7 @@ extern int io_epoll_fd;
  _(supr_signal) \
  _(supr_read_from_child) \
  _(test1) \
+ _(serial) \
 
 
 #define _(name) _io_timer_ ## name,
@@ -45,22 +46,10 @@ typedef union {
 #include <errno.h>
 #include <sys/epoll.h>
 #include "logging.h"
-__attribute__((unused))
-static void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
-    io_EPData data = {.my_data = { .event_type = type }};
-    struct epoll_event epe = {.data = data.data, .events = flags};
-    r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
-}
-
-__attribute__((unused))
-static void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
-    io_EPData data = {.my_data = { .event_type = type }};
-    struct epoll_event epe = {.data = data.data, .events = flags};
-    r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
-}
 
 
 #define io_ADD_R(fd) __io_set(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, fd)
+void __io_set(int flags, int op, enum _io_socket_types type, int fd);
 
 
 
