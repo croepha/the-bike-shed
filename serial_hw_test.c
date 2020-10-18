@@ -38,7 +38,6 @@ void logging_send_timeout() {
     INFO();
     dprintf(serial_fd, "TEST TEST\n");
     IO_TIMER_MS(logging_send) = (now_sec() + 1) * 1000;
-    INFO("%"PRIu64, IO_TIMER_MS(logging_send));
 }
 
 int main (int argc, char ** argv) {

@@ -1,4 +1,4 @@
-#define LOG_DEBUG
+// #define LOG_DEBUG
 #include <inttypes.h>
 #include <sys/epoll.h>
 #include <errno.h>
