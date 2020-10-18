@@ -302,6 +302,7 @@ depends_on logging
 depends_on io_core
 depends_on serial_open
 depends_on misc
+depends_on line_accumulator
 compile serial_hw_test
 link_exec serial_hw_test
 
