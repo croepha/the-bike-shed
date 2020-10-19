@@ -30,16 +30,21 @@ u16 * access_idle_maintenance_prev;
 #define USER (access_users_space[USER_idx])
 #define MAP  (        access_map[MAP_idx ])
 
-static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
-static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
-static u8 user_is_expired(u16 USER_idx) {
+
+u16 access_now_day() {
   // Lets put the cutoff at 1pm Pacific Time, that ensures that fresh
   //  expirations happen when there are likely to be most noisebridgers around
   u64  utc_sec = now_sec();
   u64  utc_hour = utc_sec / (60*60);
-  u16  pt_hour = utc_hour - 7 /* 7 hours */ ;
+  u32  pt_hour = utc_hour - 7 /* 7 hours */ ;
   u16  pt_day = pt_hour / 24;
+  return pt_day;
+}
 
+static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
+static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
+static u8 user_is_expired(u16 USER_idx) {
+  u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
   return pt_day > USER.expire_day;
 }

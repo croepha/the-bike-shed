@@ -66,6 +66,8 @@ DEBUG   An internal dump of an algorithms state or event tracing, these are turn
 #define TRACE_HEXBUFFER(...)  LOG("TRACE", buffer_hex,(char*)__VA_ARGS__)
 #define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
 #define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
+#define ERROR_BUFFER(   ...)  LOG("ERROR", buffer_string,    __VA_ARGS__)
+#define ERROR_HEXBUFFER(...)  LOG("ERROR", buffer_hex,(char*)__VA_ARGS__)
 #define FATAL(          ...) FLOG("FATAL", plain, 0, 0,      __VA_ARGS__)
 
 #ifndef LOG_DEBUG

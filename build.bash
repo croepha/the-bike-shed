@@ -278,6 +278,7 @@ do_test access_data_test /build/access_data_test.dbg.exec
 
 re parse_headers
 re config
+re exterior_protocol
 
 #  --sysroot=/build/root/pi0_usr_include/output/staging//build/email_test.dbg.exec
 

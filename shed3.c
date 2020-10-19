@@ -17,39 +17,35 @@ void gpio_pwm_start(void) {
     INFO();
 }
 
-void serial_line_handler(char* line) { int r;
-
-    /* Line is something like:
-    SCAN_START
-    OPTION 001
-    PIN  123123234
-    RFID 12341234123412341234123412341234
-    SCAN_FINISHED
-
-    */
-
-    // Parse line.... do different things...
-
-    // SCAN_START
-    // memset(access_hash_payload.salt, 0, salt...);
-    memset(access_hash_payload.pin, 0, sizeof access_hash_payload.pin);
-    memset(access_hash_payload.rfid, 0, sizeof access_hash_payload.rfid);
-    char option[8];
-    int  option_int = 0;
-    memset(option, 0, sizeof option);
 
 
-    // PIN
-    strcpy((char*)access_hash_payload.pin, line);
+static usz const option_LEN = 10;
 
-    // RFID
-    strcpy((char*)access_hash_payload.rfid, line);
+char exterior_option [option_LEN];
+char exterior_pin    [pin_LEN   ];
+char exterior_rfid   [rfid_LEN  ];
 
-    // OPTION
-    strcpy((char*)option, line);
 
-    // SCAN_FINISHED
-    if (option_int == 0) { // Accesss request
+static void __exterior_set(char * start, char * end, char * dest, char * dest_name, usz dest_size) {
+  usz len = end - start;
+  if (end - start >= dest_size - 1) {
+    ERROR_BUFFER(start, len, " %s too long", dest_name);
+  } else {
+    memcpy(dest, start, len);
+    dest[len] = 0;
+  }
+}
+#define exterior_set(dest)  __exterior_set(start, end, dest, #dest, sizeof dest); return
+#define clear(dest)  memset(dest, 0, sizeof dest)
+
+static void exterior_scan_start() {
+    clear(exterior_option);
+    clear(exterior_pin   );
+    clear(exterior_rfid  );
+}
+
+static void exterior_scan_finished() { int r;
+    if (strcmp(exterior_option, "") == 0) { // Accesss request
         u8 granted = access_requested((char*)access_hash_payload.rfid, (char*)access_hash_payload.pin);
         if (granted) {
             r = dprintf(serial_fd, "TEXT_SHOW ACCESS GRANTED");
@@ -60,7 +56,7 @@ void serial_line_handler(char* line) { int r;
             r = dprintf(serial_fd, "TEXT_SHOW ACCESS DENIED");
             error_check(r);
         }
-    } else if (option_int == 100) { // Email hash
+    } else if (strcmp(exterior_option, "100") == 0) { // Email hash
         enum {
             STATE_IDLE,
             STATE_SENDING,
@@ -84,6 +80,12 @@ void serial_line_handler(char* line) { int r;
     }
 }
 
+#include "/build/exterior_protocol.re.c"
+
+
+
+// TODO needs maintenance
 int main ()  {
+    access_user_list_init();
 
 }

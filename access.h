@@ -19,6 +19,7 @@ void access_idle_maintenance(void);
 u8   access_requested(char * rfid, char * pin);
 extern u16 * access_idle_maintenance_prev;
 extern u16 access_users_first_idx;
+u16 access_now_day(void);
 
 
 extern char access_salt[];
