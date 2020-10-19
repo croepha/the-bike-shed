@@ -1,4 +1,8 @@
  INFO: Testing set: valid_config_email_from	(./config_nodiag_test.c main)
+ INFO:	 Trying line: 'EmailAddress:    asdfsdfasdasd32323@GMAIL.com'	(./config_nodiag_test.c _test_set)
+ INFO:	 Effective: 'asdfsdfasdasd32323@GMAIL.com' Failures: 0	(./config_nodiag_test.c _test_set)
+ INFO:	 Trying line: 'EmailAddress:    AASDFsdfasdasd32323@gmail.com'	(./config_nodiag_test.c _test_set)
+ INFO:	 Effective: 'AASDFsdfasdasd32323@gmail.com' Failures: 0	(./config_nodiag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress:    asdasdfasdasd32323@gmail.com'	(./config_nodiag_test.c _test_set)
  INFO:	 Effective: 'asdasdfasdasd32323@gmail.com' Failures: 0	(./config_nodiag_test.c _test_set)
  INFO:	 Trying line: 'EmailAddress:    yahooyahoo@yahoo.com'	(./config_nodiag_test.c _test_set)

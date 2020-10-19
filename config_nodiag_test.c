@@ -55,6 +55,8 @@ static void _test_set2(char**set, usz set_len) {
 
 
 char *   valid_config_email_from[] = {
+    "EmailAddress:    asdfsdfasdasd32323@GMAIL.com",
+    "EmailAddress:    AASDFsdfasdasd32323@gmail.com",
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
     "EmailAddress:    yahooyahoo@yahoo.com",
     "EmailAddress: tmp-from@testtest.test",

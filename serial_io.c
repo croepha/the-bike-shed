@@ -21,3 +21,4 @@ void serial_io_event(struct epoll_event event_info) {
     error_check(size);
     line_accumulator(&serial_line_leftovers, buf, size, serial_line_handler);
 }
+ 
