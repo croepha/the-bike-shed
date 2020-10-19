@@ -205,61 +205,7 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   }
 }
 
-static void __access_user_lookup(u32 * MAP_idx_out, u32 * USER_idx_out, char * rfid, char * pin) {
-  *MAP_idx_out = (u32)-1;
-  *USER_idx_out = (u32)-1;
-  struct access_HashPayload payload = {};
-  __access_requested_payload(&payload, rfid, pin);
-  // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
-  access_HashResult hash;
-  access_hash(hash, &payload);
-
-  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
-
-  assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
-  assert( HASH_MAP_LEN >= USER_TABLE_LEN);
-
-  u32 map_first_tombstone = (u32)-1;
-  for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1) {
-      if(map_first_tombstone == (u32)-1) {
-        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
-        map_first_tombstone = MAP_idx;
-      }
-    } else if (MAP == 0) {
-      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
-      return 0;
-    } else {
-      u16 USER_idx = MAP - 1;
-      assert(!USER.debug_is_free);
-      if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
-        if (map_first_tombstone != (u32)-1) {
-          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
-          MAP = (u16)-1;
-          MAP_idx = map_first_tombstone;
-          MAP = USER_idx + 1;
-        }
-        LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-        return !user_is_expired(USER_idx);
-      } else {
-        *MAP_idx_out = MAP_idx;
-        *USER_idx_out = USER_idx;
-        return;
-      }
-    }
-  }
-  __builtin_unreachable();
-  return 0; // unreachable
-}
-
-
 u8 access_requested(char * rfid, char * pin) {
-
-  u32 MAP_idx;
-  u16 USER_idx;
-  __access_user_lookup(&MAP_idx, &USER_idx, rfid, pin);
-  TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
-
 
   struct access_HashPayload payload = {};
   __access_requested_payload(&payload, rfid, pin);
