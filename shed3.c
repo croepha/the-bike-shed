@@ -19,13 +19,6 @@ void gpio_pwm_start(void) {
 }
 
 
-char * email_from;
-char * email_rcpt;
-char * email_host;
-char * email_user_pass;
-
-
-
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];
@@ -151,8 +144,22 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
 }
 
 
+char * email_from = "shed-test@example.com";
+char * email_host = "smtp://127.0.0.1:8025";
+char * email_user_pass = "username:password";
+char * email_rcpt = "shed-test-dest@example.com";
+char * serial_path = "/build/exterior_mock.pts";
+
 // TODO needs maintenance
 int main ()  {
+    setlinebuf(stderr);
+    io_initialize();
+    io_curl_initialize();
     access_user_list_init();
+    serial_io_initialize(serial_path);
 
+    for(;;) {
+        log_allowed_fails = 100000000;
+        io_process_events();
+    }
 }
