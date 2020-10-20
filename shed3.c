@@ -150,22 +150,6 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
     state = STATE_IDLE;
 }
 
-// void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct SupervisorEmailCtx * ctx) {
-//   DEBUG("easy:%p result:%d", easy, result);
-//   if (result == CURLE_OK) {
-//     memmove(supr_email_buf, supr_email_buf + supr_email_sent_bytes,
-//             supr_email_sent_bytes);
-//     supr_email_buf_used -= supr_email_sent_bytes;
-//   } else {
-//     INFO("failed %s", curl_easy_strerror(result));
-//   }
-//   supr_email_sent_bytes = 0;
-//   email_free(&supr_email_ctx);
-//   supr_email_state = SUPR_LOG_EMAIL_STATE_COOLDOWN;
-//   poke_state_machine();
-// }
-
-
 
 // TODO needs maintenance
 int main ()  {

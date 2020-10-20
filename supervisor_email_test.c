@@ -52,10 +52,10 @@ u64 now_ms() {
 #include "email.h"
 #include "io_curl.h"
 
-struct SupervisorEmailCtx {
+struct SupervisorCurlCtx {
   enum _io_curl_type curl_type;
 };
-extern struct SupervisorEmailCtx supr_email_email_ctx;
+extern struct SupervisorCurlCtx supr_email_email_ctx;
 
 CURL* __io_curl_create_handle() {
   return 0;

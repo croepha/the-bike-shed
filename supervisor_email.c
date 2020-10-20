@@ -32,11 +32,11 @@ enum SUPR_LOG_EMAIL_STATE_T {
 };
 enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 
-struct SupervisorEmailCtx {
+struct SupervisorCurlCtx {
   enum _io_curl_type curl_type;
 };
-struct SupervisorEmailCtx supr_email_email_ctx;
-IO_CURL_SETUP(supervisor_email, struct SupervisorEmailCtx, curl_type);
+struct SupervisorCurlCtx supr_email_email_ctx;
+IO_CURL_SETUP(supervisor_email, struct SupervisorCurlCtx, curl_type);
 
 
 static void poke_state_machine() {
@@ -114,7 +114,7 @@ static void poke_state_machine() {
     }
 }
 
-void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct SupervisorEmailCtx * ctx) {
+void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct SupervisorCurlCtx * ctx) {
   DEBUG("easy:%p result:%d", easy, result);
   if (result == CURLE_OK) {
     memmove(supr_email_buf, supr_email_buf + supr_email_sent_bytes,
