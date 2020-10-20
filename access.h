@@ -16,7 +16,7 @@ void access_hash(access_HashResult result, struct access_HashPayload * payload);
 void access_user_add(access_HashResult hash, u16 expire_day);
 void access_user_list_init(void);
 void access_idle_maintenance(void);
-u8   access_requested(char * rfid, char * pin);
+u8   access_requested(char * rfid, char * pin, u16 * days_left);
 extern u16 * access_idle_maintenance_prev;
 extern u16 access_users_first_idx;
 u16 access_now_day(void);

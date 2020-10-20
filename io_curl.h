@@ -10,6 +10,7 @@
   _(logging) \
   _(config_download) \
   _(supervisor_email) \
+  _(emailed_hash) \
 
 #define _(name) _io_curl_type_ ## name,
 enum _io_curl_type { _(INVALID) _IO_CURL_TYPES _(COUNT)};

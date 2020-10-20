@@ -46,7 +46,8 @@ static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
 static void test_req(u32 hash_i, u32 extra) {
   u8 result;
   set_mock_salt(hash_i, extra);
-  result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  u16 days_left = (u16)-1;
+  result = access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231", &days_left);
   INFO("Request: %x %x result: %d", hash_i, extra, result);
 }
 
@@ -143,6 +144,7 @@ int main() {
   memset(access_salt, 0, SALT_BUF_LEN);
   strcpy(access_salt, "saltysalt");
 
-  access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  u16 days_left = (u16)-1;
+  access_requested("rfidrfidrfidrfidrfidrf2d", "pin1231231", &days_left);
 
 }

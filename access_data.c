@@ -43,9 +43,16 @@ u16 access_now_day() {
 
 static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
 static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
-static u8 user_is_expired(u16 USER_idx) {
+static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
+  if (days_left) {
+    if (pt_day <= USER.expire_day) {
+      *days_left = USER.expire_day - pt_day;
+    } else {
+      *days_left = 0;
+    }
+  }
   return pt_day > USER.expire_day;
 }
 
@@ -104,7 +111,7 @@ void access_idle_maintenance(void) {
         u8 is_expired;
         {
           LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-          is_expired = user_is_expired(USER_idx);
+          is_expired = user_is_expired(USER_idx, 0);
         }
         if (is_expired) { // This entry is expired lets remove it
           TRACE("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP_idx);
@@ -205,8 +212,8 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   }
 }
 
-u8 access_requested(char * rfid, char * pin) {
-
+u8 access_requested(char * rfid, char * pin, u16 * days_left) {
+  *days_left = (u16)-1;
   struct access_HashPayload payload = {};
   __access_requested_payload(&payload, rfid, pin);
   // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
@@ -233,13 +240,14 @@ u8 access_requested(char * rfid, char * pin) {
       assert(!USER.debug_is_free);
       if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
         if (map_first_tombstone != (u32)-1) {
-          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ",
+               map_first_tombstone, USER_idx, MAP_idx);
           MAP = (u16)-1;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         }
         LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-        return !user_is_expired(USER_idx);
+        return !user_is_expired(USER_idx, days_left);
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
         TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
