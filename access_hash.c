@@ -41,7 +41,7 @@ static void deallocate_memory(uint8_t *memory, size_t bytes_to_allocate) {
 
 
 
-void access_hash(access_HashResult result, struct access_HashPayload * payload) {
+void __access_hash(access_HashResult result, struct access_HashPayload * payload) {
     u32 const t_cost = 1;
     u32 const parallelism = 1;
 

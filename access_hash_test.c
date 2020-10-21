@@ -24,7 +24,7 @@ static void access_hash_test(char * salt, char * rfid, char *  pin) {
 
     access_HashResult result = {};
     INFO_HEXBUFFER(&payload, sizeof payload, "payload:");
-    access_hash(result, &payload);
+    __access_hash(result, &payload);
     INFO_HEXBUFFER(&result, sizeof result, "result:");
 }
 

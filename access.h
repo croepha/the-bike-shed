@@ -11,7 +11,7 @@ struct access_HashPayload {
   u8 pin  [pin_LEN     ];
 };
 typedef u8 access_HashResult[64];
-void access_hash(access_HashResult result, struct access_HashPayload * payload);
+void __access_hash(access_HashResult result, struct access_HashPayload * payload);
 
 void access_user_add(access_HashResult hash, u16 expire_day);
 void access_user_list_init(void);

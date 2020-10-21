@@ -39,7 +39,7 @@ static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
   INFO("Add: %x %x", hash_i, extra);
   set_mock_salt(hash_i, extra);
   __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  access_hash(hash, &payload);
+  __access_hash(hash, &payload);
   access_user_add(hash, expire_day);
 }
 
@@ -57,7 +57,7 @@ u64 now_ms(void) {
 }
 
 
-void access_hash(access_HashResult result, struct access_HashPayload * payload) {
+void __access_hash(access_HashResult result, struct access_HashPayload * payload) {
     memset(result, 0x69, sizeof(access_HashResult));
     *(u64*)result = *(u64*)payload->salt;
 }
@@ -67,19 +67,19 @@ int main() {
 
   // set_mock_salt(0x01, 0xffffffff);
   // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  // access_hash(hash, &payload);
+  // __access_hash(hash, &payload);
   // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
   // INFO("hash_i: %x", get_hash_i(hash));
 
   // set_mock_salt(0x02, 0xffffffff);
   // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  // access_hash(hash, &payload);
+  // __access_hash(hash, &payload);
   // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
   // INFO("hash_i: %x", get_hash_i(hash));
 
   // set_mock_salt(0x01, 0xffffffff);
   // __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  // access_hash(hash, &payload);
+  // __access_hash(hash, &payload);
   // INFO_HEXBUFFER(hash, sizeof hash, "hash:");
   // INFO("hash_i: %x", get_hash_i(hash));
 

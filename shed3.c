@@ -11,7 +11,6 @@
 
 u64 now_ms() { return real_now_ms(); }
 
-struct access_HashPayload access_hash_payload;
 void gpio_pwm_start(void);
 
 void gpio_pwm_start(void) {
@@ -82,9 +81,11 @@ enum {
 } state = 0;
 
 static int base16_to_int(char c) {
-    if ('a' <= c || c <= 'f') {
+    if ('A' <= c && c <= 'F') {
+        return 10 + c - 'A';
+    } else if ('a' <= c && c <= 'f') {
         return 10 + c - 'a';
-    } else if ('0' <= c || c <= '9') {
+    } else if ('0' <= c && c <= '9') {
         return c - '0';
     } else {
         ERROR("bad char: %c", c);
@@ -92,20 +93,22 @@ static int base16_to_int(char c) {
     }
 }
 
+static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
+    u8 * buf = buf_;
+    for (int i = 0; i < buf_len; i++) {
+        buf[i] = (base16_to_int(hex[2*i+0]) << 4)
+          | (base16_to_int(hex[2*i+1]) << 0);
+    }
+}
+
 static void exterior_scan_finished() { int r;
 
-    u8 exterior_rfid[rfid_LEN];
-
-    memset(exterior_rfid, 0, sizeof exterior_rfid);
-    for (int i = 0; i < sizeof exterior_rfid; i++) {
-        exterior_rfid[i] = (base16_to_int(exterior_rfid_text[2*i+0]) << 8)
-          & (base16_to_int(exterior_rfid_text[2*i+1]) << 0);
-    }
-
+    u8 exterior_rfid[rfid_LEN] = {};
+    buf_from_hex(exterior_rfid, sizeof exterior_rfid, exterior_rfid_text);
 
     if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
-        u8 granted = access_requested((char*)access_hash_payload.rfid, (char*)access_hash_payload.pin, &days_left);
+        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
         if (granted) {
             r = dprintf(serial_fd, "TEXT_SHOW ACCESS GRANTED days_left:%hu\n", days_left);
             error_check(r);
@@ -139,12 +142,13 @@ static void exterior_scan_finished() { int r;
                 r = dprintf(serial_fd, "TEXT_SHOW Request sending Day:%hu Idx:%hu %s\n", day, idx, cancel_text);
                 error_check(r);
                 access_HashResult h;
-                access_hash(h, &access_hash_payload);
+                struct access_HashPayload access_hash_payload;
+                __access_hash(h, &access_hash_payload);
                 r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
                     "Day: %hu Idx: %hu\n"
                     "Hash: "
-                    "%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:"
-                    "%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x\n",
+                    "%016"PRIx64"%016"PRIx64"%016"PRIx64"%016"PRIx64""
+                    "%016"PRIx64"%016"PRIx64"%016"PRIx64"%016"PRIx64"\n",
                     day, idx,
                     *(u64*)&h[ 0], *(u64*)&h[ 8], *(u64*)&h[16], *(u64*)&h[24],
                     *(u64*)&h[32], *(u64*)&h[40], *(u64*)&h[48], *(u64*)&h[56]
@@ -200,6 +204,16 @@ int main ()  {
     io_curl_initialize();
     access_user_list_init();
     serial_io_initialize(serial_path);
+
+    assert(base16_to_int('0') == 0);
+    assert(base16_to_int('1') == 1);
+    assert(base16_to_int('9') == 9);
+    assert(base16_to_int('a') == 10);
+    assert(base16_to_int('f') == 15);
+
+    access_HashResult hash = {};
+    buf_from_hex(hash, sizeof hash, "859f3efa83dc0b75985995516c06d05fd7516e06b4b318ecbc63adde14a945e21e038bc5b5e1c5eb19b88ffa73d954b8149f50c7d4fa8ae92e86d60c8af2e785");
+    access_user_add(hash, access_now_day() + 1);
 
     for(;;) {
         log_allowed_fails = 100000000;

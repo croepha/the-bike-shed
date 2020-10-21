@@ -79,7 +79,7 @@ void serial_line(char* line) { int r;
                 r = dprintf(serial_fd, "TEXT_SHOW Request sending day:%hu idx:%hu", idx, day);
                 error_check(r);
                 access_HashResult result;
-                access_hash(result, &access_hash_payload);
+                __access_hash(result, &access_hash_payload);
                 struct email_Send;
                 // email_init(&email_Send, ....)
             } break;

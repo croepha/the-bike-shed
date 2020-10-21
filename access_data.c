@@ -218,7 +218,7 @@ u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   __access_requested_payload(&payload, rfid, pin);
   // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
   access_HashResult hash;
-  access_hash(hash, &payload);
+  __access_hash(hash, &payload);
 
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
