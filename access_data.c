@@ -212,6 +212,13 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
   }
 }
 
+void access_hash(access_HashResult hash, char * rfid, char * pin) {
+  struct access_HashPayload payload = {};
+  __access_requested_payload(&payload, rfid, pin);
+  __access_hash(hash, &payload);
+}
+
+
 u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   *days_left = (u16)-1;
   struct access_HashPayload payload = {};

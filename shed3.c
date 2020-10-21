@@ -101,6 +101,7 @@ static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
     }
 }
 
+
 static void exterior_scan_finished() { int r;
 
     u8 exterior_rfid[rfid_LEN] = {};
@@ -141,17 +142,30 @@ static void exterior_scan_finished() { int r;
                 u16 idx = emailed_hash_idx++;
                 r = dprintf(serial_fd, "TEXT_SHOW Request sending Day:%hu Idx:%hu %s\n", day, idx, cancel_text);
                 error_check(r);
+
                 access_HashResult h;
-                struct access_HashPayload access_hash_payload;
-                __access_hash(h, &access_hash_payload);
+                access_hash(h, (char*)exterior_rfid, (char*)exterior_pin);
+                INFO_HEXBUFFER(h, sizeof h, "Requested send   Day:%hu Idx:%hu :", day, idx);
                 r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
                     "Day: %hu Idx: %hu\n"
                     "Hash: "
-                    "%016"PRIx64"%016"PRIx64"%016"PRIx64"%016"PRIx64""
-                    "%016"PRIx64"%016"PRIx64"%016"PRIx64"%016"PRIx64"\n",
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x"
+                    "%02x%02x%02x%02x%02x%02x%02x%02x",
                     day, idx,
-                    *(u64*)&h[ 0], *(u64*)&h[ 8], *(u64*)&h[16], *(u64*)&h[24],
-                    *(u64*)&h[32], *(u64*)&h[40], *(u64*)&h[48], *(u64*)&h[56]
+                    h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
+                    h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
+                    h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
+                    h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
+                    h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
+                    h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
+                    h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
+                    h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]
                     );
                 if (r == -1 || r >= sizeof emailed_hash_buf - 1) {
                     ERROR("emailed_hash_buf snprintf r:%d", r);
@@ -212,7 +226,7 @@ int main ()  {
     assert(base16_to_int('f') == 15);
 
     access_HashResult hash = {};
-    buf_from_hex(hash, sizeof hash, "859f3efa83dc0b75985995516c06d05fd7516e06b4b318ecbc63adde14a945e21e038bc5b5e1c5eb19b88ffa73d954b8149f50c7d4fa8ae92e86d60c8af2e785");
+    buf_from_hex(hash, sizeof hash, "8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed");
     access_user_add(hash, access_now_day() + 1);
 
     for(;;) {

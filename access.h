@@ -12,6 +12,7 @@ struct access_HashPayload {
 };
 typedef u8 access_HashResult[64];
 void __access_hash(access_HashResult result, struct access_HashPayload * payload);
+void access_hash(access_HashResult hash, char * rfid, char * pin);
 
 void access_user_add(access_HashResult hash, u16 expire_day);
 void access_user_list_init(void);
