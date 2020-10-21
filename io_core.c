@@ -44,7 +44,7 @@ void io_process_events() { start:;
   s32 timeout_interval_ms;
   u64 now_epoch_ms = now_ms();
   if (next_timer_epoch_ms < now_epoch_ms) {
-    // next timer is in the past, lets not wait at all
+    DEBUG("running_timer:%d is in the past:%"PRIu64", not waiting at all", running_timer, next_timer_epoch_ms);
     timeout_interval_ms = 0;
   } else if (next_timer_epoch_ms == -1) {
     // No timers set, wait infinite time

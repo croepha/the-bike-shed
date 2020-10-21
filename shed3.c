@@ -19,16 +19,38 @@ void gpio_pwm_start(void) {
 }
 
 
+/*
+
+SCAN_START
+OPTION 001
+PIN 123456
+RFID 000102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+
+SCAN_START
+OPTION 100
+PIN 123456
+RFID 000102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+
+SCAN_START
+PIN 123456
+RFID 000102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+
+
+*/
+
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];
 char exterior_pin    [pin_LEN   ];
-char exterior_rfid   [rfid_LEN  ];
+char exterior_rfid_text [rfid_LEN * 2 + 1];
 
 static void __exterior_set(char * start, char * end, char * dest, char * dest_name, usz dest_size) {
   usz len = end - start;
-  if (end - start >= dest_size - 1) {
-    ERROR_BUFFER(start, len, " %s too long", dest_name);
+  if (len >= dest_size) {
+    ERROR_BUFFER(start, len, "  %s too long, len:%zu/%zu :", dest_name, len,dest_size);
   } else {
     memcpy(dest, start, len);
     dest[len] = 0;
@@ -39,7 +61,7 @@ static void __exterior_set(char * start, char * end, char * dest, char * dest_na
 static void exterior_scan_start() {
     clear(exterior_option);
     clear(exterior_pin   );
-    clear(exterior_rfid  );
+    clear(exterior_rfid_text);
 }
 
 u16 emailed_hash_idx = 0;
@@ -59,8 +81,28 @@ enum {
     STATE_SENDING_CANCELLED,
 } state = 0;
 
+static int base16_to_int(char c) {
+    if ('a' <= c || c <= 'f') {
+        return 10 + c - 'a';
+    } else if ('0' <= c || c <= '9') {
+        return c - '0';
+    } else {
+        ERROR("bad char: %c", c);
+        return 0;
+    }
+}
 
 static void exterior_scan_finished() { int r;
+
+    u8 exterior_rfid[rfid_LEN];
+
+    memset(exterior_rfid, 0, sizeof exterior_rfid);
+    for (int i = 0; i < sizeof exterior_rfid; i++) {
+        exterior_rfid[i] = (base16_to_int(exterior_rfid_text[2*i+0]) << 8)
+          & (base16_to_int(exterior_rfid_text[2*i+1]) << 0);
+    }
+
+
     if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
         u8 granted = access_requested((char*)access_hash_payload.rfid, (char*)access_hash_payload.pin, &days_left);
@@ -79,14 +121,6 @@ static void exterior_scan_finished() { int r;
             }
         }
     } else if (strcmp(exterior_option, "100") == 0) { // Email hash
-        u16 day = access_now_day();
-        if (day != emailed_hash_day) {
-            emailed_hash_day = day;
-            emailed_hash_idx = 0;
-        }
-        u16 idx = emailed_hash_idx++;
-
-
         char * cancel_text = "";
 
         switch (state) {
@@ -96,13 +130,18 @@ static void exterior_scan_finished() { int r;
                 email_free(&emailed_hash_email_ctx); // Aborting previous send...
             } // Fall through
             case STATE_IDLE: {
+                u16 day = access_now_day();
+                if (day != emailed_hash_day) {
+                    emailed_hash_day = day;
+                    emailed_hash_idx = 0;
+                }
+                u16 idx = emailed_hash_idx++;
                 r = dprintf(serial_fd, "TEXT_SHOW Request sending Day:%hu Idx:%hu %s\n", day, idx, cancel_text);
                 error_check(r);
-
                 access_HashResult h;
                 access_hash(h, &access_hash_payload);
                 r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
-                    "Day: %hu Idx: %hu"
+                    "Day: %hu Idx: %hu\n"
                     "Hash: "
                     "%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:"
                     "%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x:%016"PRIx64"x\n",
@@ -131,6 +170,10 @@ static void exterior_scan_finished() { int r;
                 state = STATE_SENDING_CANCELLED;
             } break;
         }
+    } else {
+        r = dprintf(serial_fd, "TEXT_SHOW Unkown option\n");
+        error_check(r);
+        ERROR("Got an unknown option from the exterior");
     }
 }
 
@@ -161,5 +204,6 @@ int main ()  {
     for(;;) {
         log_allowed_fails = 100000000;
         io_process_events();
+        io_curl_process_events();
     }
 }

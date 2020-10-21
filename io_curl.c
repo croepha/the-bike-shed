@@ -10,7 +10,7 @@
 
 static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
   if (timeout_ms_ < 0) {
-    IO_TIMER_MS(io_curl) = 0;
+    IO_TIMER_MS(io_curl) = -1;
   } else {
     IO_TIMER_MS(io_curl) = now_ms() + timeout_ms_;
   }
