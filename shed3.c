@@ -101,13 +101,22 @@ static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
     }
 }
 
+u8 add_next_user;
 
 static void exterior_scan_finished() { int r;
 
     u8 exterior_rfid[rfid_LEN] = {};
     buf_from_hex(exterior_rfid, sizeof exterior_rfid, exterior_rfid_text);
 
-    if (strcmp(exterior_option, "") == 0) { // Accesss request
+    if (add_next_user == 1) {
+        // TODO enforce pin complexity?
+        access_HashResult hash = {};
+        access_hash(hash, (char*)exterior_rfid, exterior_pin);
+        access_user_add(hash, access_now_day() + 30);
+        r = dprintf(serial_fd, "TEXT_SHOW User Added days_left:30\n");
+        error_check(r);
+        add_next_user = 0;
+    } else if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
         u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
         if (granted) {
@@ -188,6 +197,23 @@ static void exterior_scan_finished() { int r;
                 state = STATE_SENDING_CANCELLED;
             } break;
         }
+    } else if (strcmp(exterior_option, "200") == 0) {
+        // Philanthripist sign up new user
+        u16 days_left = (u16)-1;
+        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
+        if (!granted) {
+            r = dprintf(serial_fd, "TEXT_SHOW DENIED: Unknown User\n");
+            error_check(r);
+        } if (days_left != (u16)-1) {
+            r = dprintf(serial_fd, "TEXT_SHOW DENIED: Not a philanthrapist\n");
+            error_check(r);
+        } else {
+            add_next_user = 1;
+            // TODO add timer to reset this
+            r = dprintf(serial_fd, "TEXT_SHOW Will add next user\n");
+            error_check(r);
+        }
+
     } else {
         r = dprintf(serial_fd, "TEXT_SHOW Unkown option\n");
         error_check(r);
@@ -224,6 +250,8 @@ int main ()  {
     assert(base16_to_int('9') == 9);
     assert(base16_to_int('a') == 10);
     assert(base16_to_int('f') == 15);
+    assert(base16_to_int('A') == 10);
+    assert(base16_to_int('F') == 15);
 
     access_HashResult hash = {};
     buf_from_hex(hash, sizeof hash, "8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed");

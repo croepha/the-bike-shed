@@ -47,7 +47,10 @@ static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
   if (days_left) {
-    if (pt_day <= USER.expire_day) {
+    if (USER.expire_day == (u16)-1) {
+      // philanthrapist level of access
+      *days_left = (u16) -1;
+    } else if (pt_day <= USER.expire_day) {
       *days_left = USER.expire_day - pt_day;
     } else {
       *days_left = 0;
