@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "io_curl.h"
 #include "logging.h"
 #include "io.h"
 #include "serial.h"
@@ -235,6 +236,33 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
     state = STATE_IDLE;
 }
 
+struct config_download_CurlCtx {
+    enum _io_curl_type curl_type;
+    CURL * easy;
+};
+struct config_download_CurlCtx static config_download_curl_ctx;
+IO_CURL_SETUP(config_download, struct config_download_CurlCtx, curl_type);
+
+static void io_curl_free(CURL ** easy) {
+    io_curl_abort(*easy);
+    curl_easy_cleanup(*easy);
+    *easy = 0;
+}
+void config_download_io_curl_complete(CURL * easy, CURLcode result, struct config_download_CurlCtx * ctx) {
+    assert(easy == ctx->easy);
+    io_curl_free(&ctx->easy);
+}
+
+//u64 config_download_interval_sec = 60 * 60; // 1 Hour
+u64 config_download_interval_sec = 20;
+char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
+
+void config_download_timeout() {
+    io_curl_free(&config_download_curl_ctx.easy);
+    config_download_io_curl_create_handle(&config_download_curl_ctx);
+
+    IO_TIMER_MS(config_download) = now_sec() + config_download_interval_sec;
+}
 
 char * email_from = "shed-test@example.com";
 char * email_host = "smtp://127.0.0.1:8025";
