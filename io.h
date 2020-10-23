@@ -8,6 +8,7 @@ extern int io_epoll_fd;
 //#define _io_timers_FIRST _io_timer_logging_send
 #define _IO_TIMERS \
  _(logging_send) \
+ _(shed_pwm) \
  _(io_curl) \
 
 //#define _io_socket_type_FIRST _io_socket_type_io_curl

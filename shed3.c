@@ -11,12 +11,16 @@
 
 u64 now_ms() { return real_now_ms(); }
 
-void gpio_pwm_start(void);
+void gpio_pwm_set(u8 value);
 
-void gpio_pwm_start(void) {
-    INFO();
+void gpio_pwm_set(u8 value) {
+    INFO("%d", value);
 }
 
+void shed_pwm_timeout() {
+    gpio_pwm_set(0);
+    IO_TIMER_MS(shed_pwm) = -1;
+}
 
 /*
 
@@ -122,7 +126,8 @@ static void exterior_scan_finished() { int r;
         if (granted) {
             r = dprintf(serial_fd, "TEXT_SHOW ACCESS GRANTED days_left:%hu\n", days_left);
             error_check(r);
-            gpio_pwm_start();
+            gpio_pwm_set(1);
+            IO_TIMER_MS(shed_pwm);
         } else {
             // TODO give reason?
             if (days_left == 0) {
