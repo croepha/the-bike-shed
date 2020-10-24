@@ -8,6 +8,8 @@
 
 
 
+u64 now_ms() { return real_now_ms(); }
+
 void config_parse_line(char *line, int line_number) {
   usz len = strlen(line);
   INFO_BUFFER(line, len, "line: len:%zu data:", len);

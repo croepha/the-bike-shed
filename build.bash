@@ -253,7 +253,6 @@ do_test email_test   /build/email_test.dbg.exec
 do_test io_core_test /build/io_core_test.dbg.exec
 do_test io_curl_test /build/io_curl_test.dbg.exec
 do_test io_test_full /build/io_test_full.dbg.exec
-do_test config_download_test2 /build/config_download_test2.dbg.exec
 
 
 reset
@@ -266,9 +265,12 @@ do_test line_accumulator_test /build/line_accumulator_test.dbg.exec
 reset
 depends_on logging
 depends_on line_accumulator
+depends_on io_core
+depends_on io_curl
 compile config_download
 compile config_download_test2
-link_exec config_download_test2
+link_exec config_download_test2 -l curl
+do_test config_download_test2 /build/config_download_test2.dbg.exec
 
 reset
 depends_on logging
