@@ -9,13 +9,9 @@
 #include "line_accumulator.h"
 
 
-static void config_parse_line(char *line, int line_number) {
+static void line_handler(char* line) {
   usz len = strlen(line);
   INFO_BUFFER(line, len, "line: len:%zu data:", len);
-}
-
-static void __line_handler(char* line) {
-    config_parse_line(line, 0);
 }
 
 struct line_accumulator_Data leftover_d = {};
@@ -24,7 +20,7 @@ struct line_accumulator_Data leftover_d = {};
 // It is likely that size is large, containing many lines
 static size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
   size = size * nmemb;
-  line_accumulator(&leftover_d, data, size, __line_handler);
+  line_accumulator(&leftover_d, data, size, line_handler);
   return size;
 }
 
