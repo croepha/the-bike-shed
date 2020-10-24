@@ -45,7 +45,7 @@ int main() { int r;
   data_send(config_download_leftover_SIZE + 1);
   data_send(0);
   data_send(1);
-  
+
   data_send(config_download_leftover_SIZE - 1);
   data_send(config_download_leftover_SIZE + 0);
   data_send(config_download_leftover_SIZE + 1);
