@@ -9,9 +9,13 @@
 #include "line_accumulator.h"
 
 
+static void config_parse_line(char *line, int line_number) {
+  usz len = strlen(line);
+  INFO_BUFFER(line, len, "line: len:%zu data:", len);
+}
 
 static void __line_handler(char* line) {
-    INFO_BUFFER(line, strlen(line), "line:");
+    config_parse_line(line, 0);
 }
 
 struct line_accumulator_Data leftover_d = {};
