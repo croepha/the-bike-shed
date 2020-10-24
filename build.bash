@@ -255,11 +255,19 @@ do_test io_curl_test /build/io_curl_test.dbg.exec
 do_test io_test_full /build/io_test_full.dbg.exec
 do_test config_download_test2 /build/config_download_test2.dbg.exec
 
+
 reset
 depends_on logging
+compile line_accumulator
+compile line_accumulator_test
+link_exec line_accumulator_test
+do_test line_accumulator_test /build/line_accumulator_test.dbg.exec
+
+reset
+depends_on logging
+depends_on line_accumulator
 compile config_download
 compile config_download_test2
-compile line_accumulator
 link_exec config_download_test2
 
 reset

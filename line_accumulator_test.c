@@ -1,18 +1,30 @@
-
-#include <unistd.h>
-#include <errno.h>
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+
+
+#include "common.h"
 #include "logging.h"
-#include "config.h"
+#include "line_accumulator.h"
 
 
 
-void config_parse_line(char *line, int line_number) {
-  usz len = strlen(line);
-  INFO_BUFFER(line, len, "line: len:%zu data:", len);
+static void __line_handler(char* line) {
+    INFO_BUFFER(line, strlen(line), "line:");
 }
 
+struct line_accumulator_Data leftover_d = {};
+
+
+// It is likely that size is large, containing many lines
+static size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
+  size = size * nmemb;
+  line_accumulator(&leftover_d, data, size, __line_handler);
+  return size;
+}
+
+static const usz config_download_leftover_SIZE = line_accumulator_Data_SIZE;
 usz  const  data_LEN = config_download_leftover_SIZE * 50;
 char  data[data_LEN];
 usz   data_consumed;
@@ -24,7 +36,9 @@ static void data_send(usz len) {
   data_consumed += len;
 }
 
-int main() { int r;
+
+int main( ) { int r;
+
   setlinebuf(stderr);
   r = alarm(1); error_check(r);
 
@@ -45,11 +59,12 @@ int main() { int r;
   data_send(config_download_leftover_SIZE + 1);
   data_send(0);
   data_send(1);
-  
+
   data_send(config_download_leftover_SIZE - 1);
   data_send(config_download_leftover_SIZE + 0);
   data_send(config_download_leftover_SIZE + 1);
 
+
+
+
 }
-
-

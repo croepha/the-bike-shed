@@ -10,7 +10,6 @@ static void __line_handler(char* line) {
   config_parse_line(line, 0);
 }
 
-
 struct line_accumulator_Data leftover_d;
 
 // It is likely that size is large, containing many lines
