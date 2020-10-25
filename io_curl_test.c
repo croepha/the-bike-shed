@@ -25,10 +25,7 @@
 
 typedef struct {
   struct line_accumulator_Data line_accumulator_data;
-  SHA256_CTX sha256;
   CURL* curl;
-  double downloaded;
-  u64 print_time;
   int id;
   struct curl_slist* headers_list;
   char etag[32];
@@ -47,18 +44,6 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
   config_download_Ctx *c = (config_download_Ctx *)userp;
   size = size * nmemb;
   line_accumulator(&c->line_accumulator_data, contents, size, 0);
-
-  c->downloaded += size;
-  u64 now = now_ms();
-  if (c->print_time + 500 < now) {
-    c->print_time = now;
-    double total_size;
-    CURLcode cr = curl_easy_getinfo(c->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &total_size);
-    error_check_curl(cr);
-    DEBUG("%d, %f ", c->id, (float)c->downloaded/(float)total_size);
-  }
-  // print("size", size, "nmemb", nmemb);
-  SHA256_Update(&c->sha256, contents, size);
   return size;
 }
 
@@ -93,7 +78,6 @@ int pending_events;
 static void _dl(config_download_Ctx *c, char *url, char *previous_etag,
                 u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
-  SHA256_Init(&c->sha256);
   assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
   SHA256_Init((SHA256_CTX*)&c->line_accumulator_data);
   c->headers_list = NULL;
