@@ -1,3 +1,4 @@
+#define LOG_DEBUG
 #include <string.h>
 
 #include "common.h"
@@ -255,18 +256,21 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
 }
 
 void config_download_timeout() {
+  DEBUG();
   config_download_abort(&config_download_ctx);
   last_config_download_sec = now_sec();
   memset(&config_download_ctx.line_accumulator_data, 0, sizeof config_download_ctx.line_accumulator_data);
+  __config_download_start(
+    &config_download_ctx,
+    config_download_url,
+    config_download_previous_etag,
+    config_download_previous_modified_time_sec);
 
   IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
 }
 
 void __debug_config_download_complete_hook() {};
 struct StringList tmp_arg;
-
-
-
 
 
 char * email_from = "shed-test@example.com";

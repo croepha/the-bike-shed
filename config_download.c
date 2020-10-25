@@ -1,3 +1,5 @@
+#include <curl/curl.h>
+#define LOG_DEBUG
 #include <string.h>
 
 #include "common.h"
@@ -5,6 +7,7 @@
 #include "config.h"
 #include "io.h"
 #include "io_curl.h"
+#include <inttypes.h>
 
 #include "config.h"
 #include "config_download.h"
@@ -19,8 +22,14 @@ static void __line_handler(char* line) {
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
   struct config_download_Ctx *c = (struct config_download_Ctx *)userp;
+  CURLcode cr;
+  int response_code;
+  cr = curl_easy_getinfo(c->easy, CURLINFO_RESPONSE_CODE, &response_code);
+  error_check_curl(cr);
   size = size * nmemb;
-  line_accumulator(&c->line_accumulator_data, contents, size, __line_handler);
+  if (response_code == 200) {
+    line_accumulator(&c->line_accumulator_data, contents, size, __line_handler);
+  }
   return size;
 }
 
@@ -93,8 +102,10 @@ static void io_curl_free(CURL ** easy) {
 }
 
 void config_download_abort(struct config_download_Ctx *c) {
-  curl_slist_free_all(c->headers_list);
-  io_curl_free(&c->easy);
+  if (c->easy) {
+    curl_slist_free_all(c->headers_list);
+    io_curl_free(&c->easy);
+  }
 }
 
 static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;

@@ -1,4 +1,4 @@
-
+#define LOG_DEBUG
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -76,6 +76,7 @@ static void __set_config(char* var_name, char** var, char* value, int line_numbe
     }
     *var = config_push_string(value);
 #elif CONFIG_DIAGNOSTICS == 0
+    DEBUG("%s=%s", var_name, value);
     if (!var) {
         DEBUG("Ignoring config for variable: %s", var_name);
     } else {
@@ -99,6 +100,7 @@ static void __config_append(struct StringList *sl, char* str) {
 #if CONFIG_DIAGNOSTICS == 1
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
+    "EmailAddress: \tasdasdfasdasd32323@gmail.com",
     "EmailAddress:    yahooyahoo@yahoo.com",
     "EmailAddress: tmp-from@testtest.test",
 0};
