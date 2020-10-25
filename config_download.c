@@ -40,6 +40,7 @@ static void io_curl_free(CURL ** easy) {
 }
 void config_download_io_curl_complete(CURL * easy, CURLcode result, struct config_download_CurlCtx * ctx) {
     assert(easy == ctx->easy);
+    // TODO: What if config doesn't have a trailing new line, does that mean we don't do the last config line?
     io_curl_free(&ctx->easy);
 }
 
@@ -50,12 +51,15 @@ char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/she
 void config_download_timeout() {
     io_curl_free(&config_download_curl_ctx.easy);
     config_download_io_curl_create_handle(&config_download_curl_ctx);
+    memset(&leftover_d, 0, sizeof leftover_d);
+
 
     IO_TIMER_MS(config_download) = now_sec() + config_download_interval_sec;
 }
 
 
 
+ 
 
 // #include <inttypes.h>
 
