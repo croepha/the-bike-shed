@@ -6,6 +6,8 @@
 #include "io.h"
 #include "io_curl.h"
 
+#include "config.h"
+#include "config_download.h"
 
 
 static void __line_handler(char* line) {
@@ -24,24 +26,20 @@ static size_t config_download_write_callback(char *data, size_t size, size_t nme
 char percon_config_etag[32];
 u64  percon_config_modtime_sec;
 
-
-
-struct config_download_CurlCtx {
-    enum _io_curl_type curl_type;
-    CURL * easy;
-};
-struct config_download_CurlCtx static config_download_curl_ctx;
-IO_CURL_SETUP(config_download, struct config_download_CurlCtx, curl_type);
+struct config_download_Ctx static config_download_curl_ctx;
+IO_CURL_SETUP(config_download, struct config_download_Ctx, curl_type);
 
 static void io_curl_free(CURL ** easy) {
     io_curl_abort(*easy);
     curl_easy_cleanup(*easy);
     *easy = 0;
 }
-void config_download_io_curl_complete(CURL * easy, CURLcode result, struct config_download_CurlCtx * ctx) {
-    assert(easy == ctx->easy);
-    // TODO: What if config doesn't have a trailing new line, does that mean we don't do the last config line?
-    io_curl_free(&ctx->easy);
+void config_download_io_curl_complete(CURL *easy, CURLcode result,
+                                      struct config_download_Ctx *ctx) {
+  assert(easy == ctx->easy);
+  // TODO: What if config doesn't have a trailing new line, does that mean we
+  // don't do the last config line?
+  io_curl_free(&ctx->easy);
 }
 
 //u64 config_download_interval_sec = 60 * 60; // 1 Hour

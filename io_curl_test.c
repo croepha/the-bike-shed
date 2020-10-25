@@ -17,34 +17,24 @@
 #include "logging.h"
 #include "io.h"
 #include "io_curl.h"
-#include "line_accumulator.h"
+#include "config.h"
+#include "config_download.h"
 
 #include <openssl/sha.h>
 
 
-typedef struct {
-  struct line_accumulator_Data line_accumulator_data;
-  CURL* curl;
-  int id;
-  struct curl_slist* headers_list;
-  char etag[32];
-  u64  modified_time;
-  enum _io_curl_type curl_type;
-} config_download_Ctx;
 
-IO_CURL_SETUP(config_download, config_download_Ctx, curl_type);
 
-u64 now_ms() { return real_now_ms(); }
+IO_CURL_SETUP(config_download, struct config_download_Ctx, curl_type);
 
-void line_accumulator(struct line_accumulator_Data *leftover, char *data, usz data_len, void (*line_handler)(char *)) {
-  assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
-  SHA256_Update((SHA256_CTX*)leftover, data, data_len);
+static void __line_handler(char* line) {
+  config_parse_line(line, 0);
 }
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
-  config_download_Ctx *c = (config_download_Ctx *)userp;
+  struct config_download_Ctx *c = (struct config_download_Ctx *)userp;
   size = size * nmemb;
-  line_accumulator(&c->line_accumulator_data, contents, size, 0);
+  line_accumulator(&c->line_accumulator_data, contents, size, __line_handler);
   return size;
 }
 
@@ -52,7 +42,7 @@ static size_t _write_function(void *contents, size_t size, size_t nmemb, void*us
 #include "/build/parse_headers.re.c"
 
 static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *userdata) {
-  config_download_Ctx *c = userdata;
+  struct config_download_Ctx *c = userdata;
   buffer[nitems-2] = 0;
   DEBUG_BUFFER(buffer, nitems, "Got header:");
   struct ParsedHeader header =  parse_header(buffer);
@@ -73,15 +63,14 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
   return nitems;
 }
 
-
-static void __config_download_start(config_download_Ctx *c, char *url, char *previous_etag,
+void __config_download_start(struct config_download_Ctx *c, char *url, char *previous_etag,
                u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
   SHA256_Init((SHA256_CTX*)&c->line_accumulator_data);
   c->headers_list = NULL;
   c->curl_type = _io_curl_type_test;
-  c->curl = config_download_io_curl_create_handle(c);
+  c->easy = config_download_io_curl_create_handle(c);
 
   if (previous_etag) {
     char tmp[256];
@@ -94,7 +83,7 @@ static void __config_download_start(config_download_Ctx *c, char *url, char *pre
   }
 
   {
-    CURL* easy = c->curl;
+    CURL *easy = c->easy;
     CURLESET(HTTPHEADER, c->headers_list);
     CURLESET(HEADERFUNCTION, _header_callback);
     CURLESET(WRITEFUNCTION, _write_function);
@@ -113,9 +102,15 @@ static void __config_download_start(config_download_Ctx *c, char *url, char *pre
   }
 }
 
-static void _dl_free(config_download_Ctx *c) {
+static void io_curl_free(CURL ** easy) {
+    io_curl_abort(*easy);
+    curl_easy_cleanup(*easy);
+    *easy = 0;
+}
+
+static void _dl_free(struct config_download_Ctx *c) {
   curl_slist_free_all(c->headers_list);
-  curl_easy_cleanup(c->curl);
+  io_curl_free(&c->easy);
 }
 
 static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
@@ -146,20 +141,35 @@ static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
-void __debug_config_download_complete_hook(void);
-
 static void config_download_io_curl_complete(CURL *easy, CURLcode result,
-                                  config_download_Ctx *c) {
+                                  struct config_download_Ctx *c) {
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
   __debug_config_download_complete_hook();
   u8 is_success = download_is_successful(result, easy);
-  if (is_success == 1) {
+  config_download_finished(c, is_success == 1);
+  _dl_free(c);
+}
+
+
+
+
+void config_parse_line() {}
+u64 now_ms() { return real_now_ms(); }
+
+void line_accumulator(struct line_accumulator_Data *leftover, char *data, usz data_len, void (*line_handler)(char *)) {
+  assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
+  SHA256_Update((SHA256_CTX*)leftover, data, data_len);
+}
+
+
+
+void config_download_finished(struct config_download_Ctx *c, u8 success) {
+  if (success) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256_Final(hash, (SHA256_CTX*)&c->line_accumulator_data);
     INFO_HEXBUFFER(hash, SHA256_DIGEST_LENGTH);
   }
-  _dl_free(c);
 }
 
 
@@ -169,7 +179,7 @@ void __debug_config_download_complete_hook(void) {
   log_allowed_fails = 100;
 }
 
-static void dl(config_download_Ctx *c, char *url, char *previous_etag,
+static void dl(struct config_download_Ctx *c, char *url, char *previous_etag,
                u64 previous_mod_time) {
     __config_download_start(c, url, previous_etag, previous_mod_time);
   pending_events ++;
@@ -195,26 +205,26 @@ static void download_test() {
   io_initialize();
   io_curl_initialize();
 
-  config_download_Ctx c1 = {.id = 1};
+  struct config_download_Ctx c1 = {.id = 1};
   char* url = "http://127.0.0.1:9160/workspaces/the-bike-shed/README.md";
   char* url2 = "http://127.0.0.1:9161/workspaces/the-bike-shed/README.md";
   dl(&c1, url, 0, 0);
 
-  config_download_Ctx c2 = {.id = 2};
+  struct config_download_Ctx c2 = {.id = 2};
   dl(&c2, "ftp://127.0.0.1:232/asdfas", 0, 0);
 
-  config_download_Ctx c3 = {.id = 3};
+  struct config_download_Ctx c3 = {.id = 3};
   dl(&c3, url2, 0, 0);
 
   _perform_all();
 
-  config_download_Ctx c4 = {.id = 4};
+  struct config_download_Ctx c4 = {.id = 4};
   dl(&c4, url, c1.etag, c1.modified_time);
 
-  config_download_Ctx c5 = {.id = 5};
+  struct config_download_Ctx c5 = {.id = 5};
   dl(&c5, url, 0, 0);
 
-  config_download_Ctx c6 = {.id = 6};
+  struct config_download_Ctx c6 = {.id = 6};
   dl(&c6, url2, 0, 0);
 
   _perform_all();
