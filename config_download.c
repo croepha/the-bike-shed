@@ -43,14 +43,14 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
     case HEADER_TYPE_LAST_MODIFIED: {
       u64 seconds = curl_getdate(header.value, 0);
       DEBUG_BUFFER(header.value, strlen(header.value), "HEADER_TYPE_LAST_MODIFIED %"PRId64"", seconds);
-      c->modified_time = seconds;
+      c->modified_time_sec = seconds;
     } break;
   }
   return nitems;
 }
 
-void __config_download_start(struct config_download_Ctx *c, char *url, char *previous_etag,
-               u64 previous_mod_time) {
+void __config_download_start(struct config_download_Ctx *c, char *url,
+                             char *previous_etag, u64 previous_mod_time_sec) {
   DEBUG("c:%p id:%02d", c, c->id);
   c->headers_list = NULL;
   c->curl_type = _io_curl_type_test;
@@ -71,9 +71,9 @@ void __config_download_start(struct config_download_Ctx *c, char *url, char *pre
     CURLESET(HTTPHEADER, c->headers_list);
     CURLESET(HEADERFUNCTION, _header_callback);
     CURLESET(WRITEFUNCTION, _write_function);
-    if (previous_mod_time) {
+    if (previous_mod_time_sec) {
       CURLESET(TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
-      CURLESET(TIMEVALUE_LARGE, (curl_off_t)previous_mod_time);
+      CURLESET(TIMEVALUE_LARGE, (curl_off_t)previous_mod_time_sec);
     }
     //CURLESET(COOKIEFILE, "");
     CURLESET(USERAGENT, "the-bike-shed/0");
@@ -92,7 +92,7 @@ static void io_curl_free(CURL ** easy) {
     *easy = 0;
 }
 
-static void _dl_free(struct config_download_Ctx *c) {
+void config_download_abort(struct config_download_Ctx *c) {
   curl_slist_free_all(c->headers_list);
   io_curl_free(&c->easy);
 }
@@ -133,30 +133,8 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
   __debug_config_download_complete_hook();
   u8 is_success = download_is_successful(result, easy);
   config_download_finished(c, is_success == 1);
-  _dl_free(c);
+  config_download_abort(c);
 }
-
-
-
-
-
-
-
-
-
-
-// //u64 config_download_interval_sec = 60 * 60; // 1 Hour
-// u64 config_download_interval_sec = 20;
-// char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
-
-// void config_download_timeout() {
-//     io_curl_free(&config_download_curl_ctx.easy);
-//     config_download_io_curl_create_handle(&config_download_curl_ctx);
-//     memset(&leftover_d, 0, sizeof leftover_d);
-
-
-//     IO_TIMER_MS(config_download) = now_sec() + config_download_interval_sec;
-// }
 
 
 

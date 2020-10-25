@@ -9,7 +9,7 @@
 #include "access.h"
 #include "email.h"
 #include "inttypes.h"
-//#include "config_download.h"
+#include "config_download.h"
 
 u64 now_ms() { return real_now_ms(); }
 
@@ -237,6 +237,38 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
     state = STATE_IDLE;
 }
 
+
+
+//u64 config_download_interval_sec = 60 * 60; // 1 Hour
+u64 config_download_interval_sec = 20;
+char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
+char config_download_previous_etag[32];
+u64 config_download_previous_modified_time_sec;
+static struct config_download_Ctx config_download_ctx;
+
+static u64 last_config_download_sec = 0;
+
+void config_download_finished(struct config_download_Ctx *c, u8 success) {
+  memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
+  strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
+  IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
+}
+
+void config_download_timeout() {
+  config_download_abort(&config_download_ctx);
+  last_config_download_sec = now_sec();
+  memset(&config_download_ctx.line_accumulator_data, 0, sizeof config_download_ctx.line_accumulator_data);
+
+  IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
+}
+
+void __debug_config_download_complete_hook() {};
+struct StringList tmp_arg;
+
+
+
+
+
 char * email_from = "shed-test@example.com";
 char * email_host = "smtp://127.0.0.1:8025";
 char * email_user_pass = "username:password";
@@ -250,6 +282,7 @@ int main ()  {
     io_curl_initialize();
     access_user_list_init();
     serial_io_initialize(serial_path);
+    config_download_timeout();
 
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);

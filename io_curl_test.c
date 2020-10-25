@@ -52,14 +52,12 @@ void __debug_config_download_complete_hook(void) {
 }
 
 static void dl(struct config_download_Ctx *c, char *url, char *previous_etag,
-               u64 previous_mod_time) {
+               u64 previous_mod_time_sec) {
   assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
   SHA256_Init((SHA256_CTX*)&c->line_accumulator_data);
-    __config_download_start(c, url, previous_etag, previous_mod_time);
+  __config_download_start(c, url, previous_etag, previous_mod_time_sec);
   pending_events ++;
 }
-
-
 
 static void _perform_all() {
   while (pending_events > 0) {
@@ -93,7 +91,7 @@ static void download_test() {
   _perform_all();
 
   struct config_download_Ctx c4 = {.id = 4};
-  dl(&c4, url, c1.etag, c1.modified_time);
+  dl(&c4, url, c1.etag, c1.modified_time_sec);
 
   struct config_download_Ctx c5 = {.id = 5};
   dl(&c5, url, 0, 0);

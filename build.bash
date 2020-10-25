@@ -337,6 +337,8 @@ depends_on argon2/core
 depends_on argon2/argon2
 depends_on access_hash
 depends_on access_data
+depends_on config_download
+FLAVOR=nodiagnostic depends_on config
 compile shed3
 link_exec shed3 -l curl -l pthread
 
