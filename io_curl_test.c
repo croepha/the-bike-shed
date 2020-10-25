@@ -17,7 +17,6 @@
 #include "logging.h"
 #include "io.h"
 #include "io_curl.h"
-#include "downloading.h"
 #include "line_accumulator.h"
 
 #include <openssl/sha.h>

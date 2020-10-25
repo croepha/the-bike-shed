@@ -14,8 +14,8 @@ static void __line_handler(char* line) {
 
 struct line_accumulator_Data leftover_d;
 
-// It is likely that size is large, containing many lines
-size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
+__attribute__((unused))     // TODO
+static size_t config_download_write_callback(char *data, size_t size, size_t nmemb, void *userdata) {
   size = size * nmemb;
   line_accumulator(&leftover_d, data, size, __line_handler);
   return size;
@@ -59,7 +59,7 @@ void config_download_timeout() {
 
 
 
- 
+
 
 // #include <inttypes.h>
 
