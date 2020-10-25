@@ -113,14 +113,6 @@ static void __config_download_start(config_download_Ctx *c, char *url, char *pre
   }
 }
 
-int pending_events;
-
-static void dl(config_download_Ctx *c, char *url, char *previous_etag,
-               u64 previous_mod_time) {
-    __config_download_start(c, url, previous_etag, previous_mod_time);
-  pending_events ++;
-  }
-
 static void _dl_free(config_download_Ctx *c) {
   curl_slist_free_all(c->headers_list);
   curl_easy_cleanup(c->curl);
@@ -154,12 +146,13 @@ static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
+void __debug_config_download_complete_hook(void);
+
 static void config_download_io_curl_complete(CURL *easy, CURLcode result,
                                   config_download_Ctx *c) {
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
-  pending_events --;
-  log_allowed_fails = 100;
+  __debug_config_download_complete_hook();
   u8 is_success = download_is_successful(result, easy);
   if (is_success == 1) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -168,6 +161,21 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
   }
   _dl_free(c);
 }
+
+
+int pending_events;
+void __debug_config_download_complete_hook(void) {
+  pending_events --;
+  log_allowed_fails = 100;
+}
+
+static void dl(config_download_Ctx *c, char *url, char *previous_etag,
+               u64 previous_mod_time) {
+    __config_download_start(c, url, previous_etag, previous_mod_time);
+  pending_events ++;
+}
+
+
 
 static void _perform_all() {
   while (pending_events > 0) {
@@ -178,7 +186,6 @@ static void _perform_all() {
 
 
 
-void logging_send_timeout() { }
 
 static void download_test() {
 
