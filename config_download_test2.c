@@ -5,8 +5,11 @@
 #include <string.h>
 #include "logging.h"
 #include "config.h"
+#include "config_download.h"
 
 
+void __debug_config_download_complete_hook(void) {}
+void config_download_finished(struct config_download_Ctx *c, u8 success) {}
 
 u64 now_ms() { return real_now_ms(); }
 

@@ -165,6 +165,7 @@ compile    misc
 compile    io_core
 compile    io_curl
 compile    io_curl_test
+depends_on config_download
 link_exec  io_curl_test -l curl -l crypto
 
 reset
