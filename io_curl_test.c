@@ -32,6 +32,8 @@ typedef struct {
   enum _io_curl_type curl_type;
 } config_download_Ctx;
 
+IO_CURL_SETUP(config_download, config_download_Ctx, curl_type);
+
 u64 now_ms() { return real_now_ms(); }
 
 void line_accumulator(struct line_accumulator_Data *leftover, char *data, usz data_len, void (*line_handler)(char *)) {
@@ -71,17 +73,15 @@ static size_t _header_callback(char *buffer, size_t _s, size_t nitems, void *use
   return nitems;
 }
 
-IO_CURL_SETUP(test, config_download_Ctx, curl_type);
 
-int pending_events;
-static void _dl(config_download_Ctx *c, char *url, char *previous_etag,
-                u64 previous_mod_time) {
+static void __config_download_start(config_download_Ctx *c, char *url, char *previous_etag,
+               u64 previous_mod_time) {
   DEBUG("c:%p id:%02d", c, c->id);
   assert(sizeof(SHA256_CTX) < sizeof(struct line_accumulator_Data));
   SHA256_Init((SHA256_CTX*)&c->line_accumulator_data);
   c->headers_list = NULL;
   c->curl_type = _io_curl_type_test;
-  c->curl = test_io_curl_create_handle(c);
+  c->curl = config_download_io_curl_create_handle(c);
 
   if (previous_etag) {
     char tmp[256];
@@ -111,8 +111,15 @@ static void _dl(config_download_Ctx *c, char *url, char *previous_etag,
     CURLESET(URL, url);
 
   }
-  pending_events ++;
 }
+
+int pending_events;
+
+static void dl(config_download_Ctx *c, char *url, char *previous_etag,
+               u64 previous_mod_time) {
+    __config_download_start(c, url, previous_etag, previous_mod_time);
+  pending_events ++;
+  }
 
 static void _dl_free(config_download_Ctx *c) {
   curl_slist_free_all(c->headers_list);
@@ -147,7 +154,7 @@ static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
   }
 }
 
-static void test_io_curl_complete(CURL *easy, CURLcode result,
+static void config_download_io_curl_complete(CURL *easy, CURLcode result,
                                   config_download_Ctx *c) {
   DEBUG("c:%p", c);
   LOGCTX(" test_sort:id:%02d", c->id);
@@ -184,24 +191,24 @@ static void download_test() {
   config_download_Ctx c1 = {.id = 1};
   char* url = "http://127.0.0.1:9160/workspaces/the-bike-shed/README.md";
   char* url2 = "http://127.0.0.1:9161/workspaces/the-bike-shed/README.md";
-  _dl(&c1, url, 0, 0);
+  dl(&c1, url, 0, 0);
 
   config_download_Ctx c2 = {.id = 2};
-  _dl(&c2, "ftp://127.0.0.1:232/asdfas", 0, 0);
+  dl(&c2, "ftp://127.0.0.1:232/asdfas", 0, 0);
 
   config_download_Ctx c3 = {.id = 3};
-  _dl(&c3, url2, 0, 0);
+  dl(&c3, url2, 0, 0);
 
   _perform_all();
 
   config_download_Ctx c4 = {.id = 4};
-  _dl(&c4, url, c1.etag, c1.modified_time);
+  dl(&c4, url, c1.etag, c1.modified_time);
 
   config_download_Ctx c5 = {.id = 5};
-  _dl(&c5, url, 0, 0);
+  dl(&c5, url, 0, 0);
 
   config_download_Ctx c6 = {.id = 6};
-  _dl(&c6, url2, 0, 0);
+  dl(&c6, url2, 0, 0);
 
   _perform_all();
 
