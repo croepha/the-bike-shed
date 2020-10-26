@@ -41,6 +41,7 @@ void supr_exec_child() { int r;
 }
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
+void shed_add_philantropist_hex(char* hex) { }
 
 static void config_validate_or_exit() {
     log_allowed_fails = 1000;

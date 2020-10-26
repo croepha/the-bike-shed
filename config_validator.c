@@ -10,6 +10,9 @@ char * email_rcpt;
 char ** supr_child_args;
 struct StringList tmp_arg;
 
+void shed_add_philantropist_hex(char* hex) { }
+
+
 int main (int argc, char ** argv) {
     assert(argc == 2);
     setlinebuf(stderr);

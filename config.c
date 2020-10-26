@@ -66,6 +66,10 @@ char* config_push_string(char * str) {
 #error CONFIG_DIAGNOSTICS not set
 #endif
 
+#define do_philanthropist(var) *end = 0; __do_philanthropist(start); return;
+static void __do_philanthropist(char* hex) {
+    shed_add_philantropist_hex(hex);
+}
 
 #define set_config(var) *end = 0; __set_config(#var, &var, start, line_number); return;
 static void __set_config(char* var_name, char** var, char* value, int line_number) {
@@ -98,6 +102,9 @@ static void __config_append(struct StringList *sl, char* str) {
 }
 
 #if CONFIG_DIAGNOSTICS == 1
+char *   valid_config_philanthropist[] = {
+    "Philanthropist: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed",
+00};
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",
     "EmailAddress: \tasdasdfasdasd32323@gmail.com",

@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <errno.h>
+#include "common.h"
 #include "logging.h"
 #include "config.h"
 
@@ -12,7 +13,6 @@ char * email_user_pass;
 char * email_rcpt;
 char ** supr_child_args;
 struct StringList tmp_arg;
-
 
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
@@ -53,6 +53,9 @@ static void _test_set2(char**set, usz set_len) {
     }
 }
 
+void shed_add_philantropist_hex(char* hex) {
+    INFO_BUFFER(hex, strlen(hex));
+}
 
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdfsdfasdasd32323@GMAIL.com",

@@ -1,5 +1,5 @@
 #include <curl/curl.h>
-#define LOG_DEBUG
+//#define LOG_DEBUG
 #include <string.h>
 
 #include "common.h"
@@ -143,6 +143,9 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
   LOGCTX(" test_sort:id:%02d", c->id);
   __debug_config_download_complete_hook();
   u8 is_success = download_is_successful(result, easy);
+  if (is_success) {
+    INFO("Download finished successfully");
+  }
   config_download_finished(c, is_success == 1);
   config_download_abort(c);
 }

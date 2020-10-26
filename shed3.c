@@ -45,6 +45,20 @@ RFID 000102030405060708090a0b0c0d0e0f1011121314151617
 SCAN_FINISHED
 
 
+SCAN_START
+OPTION 200
+PIN 123456
+RFID 000102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+
+
+SCAN_START
+OPTION 100
+PIN 123456
+RFID f00102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+
+
 */
 
 static usz const option_LEN = 10;
@@ -279,6 +293,14 @@ char * email_user_pass = "username:password";
 char * email_rcpt = "shed-test-dest@example.com";
 char * serial_path = "/build/exterior_mock.pts";
 
+void shed_add_philantropist_hex(char* hex) {
+    access_HashResult hash = {};
+    buf_from_hex(hash, sizeof hash, hex);
+    access_user_add(hash, -1);
+}
+
+
+
 // TODO needs maintenance
 int main ()  {
     setlinebuf(stderr);
@@ -295,10 +317,6 @@ int main ()  {
     assert(base16_to_int('f') == 15);
     assert(base16_to_int('A') == 10);
     assert(base16_to_int('F') == 15);
-
-    access_HashResult hash = {};
-    buf_from_hex(hash, sizeof hash, "8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed");
-    access_user_add(hash, access_now_day() + 1);
 
     for(;;) {
         log_allowed_fails = 100000000;
