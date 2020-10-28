@@ -301,6 +301,40 @@ void shed_add_philantropist_hex(char* hex) {
 
 
 
+//   access_idle_maintenance_prev = &access_users_first_idx;
+//   while (*access_idle_maintenance_prev != (u16)-1) {
+//     access_idle_maintenance();
+//   }
+
+
+u16 last_maintenance_day;
+void idle_timeout() {
+    // Lets do maintenance at 4AM PT, should probaby be the slowest time at NB
+    u64 utc_sec = now_sec();
+    u64 utc_hour = utc_sec / (60*60);
+    u32 pt_hour = utc_hour - 7 /* 7 hours */ ;
+    u16 maint_hour = pt_hour + 4 /* 4AM */ ;
+    u16 maint_day = maint_hour / 24 ;
+
+    if (*access_idle_maintenance_prev != (u16)-1) {
+        access_idle_maintenance();
+        io_idle_has_work = 1;
+    } else if (maint_day != last_maintenance_day) {
+        INFO("Maintenance Starting");
+        last_maintenance_day = maint_day;
+        access_idle_maintenance_prev = &access_users_first_idx;
+        io_idle_has_work = 1;
+    } else {
+        INFO("Maintenance Finished");
+        // Set timer to next day
+        IO_TIMER_MS(idle) = (maint_hour + 24) * 60 * 60 * 1000;
+        io_idle_has_work = 0;
+    }
+
+//    last_maintenance_day
+}
+
+
 // TODO needs maintenance
 int main ()  {
     setlinebuf(stderr);
@@ -309,6 +343,7 @@ int main ()  {
     access_user_list_init();
     serial_io_initialize(serial_path);
     config_download_timeout();
+    idle_timeout();
 
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);

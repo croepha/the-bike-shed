@@ -14,7 +14,10 @@ u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 
 int io_epoll_fd = -1;
 
+u8   io_idle_has_work; // TODO make unit test for this
+
 void io_initialize() {
+  io_idle_has_work = 0;
   io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
 }
 
@@ -25,8 +28,13 @@ void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
 }
 
 
-
 void io_process_events() { start:;
+
+  u64 now_epoch_ms = now_ms();
+  if (io_idle_has_work) {
+    IO_TIMER_MS(idle) = now_epoch_ms + 100;
+  }
+
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
   for (int i=1; i < _io_timer_COUNT; i++) {
@@ -42,7 +50,7 @@ void io_process_events() { start:;
   }
 
   s32 timeout_interval_ms;
-  u64 now_epoch_ms = now_ms();
+
   if (next_timer_epoch_ms < now_epoch_ms) {
     DEBUG("running_timer:%d is in the past:%"PRIu64", not waiting at all", running_timer, next_timer_epoch_ms);
     timeout_interval_ms = 0;

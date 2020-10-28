@@ -11,6 +11,7 @@ extern int io_epoll_fd;
  _(shed_pwm) \
  _(io_curl) \
  _(config_download) \
+ _(idle) \
 
 //#define _io_socket_type_FIRST _io_socket_type_io_curl
 #define _IO_SOCKET_TYPES \
@@ -58,5 +59,4 @@ void __io_set(int flags, int op, enum _io_socket_types type, int fd);
 
 void io_initialize(void);
 void io_process_events(void);
-
-
+extern u8  io_idle_has_work;

@@ -27,6 +27,8 @@ static u16 access_users_first_free_idx;
 u16 access_users_first_idx;
 u16 * access_idle_maintenance_prev;
 
+// TODO make sure that maintenence is unit tested
+
 #define USER (access_users_space[USER_idx])
 #define MAP  (        access_map[MAP_idx ])
 
@@ -37,8 +39,9 @@ u16 access_now_day() {
   u64  utc_sec = now_sec();
   u64  utc_hour = utc_sec / (60*60);
   u32  pt_hour = utc_hour - 7 /* 7 hours */ ;
-  u16  pt_day = pt_hour / 24;
-  return pt_day;
+  u32  access_hour = pt_hour + 13 /* 1PM */ ;
+  u16  access_day = access_hour / 24;
+  return access_day;
 }
 
 static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
