@@ -1,6 +1,21 @@
 /*
 
+Edit /boot/config.txt.
+Add the line dtoverlay=pwm-2chan
+Save the file.
+Reboot.
+
+
 modprobe pwm-bcm2835
+
+echo 0 > /sys/class/pwm/pwmchip0/export
+echo 20000000 > /sys/class/pwm/pwmchip0/pwm0/period
+echo 18000000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+
+echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable
+echo 0 > /sys/class/pwm/pwmchip0/pwm0/enable
+
+
 cd /sys/class/pwm/pwmchip0
  echo 0 > export
 cd /sys/class/pwm/pwmchip0/pwm0/

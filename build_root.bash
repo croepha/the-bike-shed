@@ -386,7 +386,7 @@ null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 ::sysinit:/etc/init.d/rcS
 
 # Put a getty on the serial port
-console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
+# remove console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
 tty1::respawn:sh /autoexec.sh
 tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 
@@ -398,6 +398,21 @@ tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 ::shutdown:/sbin/swapoff -a
 ::shutdown:/bin/umount -a -r
 EOF
+
+# removed console=ttyAMA0,115200
+/mnt/p1/cmdline.txt:
+root=/dev/mmcblk0p2 rootwait console=tty1
+
+/mnt/p1/config.txt:
+kernel=zImage
+disable_overscan=1
+gpu_mem_256=16
+gpu_mem_512=16
+gpu_mem_1024=16
+dtoverlay=miniuart-bt
+dtoverlay=pwm-2chan
+
+
 
 cd
 umount /mnt

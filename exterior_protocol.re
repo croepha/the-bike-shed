@@ -11,7 +11,7 @@ void serial_line_handler(char *input_str) {
   "SCAN_START" { exterior_scan_start(); return; }
   "OPTION"     [ ]* @start [-a-zA-Z0-9.+_]+  @end { exterior_set(exterior_option); }
   "PIN"        [ ]* @start [-a-zA-Z0-9.+_]+  @end { exterior_set(exterior_pin   ); }
-  "RFID"       [ ]* @start [-a-zA-Z0-9.+_]+  @end { exterior_set(exterior_rfid_text  ); }
+  "RFID"       [ ]* @start [a-fA-f0-9]+  @end { exterior_set(exterior_rfid_text  ); }
   "SCAN_FINISHED" { exterior_scan_finished(); return; }
 
   */

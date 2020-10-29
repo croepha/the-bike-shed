@@ -11,19 +11,11 @@
 #include "email.h"
 #include "inttypes.h"
 #include "config_download.h"
+#include "pwm.h"
+
 
 u64 now_ms() { return real_now_ms(); }
 
-void gpio_pwm_set(u8 value);
-
-void gpio_pwm_set(u8 value) {
-    INFO("%d", value);
-}
-
-void shed_pwm_timeout() {
-    gpio_pwm_set(0);
-    IO_TIMER_MS(shed_pwm) = -1;
-}
 
 /*
 
@@ -117,6 +109,9 @@ static int base16_to_int(char c) {
 static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
     u8 * buf = buf_;
     for (int i = 0; i < buf_len; i++) {
+        if (!hex[2*i+0] || !hex[2*i+1]) {
+            break;
+        }
         buf[i] = (base16_to_int(hex[2*i+0]) << 4)
           | (base16_to_int(hex[2*i+1]) << 0);
     }
@@ -134,24 +129,32 @@ static void exterior_scan_finished() { int r;
         access_HashResult hash = {};
         access_hash(hash, (char*)exterior_rfid, exterior_pin);
         access_user_add(hash, access_now_day() + 30);
-        r = dprintf(serial_fd, "TEXT_SHOW User Added days_left:30\n");
+        r = dprintf(serial_fd, "TEXT_SHOW1 User Added\n");
+        error_check(r);
+        r = dprintf(serial_fd, "TEXT_SHOW2 days_left:30\n");
         error_check(r);
         add_next_user = 0;
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
         u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
         if (granted) {
-            r = dprintf(serial_fd, "TEXT_SHOW ACCESS GRANTED days_left:%hu\n", days_left);
+            r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS GRANTED\n");
+            error_check(r);
+            r = dprintf(serial_fd, "TEXT_SHOW2 days_left:%hu\n", days_left);
             error_check(r);
             gpio_pwm_set(1);
             IO_TIMER_MS(shed_pwm);
         } else {
             // TODO give reason?
             if (days_left == 0) {
-                r = dprintf(serial_fd, "TEXT_SHOW ACCESS DENIED: Expired\n");
+                r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS DENIED\n");
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 Expired\n");
                 error_check(r);
             } else {
-                r = dprintf(serial_fd, "TEXT_SHOW ACCESS DENIED: Unknown User\n");
+                r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS DENIED\n");
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 Unknown User\n");
                 error_check(r);
             }
         }
@@ -160,7 +163,7 @@ static void exterior_scan_finished() { int r;
 
         switch (state) {
             case STATE_SENDING_CANCELLED: {
-                cancel_text = "Cancelled previous send";
+                cancel_text = "C";
                 WARN("Cancelling previous email send");
                 email_free(&emailed_hash_email_ctx); // Aborting previous send...
             } // Fall through
@@ -171,7 +174,9 @@ static void exterior_scan_finished() { int r;
                     emailed_hash_idx = 0;
                 }
                 u16 idx = emailed_hash_idx++;
-                r = dprintf(serial_fd, "TEXT_SHOW Request sending Day:%hu Idx:%hu %s\n", day, idx, cancel_text);
+                r = dprintf(serial_fd, "TEXT_SHOW1 Request sending %s\n", cancel_text);
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 Day:%hu Idx:%hu\n", day, idx);
                 error_check(r);
 
                 access_HashResult h;
@@ -224,20 +229,24 @@ static void exterior_scan_finished() { int r;
         u16 days_left = (u16)-1;
         u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
         if (!granted) {
-            r = dprintf(serial_fd, "TEXT_SHOW DENIED: Unknown User\n");
+            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED:\n");
             error_check(r);
-        } if (days_left != (u16)-1) {
-            r = dprintf(serial_fd, "TEXT_SHOW DENIED: Not a philanthrapist\n");
+            r = dprintf(serial_fd, "TEXT_SHOW2  Unknown User\n");
+            error_check(r);
+        } else if (days_left != (u16)-1) {
+            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: Not a\n");
+            error_check(r);
+            r = dprintf(serial_fd, "TEXT_SHOW2    philanthrapist\n");
             error_check(r);
         } else {
             add_next_user = 1;
             // TODO add timer to reset this
-            r = dprintf(serial_fd, "TEXT_SHOW Will add next user\n");
+            r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
             error_check(r);
         }
 
     } else {
-        r = dprintf(serial_fd, "TEXT_SHOW Unkown option\n");
+        r = dprintf(serial_fd, "TEXT_SHOW2 Unkown option\n");
         error_check(r);
         ERROR("Got an unknown option from the exterior");
     }
@@ -256,7 +265,9 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
 
 //u64 config_download_interval_sec = 60 * 60; // 1 Hour
 u64 config_download_interval_sec = 20;
-char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
+//char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
+char * config_download_url = "http://192.168.4.159:9160/workspaces/the-bike-shed/shed_test_config";
+
 char config_download_previous_etag[32];
 u64 config_download_previous_modified_time_sec;
 static struct config_download_Ctx config_download_ctx;
@@ -291,7 +302,8 @@ char * email_from = "shed-test@example.com";
 char * email_host = "smtp://127.0.0.1:8025";
 char * email_user_pass = "username:password";
 char * email_rcpt = "shed-test-dest@example.com";
-char * serial_path = "/build/exterior_mock.pts";
+//char * serial_path = "/build/exterior_mock.pts";
+char * serial_path = "/dev/ttyAMA0";
 
 void shed_add_philantropist_hex(char* hex) {
     access_HashResult hash = {};

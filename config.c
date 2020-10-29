@@ -118,6 +118,7 @@ char * invalid_config_email_from[] = {
     "EmailAddress: @",
     "EmailAddress: dasdfasdfasd",
 0};
+
 char *   valid_config_email_host[] = {
     "EmailServer:  smtps://smtp.gmail.com",
     "EmailServer:  smtps://smtp.gmail.com:465",
@@ -212,3 +213,10 @@ void config_load_file(char * file_path) {
     r = fclose(f); error_check(r);
 }
 
+/*
+void config_dump_email_user_pass() {
+    f("EmailUserPass: %s", email_user_pass);
+}
+
+*/
+//void config_out_
