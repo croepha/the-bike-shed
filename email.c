@@ -95,8 +95,8 @@ void email_init(struct email_Send *ctx, CURL*easy, char const * to_addr, char co
   CURLESET(USERPWD, email_user_pass);
   CURLESET(USERAGENT, "curl/7.68.0");
   CURLESET(MAXREDIRS, 50L);
-  CURLESET(HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-  CURLESET(SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
+//  CURLESET(HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+//  CURLESET(SSH_KNOWNHOSTS, "/root/.ssh/known_hosts");
   //CURLESET(VERBOSE, 1L);
   CURLESET(TCP_KEEPALIVE, 1L);
   CURLESET(MAIL_FROM, email_from);

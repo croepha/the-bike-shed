@@ -11,6 +11,7 @@ extern int io_epoll_fd;
  _(shed_pwm) \
  _(io_curl) \
  _(config_download) \
+ _(clear_display) \
  _(idle) \
 
 //#define _io_socket_type_FIRST _io_socket_type_io_curl

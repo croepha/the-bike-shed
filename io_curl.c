@@ -83,6 +83,7 @@ void io_curl_process_events() {
     if (curl_msg->msg == CURLMSG_DONE) {
       result = curl_msg->data.result;
       easy = curl_msg->easy_handle;
+      error_check_curl(result);
       CURLMcode mr = curl_multi_remove_handle(multi, easy);
       error_check_curlm(mr);
 

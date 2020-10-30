@@ -340,6 +340,7 @@ cd /mnt
 cat << EOF > autoexec.sh
 #!/bin/sh
 
+modprobe pwm-bcm2835
 dd if=/dev/hwrng of=/dev/random bs=2048 count=16 &
 ip link set dev wlan0 up
 ip addr add 192.168.4.31/24 dev wlan0
@@ -409,9 +410,9 @@ root=/dev/mmcblk0p2 rootwait console=tty1
 /mnt/p1/config.txt:
 kernel=zImage
 disable_overscan=1
-gpu_mem_256=16
-gpu_mem_512=16
-gpu_mem_1024=16
+gpu_mem_256=50
+gpu_mem_512=50
+gpu_mem_1024=50
 dtoverlay=miniuart-bt
 dtoverlay=pwm-2chan
 

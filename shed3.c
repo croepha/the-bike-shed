@@ -119,6 +119,13 @@ static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
 
 u8 add_next_user;
 
+void shed_pwm_timeout(void) {
+    gpio_pwm_set(0);
+}
+
+
+
+
 static void exterior_scan_finished() { int r;
 
     u8 exterior_rfid[rfid_LEN] = {};
@@ -143,7 +150,7 @@ static void exterior_scan_finished() { int r;
             r = dprintf(serial_fd, "TEXT_SHOW2 days_left:%hu\n", days_left);
             error_check(r);
             gpio_pwm_set(1);
-            IO_TIMER_MS(shed_pwm);
+            IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
         } else {
             // TODO give reason?
             if (days_left == 0) {
@@ -257,6 +264,7 @@ static void exterior_scan_finished() { int r;
 
 
 void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_hash_CurlCtx * ctx) {
+
     email_free(&emailed_hash_email_ctx);
     state = STATE_IDLE;
 }
@@ -300,7 +308,7 @@ struct StringList tmp_arg;
 
 char * email_from = "shed-test@example.com";
 //char * email_host = "smtp://127.0.0.1:8025";
-char * email_host = "smtp://192.168.4.159::8025";
+char * email_host = "smtp://192.168.4.159:8025";
 char * email_user_pass = "username:password";
 char * email_rcpt = "shed-test-dest@example.com";
 //char * serial_path = "/build/exterior_mock.pts";
@@ -357,6 +365,7 @@ int main ()  {
     serial_io_initialize(serial_path);
     config_download_timeout();
     idle_timeout();
+    gpio_pwm_initialize();
 
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);

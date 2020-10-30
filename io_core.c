@@ -1,4 +1,4 @@
-#define LOG_DEBUG
+// #define LOG_DEBUG
 #include <inttypes.h>
 #include <sys/epoll.h>
 #include <errno.h>
@@ -41,6 +41,8 @@ EP_TYPES
   if (buf_next >= buf_END) { strcpy(buf_END -3, "..."); }
   DEBUG("%s", buf);
 }
+#else
+#define log_ep_event(...)
 #endif // LOG_DEBUG
 
 void io_process_events() { start:;
@@ -91,7 +93,8 @@ void io_process_events() { start:;
 
   if (!epoll_ret) {
     switch (running_timer) {
-      #define _(name) case _io_timer_ ## name: { DEBUG(#name "_timeout"); assert(name ## _timeout); name ## _timeout(); } break;
+      #define _(name) case _io_timer_ ## name: { DEBUG(#name "_timeout"); \
+         io_timers_epoch_ms[_io_timer_ ## name] = -1; assert(name ## _timeout);   name ## _timeout(); } break;
       _IO_TIMERS
       #undef  _
       case _io_timer_NO_TIMER: { WARN("edge case: timer wake up for no timer"); } break;

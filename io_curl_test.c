@@ -82,6 +82,8 @@ static void download_test() {
   char* url2 = "http://127.0.0.1:9161/workspaces/the-bike-shed/README.md";
   dl(&c1, url, 0, 0);
 
+  log_allowed_fails = 1000;
+
   struct config_download_Ctx c2 = {.id = 2};
   dl(&c2, "ftp://127.0.0.1:232/asdfas", 0, 0);
 

@@ -22,7 +22,13 @@ void serial_io_event(struct epoll_event event_info) {
     ssz size = read(serial_fd, buf, sizeof buf);
     DEBUG("read size:%zd", size);
     error_check(size);
-    if (size != -1) {
+    if (size >= 0) {
         line_accumulator(&serial_line_leftovers, buf, size, serial_line_handler);
+    }
+    if (event_info.events & EPOLLERR) {
+        ERROR("Serial interface is broken somehow...");
+//        ERROR("Serial interface is broken somehow... reinitializing");
+        // close(serial_fd);
+        // serial_io_initialize('');
     }
 }
