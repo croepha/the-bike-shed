@@ -346,6 +346,9 @@ ip addr add 192.168.4.31/24 dev wlan0
 ip route add default via 192.168.4.1
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
 wpa_supplicant -B  -i wlan0 -c /etc/wpa_supplicant.conf
+# TODO: Set date to mod time of the config file
+ntpd -p 0.us.pool.ntp.org -p 1.us.pool.ntp.org -p 2.us.pool.ntp.org -p 3.us.pool.ntp.org
+# TODO: Should add auth keys for ntp
 
 # # TODO: wpa_cli -a ....
 
@@ -421,3 +424,14 @@ losetup -D
 # From mac:
 sudo dd if=/Users/streaming/the-bike-shed/build/pi0w-dev-sdcard.img \
   of=/dev/disk2 bs=4098
+
+
+
+
+
+gdb notes:
+gdbserver 0.0.0.0:6969 ./shed3.pi0wdbg.exec
+gdb-multiarch
+set sysroot /build/rootpi0w-dev/staging/
+file /build/shed3.pi0wdbg.exec
+target remote 192.168.4.31:6969

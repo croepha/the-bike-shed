@@ -1,9 +1,10 @@
-// #define LOG_DEBUG
+#define LOG_DEBUG
 #include <inttypes.h>
 #include <sys/epoll.h>
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <stdio.h>
 #include "common.h"
 #include "logging.h"
 #include "io.h"
@@ -27,6 +28,20 @@ void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
     r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
 }
 
+#ifdef LOG_DEBUG
+static void log_ep_event(struct epoll_event event) {
+#define EP_TYPES _(EPOLLIN) _(EPOLLOUT) _(EPOLLRDHUP) _(EPOLLPRI) _(EPOLLERR) _(EPOLLHUP) _(EPOLLET) _(EPOLLONESHOT)
+// _(EPOLLWAKEUP)
+  char  buf[128];
+  char * buf_next = buf;
+  char * const buf_END = buf + sizeof buf;
+#define _(type) if (event.events & type && buf_next < buf_END) { buf_next += snprintf(buf_next, buf_END - buf_next, #type " "); }
+EP_TYPES
+#undef _
+  if (buf_next >= buf_END) { strcpy(buf_END -3, "..."); }
+  DEBUG("%s", buf);
+}
+#endif // LOG_DEBUG
 
 void io_process_events() { start:;
 
@@ -88,6 +103,7 @@ void io_process_events() { start:;
     for (int i = 0; i < epoll_ret; i++) {
       struct epoll_event epe = epes[i];
       io_EPData data = {.data = epe.data};
+      log_ep_event(epe);
       switch (data.my_data.event_type) {
         #define _(name) case _io_socket_type_ ## name ## _fd: { DEBUG(#name "_io_event"); assert(name ## _io_event); name ## _io_event(epe); } break;
         _IO_SOCKET_TYPES

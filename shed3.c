@@ -299,7 +299,8 @@ struct StringList tmp_arg;
 
 
 char * email_from = "shed-test@example.com";
-char * email_host = "smtp://127.0.0.1:8025";
+//char * email_host = "smtp://127.0.0.1:8025";
+char * email_host = "smtp://192.168.4.159::8025";
 char * email_user_pass = "username:password";
 char * email_rcpt = "shed-test-dest@example.com";
 //char * serial_path = "/build/exterior_mock.pts";

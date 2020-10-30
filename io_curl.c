@@ -24,6 +24,7 @@ static CURLM * multi;
 static CURLSH * share;
 
 void io_curl_timeout() {
+  IO_TIMER_MS(io_curl) = -1;
   int running_handles;
   CURLMcode mr = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
   error_check_curlm(mr);

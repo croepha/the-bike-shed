@@ -12,7 +12,7 @@
 
 
 // The point of all this is to try to make argon2 not use any dynamic memory
-static u32 const m_cost = (1<<16);
+static u32 const m_cost = (1<<10);
 static u8 static_memory_buf[m_cost << 10];
 static u8 static_memory_buf_in_use_debug;
 
