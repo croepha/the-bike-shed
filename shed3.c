@@ -124,6 +124,12 @@ void shed_pwm_timeout(void) {
 }
 
 
+void clear_display_timeout() { int r;
+    r = dprintf(serial_fd, "TEXT_SHOW1 \n");
+    error_check(r);
+    r = dprintf(serial_fd, "TEXT_SHOW2 \n");
+    error_check(r);
+}
 
 
 static void exterior_scan_finished() { int r;
@@ -133,14 +139,27 @@ static void exterior_scan_finished() { int r;
 
     if (add_next_user == 1) {
         // TODO enforce pin complexity?
-        access_HashResult hash = {};
-        access_hash(hash, (char*)exterior_rfid, exterior_pin);
-        access_user_add(hash, access_now_day() + 30);
-        r = dprintf(serial_fd, "TEXT_SHOW1 User Added\n");
-        error_check(r);
-        r = dprintf(serial_fd, "TEXT_SHOW2 days_left:30\n");
-        error_check(r);
+
+        u16 days_left = -1;
+        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
+        if (granted && days_left == (u16)-1) {
+            r = dprintf(serial_fd, "TEXT_SHOW1 Cannot add existing\n");
+            error_check(r);
+            r = dprintf(serial_fd, "TEXT_SHOW2 philanthropist\n");
+            error_check(r);
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+        } else {
+            access_HashResult hash = {};
+            access_hash(hash, (char*)exterior_rfid, exterior_pin);
+            access_user_add(hash, access_now_day() + 30);
+            r = dprintf(serial_fd, "TEXT_SHOW1 User Added\n");
+            error_check(r);
+            r = dprintf(serial_fd, "TEXT_SHOW2 days_left:30\n");
+            error_check(r);
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+        }
         add_next_user = 0;
+
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
         u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
@@ -151,6 +170,7 @@ static void exterior_scan_finished() { int r;
             error_check(r);
             gpio_pwm_set(1);
             IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
         } else {
             // TODO give reason?
             if (days_left == 0) {
@@ -158,11 +178,13 @@ static void exterior_scan_finished() { int r;
                 error_check(r);
                 r = dprintf(serial_fd, "TEXT_SHOW2 Expired\n");
                 error_check(r);
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
             } else {
                 r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS DENIED\n");
                 error_check(r);
                 r = dprintf(serial_fd, "TEXT_SHOW2 Unknown User\n");
                 error_check(r);
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
             }
         }
     } else if (strcmp(exterior_option, "100") == 0) { // Email hash
@@ -185,6 +207,7 @@ static void exterior_scan_finished() { int r;
                 error_check(r);
                 r = dprintf(serial_fd, "TEXT_SHOW2 Day:%hu Idx:%hu\n", day, idx);
                 error_check(r);
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
 
                 access_HashResult h;
                 access_hash(h, (char*)exterior_rfid, (char*)exterior_pin);
@@ -226,8 +249,9 @@ static void exterior_scan_finished() { int r;
             } break;
             case STATE_SENDING_NO_CANCEL: {
                 WARN("Got send request while email is pending");
-                r = dprintf(serial_fd, "TEXT_SHOW Cant send, email busy, try again to cancel and send again\n");
+                r = dprintf(serial_fd, "TEXT_SHOW2 Cant send, email busy, try again to cancel and send again\n");
                 error_check(r);
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
                 state = STATE_SENDING_CANCELLED;
             } break;
         }
@@ -240,21 +264,29 @@ static void exterior_scan_finished() { int r;
             error_check(r);
             r = dprintf(serial_fd, "TEXT_SHOW2  Unknown User\n");
             error_check(r);
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
         } else if (days_left != (u16)-1) {
             r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: Not a\n");
             error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2    philanthrapist\n");
+            r = dprintf(serial_fd, "TEXT_SHOW2    philanthropist\n");
             error_check(r);
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
         } else {
             add_next_user = 1;
             // TODO add timer to reset this
+            r = dprintf(serial_fd, "TEXT_SHOW1 \n");
+            error_check(r);
             r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
             error_check(r);
         }
 
     } else {
+        r = dprintf(serial_fd, "TEXT_SHOW1 \n");
+        error_check(r);
         r = dprintf(serial_fd, "TEXT_SHOW2 Unkown option\n");
         error_check(r);
+        IO_TIMER_MS(clear_display) = now_ms() + 2000;
         ERROR("Got an unknown option from the exterior");
     }
 }

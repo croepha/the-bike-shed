@@ -1,4 +1,4 @@
-#define LOG_DEBUG
+//#define LOG_DEBUG
 
 #include <unistd.h>
 
