@@ -107,6 +107,9 @@ void setup() {
  
 	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
 	mfrc522.PCD_DumpVersionToSerial();
+
+  InteriorSerial.printf("EXTERIOR_RESTART\n");
+
 }
 
 void pullup_rows() {
@@ -170,10 +173,10 @@ void draw_input_lines() {
   row_pins
   #undef _
   lcd.setCursor(0,0);  
-  lcd.printf("PIN:%12s", entered_pin);
+  lcd.printf("PIN:%12s%c", entered_pin, entering_option?' ':'<');
   lcd.setCursor(0,1);  
   if (entered_option_used || entering_option) {
-    lcd.printf("OPT:%12s", entered_option);    
+    lcd.printf("OPT:%12s%c", entered_option, entering_option?'<':' ');    
   } else {
     lcd.printf("                   ");    
   }
