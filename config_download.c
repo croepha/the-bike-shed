@@ -144,7 +144,7 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
   u8 is_success = download_is_successful(result, easy);
   if (is_success == 2) {
     INFO("Download finished successfully (not modified)");
-  } if (is_success) {
+  } else if (is_success) {
     INFO("Download finished successfully");
   }
   config_download_finished(c, is_success == 1);
