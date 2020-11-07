@@ -1,3 +1,7 @@
+
+# VARIANT="pi0w-dev" bash build_root.bash make menuconfig
+
+
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
 export GIT_DIR=$GIT_WORK_TREE/.git
