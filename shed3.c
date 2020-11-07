@@ -132,6 +132,7 @@ void clear_display_timeout() { int r;
 }
 
 
+
 static void exterior_scan_finished() { int r;
 
     u8 exterior_rfid[rfid_LEN] = {};
@@ -291,6 +292,18 @@ static void exterior_scan_finished() { int r;
     }
 }
 
+static void exterior_restart() {
+    int r;
+    r = dprintf(serial_fd, "TEXT_SHOW1 Exterior restart  \n");
+    error_check(r);
+    r = dprintf(serial_fd, "TEXT_SHOW2 Detected  \n");
+    error_check(r);
+    IO_TIMER_MS(clear_display) = now_ms() + 2000;
+    WARN("Exterior restart detected");
+}
+
+
+
 #define exterior_set(dest)  __exterior_set(start, end, dest, #dest, sizeof dest); return
 #include "/build/exterior_protocol.re.c"
 
@@ -363,11 +376,16 @@ void shed_add_philantropist_hex(char* hex) {
 u16 last_maintenance_day;
 void idle_timeout() {
     // Lets do maintenance at 4AM PT, should probaby be the slowest time at NB
-    u64 utc_sec = now_sec();
-    u64 utc_hour = utc_sec / (60*60);
-    u32 pt_hour = utc_hour - 7 /* 7 hours */ ;
-    u16 maint_hour = pt_hour + 4 /* 4AM */ ;
-    u16 maint_day = maint_hour / 24 ;
+    u64 const ms_per_hour = 60 * 60 * 1000;
+    u64 const ms_per_day  = 24 * ms_per_hour;
+
+    u64 offset_ms = (7+4); // UTC to PT + 4 hours;
+    u64 utc_ms = now_ms();
+    u16 next_maint_day = ( (utc_ms - offset_ms + ms_per_day) / ms_per_day ) ;
+    u16 maint_day = next_maint_day - 1;
+    u64 next_maint_ms = next_maint_day * ms_per_day  + offset_ms;
+
+    DEBUG("%"PRIu64" %hu", next_maint_ms, maint_day);
 
     if (*access_idle_maintenance_prev != (u16)-1) {
         access_idle_maintenance();
@@ -380,7 +398,7 @@ void idle_timeout() {
     } else {
         INFO("Maintenance Finished");
         // Set timer to next day
-        IO_TIMER_MS(idle) = (maint_hour + 24) * 60 * 60 * 1000;
+        IO_TIMER_MS(idle) = next_maint_ms;
         io_idle_has_work = 0;
     }
 
@@ -398,6 +416,15 @@ int main ()  {
     config_download_timeout();
     idle_timeout();
     gpio_pwm_initialize();
+
+    {
+        int r;
+        r = dprintf(serial_fd, "TEXT_SHOW1 System restart\n");
+        error_check(r);
+        r = dprintf(serial_fd, "TEXT_SHOW2 \n");
+        error_check(r);
+        IO_TIMER_MS(clear_display) = now_ms() + 2000;
+    }
 
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);

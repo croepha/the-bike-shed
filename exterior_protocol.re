@@ -13,6 +13,7 @@ void serial_line_handler(char *input_str) {
   "PIN"        [ ]* @start [-a-zA-Z0-9.+_]+  @end { exterior_set(exterior_pin   ); }
   "RFID"       [ ]* @start [a-fA-f0-9]+  @end { exterior_set(exterior_rfid_text  ); }
   "SCAN_FINISHED" { exterior_scan_finished(); return; }
+  "EXTERIOR_RESTART" { exterior_restart(); return; }
 
   */
 

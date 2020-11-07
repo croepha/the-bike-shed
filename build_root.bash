@@ -337,6 +337,8 @@ losetup -f --show -P /workspaces/the-bike-shed/build/pi0w-dev-sdcard.img
 mount /dev/loop0p2 /mnt
 cd /mnt
 
+// TODO: We should make sure that iptables is installed, and we should block everything
+
 cat << EOF > autoexec.sh
 #!/bin/sh
 

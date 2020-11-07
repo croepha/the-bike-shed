@@ -121,7 +121,6 @@ static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
       if (response_code == 200) {
         return 1;
       } if (response_code == 304) {
-        INFO("Download finished, not modified response_code:%ld", response_code);
         return 2;
       } else {
         ERROR("got bad response_code:%ld", response_code);
@@ -143,7 +142,9 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
   LOGCTX(" test_sort:id:%02d", c->id);
   __debug_config_download_complete_hook();
   u8 is_success = download_is_successful(result, easy);
-  if (is_success) {
+  if (is_success == 2) {
+    INFO("Download finished successfully (not modified)");
+  } if (is_success) {
     INFO("Download finished successfully");
   }
   config_download_finished(c, is_success == 1);
