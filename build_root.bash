@@ -1,6 +1,8 @@
 
+# VARIANT="pi0w-dev" bash build_root.bash full_build clean
 # VARIANT="pi0w-dev" bash build_root.bash make menuconfig
-
+# VARIANT="pi0w-dev" bash build_root.bash save_configs
+# VARIANT="pi0w-dev" bash build_root.bash full_build
 
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
