@@ -37,18 +37,19 @@ function full_build() ($_F
     # || ! -f "/build/root/$VARIANT/.config" ???
     if [[ "( "$@" )" =~ " clean " ]]; then
         make clean
-        rm -vf                    $_o/$VARIANT-*
     fi
     make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
 
     make all
+
+    rm -vf                    $_o/$VARIANT-*
     mkdir -p                  $_o
     cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
-    xz -f                     $_o/$VARIANT-rootfs.squashfs
     [[ ! "$VARIANT" =~ "host" ]] && {
         cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
-        xz -f                     $_o/$VARIANT-sdcard.img
+        xz --keep                 $_o/$VARIANT-sdcard.img
     }
+    xz --keep                 $_o/$VARIANT-rootfs.squashfs
     tar cJv -C $_b/host    . -f  $_o/$VARIANT-host.tar.xz
     tar cJv -C $_b/staging . -f  $_o/$VARIANT-staging.tar.xz
     rm -f /build/$VARIANT-full_build.working
@@ -349,9 +350,11 @@ cd /mnt
 cat << EOF > autoexec.sh
 #!/bin/sh
 
+modprobe pwm-bcm2835
+/root/supervisor.pi0wdbg.exec /root/supervisor.config &
+
 hostname shed-unconfigured
 modprobe brcmfmac
-modprobe pwm-bcm2835
 dd if=/dev/hwrng of=/dev/random bs=2048 count=16 &
 ip link set dev wlan0 up
 ip addr add 192.168.4.31/24 dev wlan0
@@ -373,7 +376,7 @@ while true; do {
 }; done
 EOF
 
-cat << EOF > etc/wpa_supplicant.conf
+cat << EOF > wpa_supplicant.conf
 update_config=1
 ctrl_interface=/var/run/wpa_supplicant
 ap_scan=1
@@ -383,6 +386,20 @@ network={
     ssid="test-ap2"
     psk="the-bike-shed"
 }
+EOF
+
+cat << EOF > cmdline.txt
+root=/dev/mmcblk0p2 rootwait console=tty1
+EOF
+
+cat << EOF > config.txt
+kernel=zImage
+disable_overscan=1
+gpu_mem_256=50
+gpu_mem_512=50
+gpu_mem_1024=50
+dtoverlay=miniuart-bt
+dtoverlay=pwm-2chan
 EOF
 
 cat << EOF > etc/inittab
@@ -414,18 +431,7 @@ tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 ::shutdown:/bin/umount -a -r
 EOF
 
-# removed console=ttyAMA0,115200
-/mnt/p1/cmdline.txt:
-root=/dev/mmcblk0p2 rootwait console=tty1
 
-/mnt/p1/config.txt:
-kernel=zImage
-disable_overscan=1
-gpu_mem_256=50
-gpu_mem_512=50
-gpu_mem_1024=50
-dtoverlay=miniuart-bt
-dtoverlay=pwm-2chan
 
 
 

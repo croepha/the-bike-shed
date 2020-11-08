@@ -1,4 +1,4 @@
-//#define LOG_DEBUG
+#define LOG_DEBUG
 
 #include <stdio.h>
 #include <string.h>
@@ -12,11 +12,14 @@
 #include "email.h"
 #include "supervisor.h"
 // TODO: setup gmail to delete old emails
-// LOW_THRESHOLDS: We will start considering sending logs once we have accumulated this much bytes/time
-u32 const SUPR_EMAIL_LOW_THRESHOLD_BYTES = 1 << 14; // 16 KB
-u32 const SUPR_EMAIL_RAPID_THRESHOLD_SECS = 20; // 20 Seconds  Prevent emails from being sent more often than this
-u32 const SUPR_EMAIL_LOW_THRESHOLD_SECS = 60 * 1; // 1 Minute
-u32 const SUPR_EMAIL_TIMEOUT_SECS = 60 * 2;       // 10 Minutes
+
+u32 supr_email_low_threshold_bytes = 1 << 14; // 16 KB
+u32 supr_email_rapid_threshold_secs = 20; // 20 Seconds  Prevent emails from being sent more often than this
+u32 supr_email_low_threshold_secs = 60 * 1; // 1 Minute
+u32 supr_email_timeout_secs = 60 * 2;       // 10 Minutes
+
+
+
 u32 const supr_email_buf_SIZE = 1 << 22; // 4 MB  // dont increase over 24 MB, gmail has a hard limit at 25MB
 char supr_email_buf[supr_email_buf_SIZE];
 u32 supr_email_buf_used;
@@ -41,9 +44,9 @@ IO_CURL_SETUP(supervisor_email, struct SupervisorCurlCtx, curl_type);
 
 static void poke_state_machine() {
   u64 now_epoch_sec = now_sec();
-  assert(now_epoch_sec > SUPR_EMAIL_RAPID_THRESHOLD_SECS);
-  assert(now_epoch_sec > SUPR_EMAIL_LOW_THRESHOLD_SECS);
-  assert(now_epoch_sec > SUPR_EMAIL_TIMEOUT_SECS);
+  assert(now_epoch_sec > supr_email_rapid_threshold_secs);
+  assert(now_epoch_sec > supr_email_low_threshold_secs);
+  assert(now_epoch_sec > supr_email_timeout_secs);
 
   start:
     DEBUG("state:%d now_sec:%"PRIu64" sent:%"PRIu64, supr_email_state, now_epoch_sec, supr_email_sent_epoch_sec);
@@ -59,9 +62,9 @@ static void poke_state_machine() {
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_COLLECTING: {
-      if (supr_email_buf_used >= SUPR_EMAIL_LOW_THRESHOLD_BYTES ||
+      if (supr_email_buf_used >= supr_email_low_threshold_bytes ||
           now_epoch_sec >=
-              supr_email_sent_epoch_sec + SUPR_EMAIL_LOW_THRESHOLD_SECS) {
+              supr_email_sent_epoch_sec + supr_email_low_threshold_secs) {
         DEBUG("one of the low thresholds are met, lets queue up an email");
         usz email_size = supr_email_buf_used;
         email_init(&supr_email_ctx,
@@ -71,18 +74,18 @@ static void poke_state_machine() {
         supr_email_sent_bytes = email_size;
         supr_email_sent_epoch_sec = now_epoch_sec;
         IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + SUPR_EMAIL_TIMEOUT_SECS) * 1000;
+            (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000;
         supr_email_state = SUPR_LOG_EMAIL_STATE_SENT;
       } else {
         DEBUG("Waiting on threshold timeout or more data");
         IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + SUPR_EMAIL_LOW_THRESHOLD_SECS) * 1000;
+            (supr_email_sent_epoch_sec + supr_email_low_threshold_secs) * 1000;
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_SENT: {
       assert(IO_TIMER_MS(logging_send) ==
-             (supr_email_sent_epoch_sec + SUPR_EMAIL_TIMEOUT_SECS) * 1000);
-      if (supr_email_sent_epoch_sec + SUPR_EMAIL_TIMEOUT_SECS <=
+             (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
+      if (supr_email_sent_epoch_sec + supr_email_timeout_secs <=
           now_epoch_sec) {
         DEBUG("If our email is timing out, lets abort it");
         ERROR("log email took too long, aborting");
@@ -97,10 +100,10 @@ static void poke_state_machine() {
     } break;
     case SUPR_LOG_EMAIL_STATE_COOLDOWN: {
       if (now_epoch_sec <
-          supr_email_sent_epoch_sec + SUPR_EMAIL_RAPID_THRESHOLD_SECS) {
+          supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) {
         DEBUG("Were cooling down");
         IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + SUPR_EMAIL_RAPID_THRESHOLD_SECS) *
+            (supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) *
             1000;
       } else {
         if (supr_email_buf_used) {

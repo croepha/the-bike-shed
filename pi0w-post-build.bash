@@ -4,6 +4,7 @@ set -u
 set -e
 
 cat << EOF > ${TARGET_DIR}/bin/_run_autoexec.sh
+#!/bin/sh
 mkdir -p /boot
 mount /dev/mmcblk0p1 /boot
 sh /boot/autoexec.sh
@@ -25,7 +26,7 @@ null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 
 # Put a getty on the serial port
 # remove console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
-tty1::respawn:sh /autoexec.sh
+tty1::respawn:/bin/_run_autoexec.sh
 tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
 
 # Stuff to do for the 3-finger salute
