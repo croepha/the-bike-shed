@@ -350,7 +350,6 @@ void config_download_timeout() {
 void __debug_config_download_complete_hook() {};
 struct StringList tmp_arg;
 
-
 char * email_from = "shed-test@example.com";
 //char * email_host = "smtp://127.0.0.1:8025";
 char * email_host = "smtp://192.168.4.159:8025";

@@ -34,7 +34,8 @@ function full_build() ($_F
     _i=$_b/images/
     _o=$_w/build/
 
-    if [[ "( "$@" )" =~ " clean " || ! -f "/build/root/$VARIANT/.config" ]]; then
+    # || ! -f "/build/root/$VARIANT/.config" ???
+    if [[ "( "$@" )" =~ " clean " ]]; then
         make clean
         rm -vf                    $_o/$VARIANT-*
     fi
