@@ -10,6 +10,13 @@
 #include <inttypes.h>
 
 
+u32 supr_email_low_threshold_bytes = 1 << 14; // 16 KB
+u32 supr_email_rapid_threshold_secs = 20; // 20 Seconds  Prevent emails from being sent more often than this
+u32 supr_email_low_threshold_secs = 60 * 1; // 1 Minute
+u32 supr_email_timeout_secs = 60 * 2;       // 2 Minutes
+
+
+
 u64 now_ms_value;
 char * email_rcpt = "logging@test.test";
 

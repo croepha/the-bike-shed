@@ -11,14 +11,8 @@
 
 #include "email.h"
 #include "supervisor.h"
+
 // TODO: setup gmail to delete old emails
-
-u32 supr_email_low_threshold_bytes = 1 << 14; // 16 KB
-u32 supr_email_rapid_threshold_secs = 20; // 20 Seconds  Prevent emails from being sent more often than this
-u32 supr_email_low_threshold_secs = 60 * 1; // 1 Minute
-u32 supr_email_timeout_secs = 60 * 2;       // 10 Minutes
-
-
 
 u32 const supr_email_buf_SIZE = 1 << 22; // 4 MB  // dont increase over 24 MB, gmail has a hard limit at 25MB
 char supr_email_buf[supr_email_buf_SIZE];
