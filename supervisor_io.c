@@ -67,6 +67,8 @@ void supr_read_from_child_io_event(struct epoll_event epe) { int r;
   supr_email_add_data_finish(r);
 }
 
+// TODO: We should have a lock file to 
+
 void supr_main () { int r;
   setlinebuf(stderr);
   //supr_exec_child();

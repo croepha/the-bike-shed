@@ -16,9 +16,9 @@ function make() ($_F
 )
 
 function full_build() ($_F
-    apt install -y cpio rsync sudo ccache build-essential unzip bc locales
-    locale-gen en_US.UTF-8
-    update-locale
+    # apt install -y cpio rsync sudo ccache build-essential unzip bc locales
+    # locale-gen en_US.UTF-8
+    # update-locale
 
 
     if [ ! -d /build/root ]; then
@@ -44,10 +44,10 @@ function full_build() ($_F
     make all
     mkdir -p                  $_o
     cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
-    xz                        $_o/$VARIANT-rootfs.squashfs
+    xz -f                     $_o/$VARIANT-rootfs.squashfs
     [[ ! "$VARIANT" =~ "host" ]] && {
         cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
-        xz                        $_o/$VARIANT-sdcard.img
+        xz -f                     $_o/$VARIANT-sdcard.img
     }
     tar cJv -C $_b/host    . -f  $_o/$VARIANT-host.tar.xz
     tar cJv -C $_b/staging . -f  $_o/$VARIANT-staging.tar.xz
@@ -344,18 +344,20 @@ losetup -f --show -P /workspaces/the-bike-shed/build/pi0w-dev-sdcard.img
 mount /dev/loop0p2 /mnt
 cd /mnt
 
-// TODO: We should make sure that iptables is installed, and we should block everything
+# TODO: We should make sure that iptables is installed, and we should block everything
 
 cat << EOF > autoexec.sh
 #!/bin/sh
 
+hostname shed-unconfigured
+modprobe brcmfmac
 modprobe pwm-bcm2835
 dd if=/dev/hwrng of=/dev/random bs=2048 count=16 &
 ip link set dev wlan0 up
 ip addr add 192.168.4.31/24 dev wlan0
 ip route add default via 192.168.4.1
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
-wpa_supplicant -B  -i wlan0 -c /etc/wpa_supplicant.conf
+wpa_supplicant -B  -i wlan0 -c /boot/wpa_supplicant.conf
 # TODO: Set date to mod time of the config file
 ntpd -p 0.us.pool.ntp.org -p 1.us.pool.ntp.org -p 2.us.pool.ntp.org -p 3.us.pool.ntp.org
 # TODO: Should add auth keys for ntp
