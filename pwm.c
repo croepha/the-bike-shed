@@ -31,7 +31,7 @@ void gpio_pwm_initialize(void) {
 
 void gpio_pwm_set(u8 value) {
     assert(pwm0_enable_fd != -1);
-    INFO("%d", value);
+    DEBUG("%d", value);
     assert(value == 0 || value == 1);
     int r = dprintf(pwm0_enable_fd, "%d\n", value);
     error_check(r);

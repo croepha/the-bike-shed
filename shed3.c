@@ -55,6 +55,11 @@ SCAN_FINISHED
 
 */
 
+
+#if BUILD_IS_RELEASE == 0
+u8 log_trace_enabled = 0;
+#endif
+
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];

@@ -7,6 +7,8 @@
 #include "common.h"
 #include "access.h"
 
+u8 log_trace_enabled = 1;
+
 
 
 static void set_mock_salt(u32 hash_i, u32 extra) {

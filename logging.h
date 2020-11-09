@@ -50,7 +50,9 @@ WARN    Just like ERROR, but slightly less severe.  Also things that might be ER
 
 FATAL   Something really unexpected has happened, execution cannot continue... Process will abort and restart
 
-DEBUG   An internal dump of an algorithms state or event tracing, these are turned of in production builds
+DEBUG   Hints to the developer these are turned of in production builds
+
+TRACE   An internal dump of an algorithms state or event tracing, useful for tests, these are turned of in production builds
 
 
 */
@@ -58,24 +60,30 @@ DEBUG   An internal dump of an algorithms state or event tracing, these are turn
 #define  INFO(          ...)  LOG(" INFO", plain, 0, 0,      __VA_ARGS__)
 #define  INFO_BUFFER(   ...)  LOG(" INFO", buffer_string,    __VA_ARGS__)
 #define  INFO_HEXBUFFER(...)  LOG(" INFO", buffer_hex,(char*)__VA_ARGS__)
-#define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
-#define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
-#define DEBUG_HEXBUFFER(...)  LOG("DEBUG", buffer_hex,(char*)__VA_ARGS__)
-#define TRACE(          ...)  LOG("TRACE", plain, 0, 0,      __VA_ARGS__)
-#define TRACE_BUFFER(   ...)  LOG("TRACE", buffer_string,    __VA_ARGS__)
-#define TRACE_HEXBUFFER(...)  LOG("TRACE", buffer_hex,(char*)__VA_ARGS__)
 #define  WARN(          ...) FLOG(" WARN", plain, 0, 0,      __VA_ARGS__)
 #define ERROR(          ...) FLOG("ERROR", plain, 0, 0,      __VA_ARGS__)
 #define ERROR_BUFFER(   ...)  LOG("ERROR", buffer_string,    __VA_ARGS__)
 #define ERROR_HEXBUFFER(...)  LOG("ERROR", buffer_hex,(char*)__VA_ARGS__)
 #define FATAL(          ...) FLOG("FATAL", plain, 0, 0,      __VA_ARGS__)
 
-#ifndef LOG_DEBUG
-#undef DEBUG
-#define DEBUG(...)
-#undef DEBUG_BUFFER
-#define DEBUG_BUFFER(...)
-#undef DEBUG_HEXBUFFER
+#if BUILD_IS_RELEASE == 1
+#define TRACE(          ...)
+#define TRACE_BUFFER(   ...)
+#define TRACE_HEXBUFFER(...)
+#else
+extern u8 log_trace_enabled;
+#define TRACE(          ...) ({ if (log_trace_enabled) { LOG("TRACE", plain, 0, 0,      __VA_ARGS__); } })
+#define TRACE_BUFFER(   ...) ({ if (log_trace_enabled) { LOG("TRACE", buffer_string,    __VA_ARGS__); } })
+#define TRACE_HEXBUFFER(...) ({ if (log_trace_enabled) { LOG("TRACE", buffer_hex,(char*)__VA_ARGS__); } })
+#endif
+
+#if defined(LOG_DEBUG) &&  BUILD_IS_RELEASE == 0
+#define DEBUG(          ...)  LOG("DEBUG", plain, 0, 0,      __VA_ARGS__)
+#define DEBUG_BUFFER(   ...)  LOG("DEBUG", buffer_string,    __VA_ARGS__)
+#define DEBUG_HEXBUFFER(...)  LOG("DEBUG", buffer_hex,(char*)__VA_ARGS__)
+#else
+#define DEBUG(          ...)
+#define DEBUG_BUFFER(   ...)
 #define DEBUG_HEXBUFFER(...)
 #endif
 
