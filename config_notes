@@ -1,0 +1,37 @@
+
+
+Cloud Configs:
+
+UserAdder      <Hash>
+UserExtender   <Hash>
+
+TimeOpen    10:30
+TimeClosed  23:00
+
+Peer <Name> <PublicKey>
+
+
+
+On device configs:
+
+
+Dynamic Configs:
+
+User <Hash> <Day>
+
+
+Static Configs:
+
+EmailDest
+EmailFrom
+EmailServer
+EmailUserPass
+
+SecretSeed
+
+
+
+wpa_supplicant
+misc:
+hostname
+ip addr

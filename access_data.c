@@ -148,7 +148,13 @@ void access_idle_maintenance(void) {
 
 }
 
-void access_user_add(access_HashResult hash, u16 expire_day) {
+// Returns error message if any
+
+static char const * const _msg_no_space_left = "No space left";
+static char const * const _msg_extend_only = "User can only extend";
+static char const * const _msg_overwrite_admin = "Already admin";
+
+char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_only, u8 overwrite_admin) {
 
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
@@ -156,9 +162,10 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
     ERROR("User list full");
     // Try real hard to fee up some space
     access_idle_maintenance();
+    // TODO, remove this heroic code.... just give up... no sense optimizing a rare case...
     if (access_users_first_free_idx == (u16)-1) {
       INFO("No space could be freed, giving up");
-      return;
+      return _msg_no_space_left;
     }
   }
 
@@ -182,16 +189,22 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
         TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
       }
 
-      USER.debug_is_free = 0;
-      USER.next_idx = access_users_first_idx;
-      access_users_first_idx = USER_idx;
+      if (extend_only) {
+        ERROR("extend_only");
+        return _msg_extend_only;
+      } else {
+        USER.debug_is_free = 0;
+        USER.next_idx = access_users_first_idx;
+        access_users_first_idx = USER_idx;
 
-      MAP = USER_idx + 1;
-      memcpy(USER.hash, hash, sizeof USER.hash);
+        MAP = USER_idx + 1;
+        memcpy(USER.hash, hash, sizeof USER.hash);
 
-      USER.expire_day = expire_day;
+        USER.expire_day = expire_day;
 
-      break;
+        return 0;
+      }
+
 
     } else {
       u16 USER_idx = MAP - 1;
@@ -207,9 +220,14 @@ void access_user_add(access_HashResult hash, u16 expire_day) {
           TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
         }
 
-        TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
-        USER.expire_day = expire_day;
-        break;
+        if (USER.expire_day > (u16)-16 && !overwrite_admin) {
+          ERROR("overwrite_admin");
+          return _msg_overwrite_admin;
+        } else {
+          TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
+          USER.expire_day = expire_day;
+          return 0;
+        }
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
         TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);

@@ -42,7 +42,7 @@ static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
   set_mock_salt(hash_i, extra);
   __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
   __access_hash(hash, &payload);
-  access_user_add(hash, expire_day);
+  access_user_add(hash, expire_day, 0, 1);
 }
 
 static void test_req(u32 hash_i, u32 extra) {

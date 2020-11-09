@@ -124,7 +124,11 @@ static void buf_from_hex(void* buf_, usz buf_len, char * hex) {
     }
 }
 
-u8 add_next_user;
+enum {
+    add_user_state_NOT_ADDING,
+    add_user_state_ADDING_NEW,
+    add_user_state_EXTENDING,
+} add_next_user;
 
 void shed_pwm_timeout(void) {
     gpio_pwm_set(0);
@@ -145,28 +149,28 @@ static void exterior_scan_finished() { int r;
     u8 exterior_rfid[rfid_LEN] = {};
     buf_from_hex(exterior_rfid, sizeof exterior_rfid, exterior_rfid_text);
 
-    if (add_next_user == 1) {
+    if (add_next_user != add_user_state_NOT_ADDING) {
         // TODO enforce pin complexity?
 
-        u16 days_left = -1;
-        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
-        if (granted && days_left == (u16)-1) {
-            r = dprintf(serial_fd, "TEXT_SHOW1 Cannot add existing\n");
+        u8 extending = add_next_user == add_user_state_EXTENDING;
+        access_HashResult hash = {};
+        access_hash(hash, (char*)exterior_rfid, exterior_pin);
+        char const * msg = access_user_add(hash, access_now_day() + 30, extending, 0);
+        if (msg) {
+            r = dprintf(serial_fd, "TEXT_SHOW1 Cannot add\n");
             error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2 philanthropist\n");
+            r = dprintf(serial_fd, "TEXT_SHOW2 %s\n", msg);
             error_check(r);
             IO_TIMER_MS(clear_display) = now_ms() + 2000;
         } else {
-            access_HashResult hash = {};
-            access_hash(hash, (char*)exterior_rfid, exterior_pin);
-            access_user_add(hash, access_now_day() + 30);
             r = dprintf(serial_fd, "TEXT_SHOW1 User Added\n");
             error_check(r);
             r = dprintf(serial_fd, "TEXT_SHOW2 days_left:30\n");
             error_check(r);
             IO_TIMER_MS(clear_display) = now_ms() + 2000;
         }
-        add_next_user = 0;
+
+        add_next_user = add_user_state_NOT_ADDING;
 
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
@@ -273,20 +277,20 @@ static void exterior_scan_finished() { int r;
             r = dprintf(serial_fd, "TEXT_SHOW2  Unknown User\n");
             error_check(r);
             IO_TIMER_MS(clear_display) = now_ms() + 2000;
-        } else if (days_left != (u16)-1) {
-            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: Not a\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2    philanthropist\n");
-            error_check(r);
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
-        } else {
-            add_next_user = 1;
+        } else if (days_left == (u16)-1) {
+            add_next_user = add_user_state_ADDING_NEW;
             // TODO add timer to reset this
             r = dprintf(serial_fd, "TEXT_SHOW1 \n");
             error_check(r);
             r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
             IO_TIMER_MS(clear_display) = now_ms() + 2000;
             error_check(r);
+        } else {
+            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: Not a\n");
+            error_check(r);
+            r = dprintf(serial_fd, "TEXT_SHOW2    philanthropist\n");
+            error_check(r);
+            IO_TIMER_MS(clear_display) = now_ms() + 2000;
         }
 
     } else {
@@ -334,10 +338,15 @@ static struct config_download_Ctx config_download_ctx;
 
 static u64 last_config_download_sec = 0;
 
+u8 admin_added;
 void config_download_finished(struct config_download_Ctx *c, u8 success) {
   memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
   strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
   IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
+
+  if (admin_added) {
+
+  }
 }
 
 void config_download_timeout() {
@@ -368,7 +377,7 @@ char * serial_path = "/dev/ttyAMA0";
 void shed_add_philantropist_hex(char* hex) {
     access_HashResult hash = {};
     buf_from_hex(hash, sizeof hash, hex);
-    access_user_add(hash, -1);
+    access_user_add(hash, -1, 0, 1);
 }
 
 
