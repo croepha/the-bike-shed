@@ -36,12 +36,10 @@ static void set_mock_salt(u32 hash_i, u32 extra) {
 
 
 static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
-  struct access_HashPayload payload = {};
   access_HashResult hash;
   INFO("Add: %x %x", hash_i, extra);
   set_mock_salt(hash_i, extra);
-  __access_requested_payload(&payload, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
-  __access_hash(hash, &payload);
+  access_hash(hash, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
   access_user_add(hash, expire_day, 0, 1);
 }
 

@@ -6,18 +6,18 @@
 
 char access_salt[SALT_BUF_LEN] = "saltysalt";
 static usz const HASH_MAP_LEN  = 1 << 18; // 256Ki
-static usz const USER_TABLE_LEN = 1 << 13; // 8192
+static access_user_IDX const USER_TABLE_LEN = 1 << 13; // 8192
 
 
 struct accessUser access_users_space[USER_TABLE_LEN];
-u16 access_map[HASH_MAP_LEN];
+access_user_IDX access_map[HASH_MAP_LEN];
 
 
 
 
-static u16 access_users_first_free_idx;
-u16 access_users_first_idx;
-u16 * access_idle_maintenance_prev;
+static access_user_IDX access_users_first_free_idx;
+access_user_IDX access_users_first_idx;
+access_user_IDX * access_idle_maintenance_prev;
 
 // TODO make sure that maintenence is unit tested
 
@@ -60,12 +60,6 @@ static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
     }
   }
   return pt_day > USER.expire_day;
-}
-
-void __access_requested_payload(struct access_HashPayload * payload, char * rfid, char * pin) {
-  memcpy(payload->salt, access_salt, sizeof payload->salt);
-  memcpy(payload->rfid, rfid, sizeof payload->rfid);
-  memcpy(payload->pin , pin , sizeof payload->pin );
 }
 
 void access_user_list_init(void) {
@@ -243,19 +237,20 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
   }
 }
 
+
+
 void access_hash(access_HashResult hash, char * rfid, char * pin) {
   struct access_HashPayload payload = {};
-  __access_requested_payload(&payload, rfid, pin);
+  memcpy(payload.salt, access_salt, sizeof payload.salt);
+  memcpy(payload.rfid, rfid, sizeof payload.rfid);
+  memcpy(payload.pin , pin , sizeof payload.pin );
   __access_hash(hash, &payload);
 }
 
 u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   *days_left = (u16)-1;
-  struct access_HashPayload payload = {};
-  __access_requested_payload(&payload, rfid, pin);
-  // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
   access_HashResult hash;
-  __access_hash(hash, &payload);
+  access_hash(hash, rfid, pin);
   access_user_IDX user_idx = access_user_lookup(hash);
   LOGCTX(" USER_idx:%x ", user_idx );
   if (user_idx != access_user_NOT_FOUND) {

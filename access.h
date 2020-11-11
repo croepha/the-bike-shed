@@ -34,7 +34,7 @@ struct accessUser {
         u16 expire_day;
     };
   };
-  u16 next_idx;
+  access_user_IDX next_idx;
 } extern access_users_space[];
 
 
@@ -46,9 +46,8 @@ void access_user_list_init(void);
 void access_idle_maintenance(void);
 u8   access_requested(char * rfid, char * pin, u16 * days_left);
 access_user_IDX   access_user_lookup(access_HashResult hash);
-extern u16 * access_idle_maintenance_prev;
-extern u16 access_users_first_idx;
+extern access_user_IDX * access_idle_maintenance_prev;
+extern access_user_IDX access_users_first_idx;
 u16 access_now_day(void);
 
 extern char access_salt[];
-void __access_requested_payload(struct access_HashPayload * payload, char * rfid, char * pin);
