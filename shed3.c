@@ -1,5 +1,6 @@
 #define LOG_DEBUG
 #include <string.h>
+#include <stdarg.h>
 
 #include "common.h"
 #include "io_curl.h"
@@ -143,6 +144,28 @@ void clear_display_timeout() { int r;
 }
 
 
+__attribute__((__format__ (__printf__, 1, 2)))
+static void exterior_display(char * fmt, ...) {
+    va_list va;
+    char buf[1024];
+    va_start(va, fmt);
+    int r = vsnprintf(buf, sizeof buf, fmt, va);
+    va_end(va);
+    error_check(r);
+    char* nl = strchr(buf, '\n');
+    char * line2 = "";
+    if (nl) {
+        *nl = 0;
+        line2 = nl+1;
+    }
+    r = dprintf(serial_fd, "TEXT_SHOW1 %s\n", buf);
+    error_check(r);
+    r = dprintf(serial_fd, "TEXT_SHOW2 %s\n", line2);
+    error_check(r);
+    IO_TIMER_MS(clear_display) = now_ms() + 2000;
+}
+
+
 
 static void exterior_scan_finished() { int r;
 
@@ -157,17 +180,9 @@ static void exterior_scan_finished() { int r;
         access_hash(hash, (char*)exterior_rfid, exterior_pin);
         char const * msg = access_user_add(hash, access_now_day() + 30, extending, 0);
         if (msg) {
-            r = dprintf(serial_fd, "TEXT_SHOW1 Cannot add\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2 %s\n", msg);
-            error_check(r);
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+            exterior_display("Cannot add\n%s", msg);
         } else {
-            r = dprintf(serial_fd, "TEXT_SHOW1 User Added\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2 days_left:30\n");
-            error_check(r);
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+            exterior_display("User Added\ndays_left:30");
         }
 
         add_next_user = add_user_state_NOT_ADDING;
@@ -186,27 +201,15 @@ static void exterior_scan_finished() { int r;
         }
 
         if (granted) {
-            r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS GRANTED\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2 days_left:%hu\n", days_left);
-            error_check(r);
+            exterior_display("ACCESS GRANTED\ndays_left:%hu", days_left);
             gpio_pwm_set(1);
             IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
         } else {
             // TODO give reason?
             if (days_left == 0) {
-                r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS DENIED\n");
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 Expired\n");
-                error_check(r);
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                exterior_display("ACCESS DENIED\nExpired");
             } else {
-                r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS DENIED\n");
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 Unknown User\n");
-                error_check(r);
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                exterior_display("ACCESS DENIED\nUnknown User");
             }
         }
     } else if (strcmp(exterior_option, "100") == 0) { // Email hash
@@ -225,11 +228,7 @@ static void exterior_scan_finished() { int r;
                     emailed_hash_idx = 0;
                 }
                 u16 idx = emailed_hash_idx++;
-                r = dprintf(serial_fd, "TEXT_SHOW1 Request sending %s\n", cancel_text);
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 Day:%hu Idx:%hu\n", day, idx);
-                error_check(r);
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                exterior_display("Request sending %s\nDay:%hu Idx:%hu", cancel_text, day, idx);
 
                 access_HashResult h;
                 access_hash(h, (char*)exterior_rfid, (char*)exterior_pin);
@@ -285,11 +284,7 @@ static void exterior_scan_finished() { int r;
         access_user_IDX USER_idx = access_user_lookup(hash);
 
         if (USER_idx == access_user_NOT_FOUND) {
-            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED:\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2  Unknown User\n");
-            error_check(r);
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+            exterior_display("DENIED:\nUnknown User");
         } else {
             u16 expire_day = access_users_space[USER_idx].expire_day;
             if (expire_day == access_expire_day_magics_NewAdder ||
@@ -297,50 +292,26 @@ static void exterior_scan_finished() { int r;
 
                 add_next_user = add_user_state_ADDING_NEW;
                 // TODO add timer to reset this
-                r = dprintf(serial_fd, "TEXT_SHOW1 \n");
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
-                error_check(r);
+                exterior_display("\nWill add next user");
 
             } else if (expire_day == access_expire_day_magics_NewExtender ||
                        expire_day == access_expire_day_magics_Extender) {
 
                 add_next_user = add_user_state_ADDING_NEW;
                 // TODO add timer to reset this
-                r = dprintf(serial_fd, "TEXT_SHOW1 \n");
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 Will extend next user\n");
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
-                error_check(r);
-
+                exterior_display("\nWill extend next user");
             } else {
-                r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: you don't\n");
-                error_check(r);
-                r = dprintf(serial_fd, "TEXT_SHOW2 have permission\n");
-                error_check(r);
-                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                exterior_display("DENIED: you don't\nhave permission");
             }
-
         }
-
     } else {
-        r = dprintf(serial_fd, "TEXT_SHOW1 \n");
-        error_check(r);
-        r = dprintf(serial_fd, "TEXT_SHOW2 Unkown option\n");
-        error_check(r);
-        IO_TIMER_MS(clear_display) = now_ms() + 2000;
-        ERROR("Got an unknown option from the exterior");
+        exterior_display("\nUnkown option");
+        ERROR("Got an unknown option from the exterior: %s", exterior_option);
     }
 }
 
 static void exterior_restart() {
-    int r;
-    r = dprintf(serial_fd, "TEXT_SHOW1 Exterior restart  \n");
-    error_check(r);
-    r = dprintf(serial_fd, "TEXT_SHOW2 Detected  \n");
-    error_check(r);
-    IO_TIMER_MS(clear_display) = now_ms() + 2000;
+    exterior_display("Exterior restart\nDetected");
     WARN("Exterior restart detected");
 }
 
@@ -350,7 +321,6 @@ static void exterior_restart() {
 
 
 void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_hash_CurlCtx * ctx) {
-
     email_free(&emailed_hash_email_ctx);
     state = STATE_IDLE;
 }
