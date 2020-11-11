@@ -38,7 +38,7 @@ u16 access_now_day() {
 
 static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
 static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
-static s32 access_user_days_left(access_user_IDX USER_idx) {
+s32 access_user_days_left(access_user_IDX USER_idx) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
 

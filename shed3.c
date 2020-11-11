@@ -173,9 +173,18 @@ static void exterior_scan_finished() { int r;
         add_next_user = add_user_state_NOT_ADDING;
 
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
-        u16 days_left = (u16)-1;
 
-        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
+
+        access_HashResult hash = {};
+        access_hash(hash, (char*)exterior_rfid, exterior_pin);
+        access_user_IDX USER_idx = access_user_lookup(hash);
+        u8 granted = 0;
+        u16 days_left = 0;
+        if (USER_idx != access_user_NOT_FOUND) {
+            granted = access_user_days_left(USER_idx) >= 0;
+            days_left = access_user_days_left(USER_idx);
+        }
+
         if (granted) {
             r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS GRANTED\n");
             error_check(r);
@@ -269,29 +278,50 @@ static void exterior_scan_finished() { int r;
             } break;
         }
     } else if (strcmp(exterior_option, "200") == 0) {
-        // Philanthripist sign up new user
-        u16 days_left = (u16)-1;
-        u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
-        if (!granted) {
+        // add new user or extend existing one
+
+        access_HashResult hash = {};
+        access_hash(hash, (char*)exterior_rfid, exterior_pin);
+        access_user_IDX USER_idx = access_user_lookup(hash);
+
+        if (USER_idx == access_user_NOT_FOUND) {
             r = dprintf(serial_fd, "TEXT_SHOW1 DENIED:\n");
             error_check(r);
             r = dprintf(serial_fd, "TEXT_SHOW2  Unknown User\n");
             error_check(r);
             IO_TIMER_MS(clear_display) = now_ms() + 2000;
-        } else if (days_left == (u16)-1) {
-            add_next_user = add_user_state_ADDING_NEW;
-            // TODO add timer to reset this
-            r = dprintf(serial_fd, "TEXT_SHOW1 \n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
-            error_check(r);
         } else {
-            r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: Not a\n");
-            error_check(r);
-            r = dprintf(serial_fd, "TEXT_SHOW2    philanthropist\n");
-            error_check(r);
-            IO_TIMER_MS(clear_display) = now_ms() + 2000;
+            u16 expire_day = access_users_space[USER_idx].expire_day;
+            if (expire_day == access_expire_day_magics_NewAdder ||
+                expire_day == access_expire_day_magics_Adder) {
+
+                add_next_user = add_user_state_ADDING_NEW;
+                // TODO add timer to reset this
+                r = dprintf(serial_fd, "TEXT_SHOW1 \n");
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 Will add next user\n");
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                error_check(r);
+
+            } else if (expire_day == access_expire_day_magics_NewExtender ||
+                       expire_day == access_expire_day_magics_Extender) {
+
+                add_next_user = add_user_state_ADDING_NEW;
+                // TODO add timer to reset this
+                r = dprintf(serial_fd, "TEXT_SHOW1 \n");
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 Will extend next user\n");
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+                error_check(r);
+
+            } else {
+                r = dprintf(serial_fd, "TEXT_SHOW1 DENIED: you don't\n");
+                error_check(r);
+                r = dprintf(serial_fd, "TEXT_SHOW2 have permission\n");
+                error_check(r);
+                IO_TIMER_MS(clear_display) = now_ms() + 2000;
+            }
+
         }
 
     } else {
@@ -313,7 +343,6 @@ static void exterior_restart() {
     IO_TIMER_MS(clear_display) = now_ms() + 2000;
     WARN("Exterior restart detected");
 }
-
 
 
 #define exterior_set(dest)  __exterior_set(start, end, dest, #dest, sizeof dest); return
