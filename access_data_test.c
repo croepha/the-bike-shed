@@ -125,12 +125,12 @@ int main() {
   test_req(0xffffffff, 0xffff02ff);
   test_req(0xffffffff, 0xffff03ff);
 
-  now_day = 105;
-  INFO("First pass of maintenance, expect frees");
-  access_idle_maintenance_prev = &access_users_first_idx;
+  now_day = 115;
+  INFO("pass of maintenance, expect no frees");
   while (*access_idle_maintenance_prev != (u16)-1) {
     access_idle_maintenance();
   }
+  INFO("Expect dennies");
 
   test_req(0x00000001, 0xffffffff);
   test_req(0x00000002, 0xffffffff);
@@ -140,6 +140,24 @@ int main() {
   test_req(0xffffffff, 0xffff01ff);
   test_req(0xffffffff, 0xffff02ff);
   test_req(0xffffffff, 0xffff03ff);
+
+  now_day = 175;
+  INFO("pass of maintenance, expect frees");
+  access_idle_maintenance_prev = &access_users_first_idx;
+  while (*access_idle_maintenance_prev != (u16)-1) {
+    access_idle_maintenance();
+  }
+  INFO("Expect not found");
+
+  test_req(0x00000001, 0xffffffff);
+  test_req(0x00000002, 0xffffffff);
+  test_req(0x00000002, 0xffff00ff);
+  test_req(0x00000002, 0xffff01ff);
+  test_req(0x00000002, 0xffff02ff);
+  test_req(0xffffffff, 0xffff01ff);
+  test_req(0xffffffff, 0xffff02ff);
+  test_req(0xffffffff, 0xffff03ff);
+
 
   memset(access_salt, 0, SALT_BUF_LEN);
   strcpy(access_salt, "saltysalt");

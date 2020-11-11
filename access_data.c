@@ -142,7 +142,8 @@ void access_idle_maintenance(void) {
         u8 is_expired;
         {
           LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-          is_expired = user_is_expired(USER_idx, 0);
+          // Lets remove people if they have been expired for at-least 60 days
+          is_expired = access_user_days_left(USER_idx) <  -60;
         }
         if (is_expired) { // This entry is expired lets remove it
           TRACE("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP_idx);
