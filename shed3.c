@@ -193,23 +193,16 @@ static void exterior_scan_finished() { int r;
         access_HashResult hash = {};
         access_hash(hash, (char*)exterior_rfid, exterior_pin);
         access_user_IDX USER_idx = access_user_lookup(hash);
-        u8 granted = 0;
-        u16 days_left = 0;
-        if (USER_idx != access_user_NOT_FOUND) {
-            granted = access_user_days_left(USER_idx) >= 0;
-            days_left = access_user_days_left(USER_idx);
-        }
-
-        if (granted) {
-            exterior_display("ACCESS GRANTED\ndays_left:%hu", days_left);
-            gpio_pwm_set(1);
-            IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+        if (USER_idx == access_user_NOT_FOUND) {
+            exterior_display("ACCESS DENIED\nUnknown User");
         } else {
-            // TODO give reason?
-            if (days_left == 0) {
+            s32 days_left = access_user_days_left(USER_idx);
+            if (days_left<0) {
                 exterior_display("ACCESS DENIED\nExpired");
             } else {
-                exterior_display("ACCESS DENIED\nUnknown User");
+                exterior_display("ACCESS GRANTED\ndays_left:%d", days_left);
+                gpio_pwm_set(1);
+                IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
             }
         }
     } else if (strcmp(exterior_option, "100") == 0) { // Email hash
@@ -270,8 +263,7 @@ static void exterior_scan_finished() { int r;
             } break;
             case STATE_SENDING_NO_CANCEL: {
                 WARN("Got send request while email is pending");
-                r = dprintf(serial_fd, "TEXT_SHOW2 Cant send, email busy, try again to cancel and send again\n");
-                error_check(r);
+                exterior_display("\nCant send, email busy, try again to cancel and send again");
                 IO_TIMER_MS(clear_display) = now_ms() + 2000;
                 state = STATE_SENDING_CANCELLED;
             } break;
