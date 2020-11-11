@@ -174,6 +174,7 @@ static void exterior_scan_finished() { int r;
 
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
         u16 days_left = (u16)-1;
+
         u8 granted = access_requested((char*)exterior_rfid, (char*)exterior_pin, &days_left);
         if (granted) {
             r = dprintf(serial_fd, "TEXT_SHOW1 ACCESS GRANTED\n");
@@ -377,7 +378,7 @@ char * serial_path = "/dev/ttyAMA0";
 void shed_add_philantropist_hex(char* hex) {
     access_HashResult hash = {};
     buf_from_hex(hash, sizeof hash, hex);
-    access_user_add(hash, -1, 0, 1);
+    access_user_add(hash, access_expire_day_magics_NewAdder, 0, 1);
 }
 
 

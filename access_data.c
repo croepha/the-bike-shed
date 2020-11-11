@@ -8,16 +8,8 @@ char access_salt[SALT_BUF_LEN] = "saltysalt";
 static usz const HASH_MAP_LEN  = 1 << 18; // 256Ki
 static usz const USER_TABLE_LEN = 1 << 13; // 8192
 
-struct accessUser {
-  u8 debug_is_free;
-  union {
-    struct {
-        access_HashResult hash;
-        u16 expire_day;
-    };
-  };
-  u16 next_idx;
-} access_users_space[USER_TABLE_LEN];
+
+struct accessUser access_users_space[USER_TABLE_LEN];
 u16 access_map[HASH_MAP_LEN];
 
 
@@ -49,8 +41,16 @@ static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u3
 static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
+
+  u8 is_admin = (
+    USER.expire_day == access_expire_day_magics_Adder       ||
+    USER.expire_day == access_expire_day_magics_NewAdder    ||
+    USER.expire_day == access_expire_day_magics_Extender    ||
+    USER.expire_day == access_expire_day_magics_NewExtender
+  );
+
   if (days_left) {
-    if (USER.expire_day == (u16)-1) {
+    if (is_admin) {
       // philanthrapist level of access
       *days_left = (u16) -1;
     } else if (pt_day <= USER.expire_day) {
@@ -220,7 +220,14 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
           TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
         }
 
-        if (USER.expire_day > (u16)-16 && !overwrite_admin) {
+        u8 is_admin = (
+          USER.expire_day == access_expire_day_magics_Adder       ||
+          USER.expire_day == access_expire_day_magics_NewAdder    ||
+          USER.expire_day == access_expire_day_magics_Extender    ||
+          USER.expire_day == access_expire_day_magics_NewExtender
+        );
+
+        if (is_admin && !overwrite_admin ) {
           ERROR("overwrite_admin");
           return _msg_overwrite_admin;
         } else {
@@ -242,7 +249,6 @@ void access_hash(access_HashResult hash, char * rfid, char * pin) {
   __access_hash(hash, &payload);
 }
 
-
 u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   *days_left = (u16)-1;
   struct access_HashPayload payload = {};
@@ -250,6 +256,15 @@ u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   // INFO_BUFFER((char*)&payload, sizeof payload, "payload:");
   access_HashResult hash;
   __access_hash(hash, &payload);
+  access_user_IDX user_idx = access_user_lookup(hash);
+  LOGCTX(" USER_idx:%x ", user_idx );
+  if (user_idx != access_user_NOT_FOUND) {
+    return !user_is_expired(user_idx, days_left);
+  }
+  return 0;
+}
+
+access_user_IDX access_user_lookup(access_HashResult hash) {
 
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
@@ -265,7 +280,7 @@ u8 access_requested(char * rfid, char * pin, u16 * days_left) {
       }
     } else if (MAP == 0) {
       TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
-      return 0;
+      return -1;
     } else {
       u16 USER_idx = MAP - 1;
       assert(!USER.debug_is_free);
@@ -277,8 +292,8 @@ u8 access_requested(char * rfid, char * pin, u16 * days_left) {
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         }
-        LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, USER_idx );
-        return !user_is_expired(USER_idx, days_left);
+        TRACE("returning MAP_idx:%x", MAP_idx);
+        return USER_idx;
       } else {
         // TODO, should this really be a warning? or at-least an INFO?
         TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
