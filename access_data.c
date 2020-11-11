@@ -38,7 +38,7 @@ u16 access_now_day() {
 
 static u32 get_hash_mask(u32 v) { return v & (HASH_MAP_LEN - 1); }
 static u32 get_hash_i(access_HashResult hash_result) { return get_hash_mask(*(u32*)hash_result); }
-static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
+static s32 access_user_days_left(access_user_IDX USER_idx) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
 
@@ -48,26 +48,51 @@ static u8 user_is_expired(u16 USER_idx, u16 * days_left) {
     USER.expire_day == access_expire_day_magics_Extender    ||
     USER.expire_day == access_expire_day_magics_NewExtender
   );
-
-  if (days_left) {
-    if (is_admin) {
-      // philanthrapist level of access
-      *days_left = (u16) -1;
-    } else if (pt_day <= USER.expire_day) {
-      *days_left = USER.expire_day - pt_day;
-    } else {
-      *days_left = 0;
-    }
+  if (is_admin) {
+    return (u16)-1;
+  } else {
+    return USER.expire_day - pt_day;
   }
-  return pt_day > USER.expire_day;
 }
+static u8 user_is_expired(access_user_IDX USER_idx, u16 * days_left) {
+  s32 _dl = access_user_days_left(USER_idx);
+  if (_dl < 0) {
+    if (days_left) *days_left = 0;
+    return 1;
+  } else {
+    if (days_left) *days_left = _dl;
+    return 0;
+  }
+}
+
+
+void access_hash(access_HashResult hash, char * rfid, char * pin) {
+  struct access_HashPayload payload = {};
+  memcpy(payload.salt, access_salt, sizeof payload.salt);
+  memcpy(payload.rfid, rfid, sizeof payload.rfid);
+  memcpy(payload.pin , pin , sizeof payload.pin );
+  __access_hash(hash, &payload);
+}
+
+u8 access_requested(char * rfid, char * pin, u16 * days_left) {
+  *days_left = (u16)-1;
+  access_HashResult hash;
+  access_hash(hash, rfid, pin);
+  access_user_IDX user_idx = access_user_lookup(hash);
+  LOGCTX(" USER_idx:%x ", user_idx );
+  if (user_idx != access_user_NOT_FOUND) {
+    return !user_is_expired(user_idx, days_left);
+  }
+  return 0;
+}
+
 
 void access_user_list_init(void) {
 
   // Initialize the free list
-  access_users_first_idx = -1;
-  access_users_first_free_idx = -1;
-  for (u16 USER_idx = 0; USER_idx < USER_TABLE_LEN; USER_idx++) {
+  access_users_first_idx = access_user_NOT_FOUND;
+  access_users_first_free_idx = access_user_NOT_FOUND;
+  for (access_user_IDX USER_idx = 0; USER_idx < USER_TABLE_LEN; USER_idx++) {
 
     USER.debug_is_free = 1;
     USER.next_idx = access_users_first_free_idx;
@@ -77,17 +102,23 @@ void access_user_list_init(void) {
   access_idle_maintenance_prev = &access_users_first_idx;
 }
 
+enum {
+  map_EMPTY = (u16)-0,
+  map_TOMB  = (u16)-1,
+};
+
 void access_idle_maintenance(void) {
 
   // Scan for users that need to be pruned
-  if (*access_idle_maintenance_prev == (u16)-1) {
+  if (*access_idle_maintenance_prev == access_user_NOT_FOUND) {
     return;
   }
 
-  u16 USER_idx = *access_idle_maintenance_prev;
+  access_user_IDX USER_idx = *access_idle_maintenance_prev;
   //DEBUG("USER_idx:%hu", USER_idx);
 
   assert(!USER.debug_is_free);
+
 
   u32 map_first_tombstone = (u32)-1;
 
@@ -95,12 +126,12 @@ void access_idle_maintenance(void) {
   u32 map_range_end = map_rage_start_idx;
 
   for (u32 MAP_idx = map_rage_start_idx;; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1) {
+    if (MAP == map_TOMB) {
       if (map_first_tombstone == (u32)-1) {
         TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
-    } else if (MAP == 0) {
+    } else if (MAP == map_EMPTY) {
       TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
       assert(0);
       map_range_end = MAP_idx;
@@ -239,25 +270,6 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 
 
 
-void access_hash(access_HashResult hash, char * rfid, char * pin) {
-  struct access_HashPayload payload = {};
-  memcpy(payload.salt, access_salt, sizeof payload.salt);
-  memcpy(payload.rfid, rfid, sizeof payload.rfid);
-  memcpy(payload.pin , pin , sizeof payload.pin );
-  __access_hash(hash, &payload);
-}
-
-u8 access_requested(char * rfid, char * pin, u16 * days_left) {
-  *days_left = (u16)-1;
-  access_HashResult hash;
-  access_hash(hash, rfid, pin);
-  access_user_IDX user_idx = access_user_lookup(hash);
-  LOGCTX(" USER_idx:%x ", user_idx );
-  if (user_idx != access_user_NOT_FOUND) {
-    return !user_is_expired(user_idx, days_left);
-  }
-  return 0;
-}
 
 access_user_IDX access_user_lookup(access_HashResult hash) {
 
