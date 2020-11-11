@@ -54,16 +54,6 @@ static s32 access_user_days_left(access_user_IDX USER_idx) {
     return USER.expire_day - pt_day;
   }
 }
-static u8 user_is_expired(access_user_IDX USER_idx, u16 * days_left) {
-  s32 _dl = access_user_days_left(USER_idx);
-  if (_dl < 0) {
-    if (days_left) *days_left = 0;
-    return 1;
-  } else {
-    if (days_left) *days_left = _dl;
-    return 0;
-  }
-}
 
 
 void access_hash(access_HashResult hash, char * rfid, char * pin) {
@@ -78,10 +68,17 @@ u8 access_requested(char * rfid, char * pin, u16 * days_left) {
   *days_left = (u16)-1;
   access_HashResult hash;
   access_hash(hash, rfid, pin);
-  access_user_IDX user_idx = access_user_lookup(hash);
-  LOGCTX(" USER_idx:%x ", user_idx );
-  if (user_idx != access_user_NOT_FOUND) {
-    return !user_is_expired(user_idx, days_left);
+  access_user_IDX USER_idx = access_user_lookup(hash);
+  LOGCTX(" USER_idx:%x ", USER_idx );
+  if (USER_idx != access_user_NOT_FOUND) {
+    s32 _dl = access_user_days_left(USER_idx);
+    if (_dl < 0) {
+      if (days_left) *days_left = 0;
+      return 0;
+    } else {
+      if (days_left) *days_left = _dl;
+      return 1;
+    }
   }
   return 0;
 }
@@ -103,7 +100,7 @@ void access_user_list_init(void) {
 }
 
 enum {
-  map_EMPTY = (u16)-0,
+  map_EMPTY = (u16) 0,
   map_TOMB  = (u16)-1,
 };
 
@@ -155,7 +152,7 @@ void access_idle_maintenance(void) {
         } else {
           if (map_first_tombstone != (u32)-1) {
             TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
-            MAP = (u16)-1;
+            MAP = (u16)map_TOMB;
             MAP_idx = map_first_tombstone;
             MAP = USER_idx + 1;
           }
@@ -184,12 +181,12 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
-  if (access_users_first_free_idx == (u16)-1) {
+  if (access_users_first_free_idx == access_user_NOT_FOUND) {
     ERROR("User list full");
     // Try real hard to fee up some space
     access_idle_maintenance();
     // TODO, remove this heroic code.... just give up... no sense optimizing a rare case...
-    if (access_users_first_free_idx == (u16)-1) {
+    if (access_users_first_free_idx == access_user_NOT_FOUND) {
       INFO("No space could be freed, giving up");
       return _msg_no_space_left;
     }
@@ -197,12 +194,12 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1) {
+    if (MAP == map_TOMB) {
       if(  map_first_tombstone == (u32)-1) {
         TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
-    } else if (MAP == 0) {
+    } else if (MAP == map_EMPTY) {
       // pop off the free list
       u16 USER_idx = access_users_first_free_idx;
       access_users_first_free_idx = USER.next_idx;
@@ -239,7 +236,7 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 
         if (map_first_tombstone != (u32)-1) {
           TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
-          MAP = (u16)-1;
+          MAP = map_TOMB;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         } else {
@@ -270,8 +267,6 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 }
 
 
-
-
 access_user_IDX access_user_lookup(access_HashResult hash) {
 
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
@@ -281,14 +276,14 @@ access_user_IDX access_user_lookup(access_HashResult hash) {
 
   u32 map_first_tombstone = (u32)-1;
   for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == (u16)-1) {
+    if (MAP == map_TOMB) {
       if(map_first_tombstone == (u32)-1) {
         TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
         map_first_tombstone = MAP_idx;
       }
-    } else if (MAP == 0) {
+    } else if (MAP == map_EMPTY) {
       TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
-      return -1;
+      return access_user_NOT_FOUND;
     } else {
       u16 USER_idx = MAP - 1;
       assert(!USER.debug_is_free);
@@ -296,7 +291,7 @@ access_user_IDX access_user_lookup(access_HashResult hash) {
         if (map_first_tombstone != (u32)-1) {
           TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ",
                map_first_tombstone, USER_idx, MAP_idx);
-          MAP = (u16)-1;
+          MAP = map_TOMB;
           MAP_idx = map_first_tombstone;
           MAP = USER_idx + 1;
         }
