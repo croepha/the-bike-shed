@@ -204,6 +204,48 @@ void access_idle_maintenance(void) {
 
 }
 
+
+
+static u32 __user_map_lookup(access_HashResult hash) {
+  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
+
+  assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
+  assert( HASH_MAP_LEN >= USER_TABLE_LEN);
+
+  u32 map_first_tombstone = (u32)-1;
+  for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
+    if (MAP == map_TOMB) {
+      if(map_first_tombstone == (u32)-1) {
+        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
+        map_first_tombstone = MAP_idx;
+      }
+    } else if (MAP == map_EMPTY) {
+      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
+      return MAP_idx;
+    } else {
+      u16 USER_idx = MAP - 1;
+      assert(!USER.debug_is_free);
+      if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
+        if (map_first_tombstone != (u32)-1) {
+          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ",
+               map_first_tombstone, USER_idx, MAP_idx);
+          MAP = map_TOMB;
+          MAP_idx = map_first_tombstone;
+          MAP = USER_idx + 1;
+        }
+        TRACE("returning MAP_idx:%x", MAP_idx);
+        return MAP_idx;
+      } else {
+        // TODO, should this really be a warning? or at-least an INFO?
+        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+      }
+    }
+  }
+  __builtin_unreachable();
+  return -1; // unreachable
+}
+
+
 // Returns error message if any
 
 static char const * const _msg_no_space_left = "No space left";
@@ -299,50 +341,10 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
   }
 }
 
-
-static u32 __user_map_lookup(access_HashResult hash) {
-  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
-
-  assert( !get_hash_mask(HASH_MAP_LEN) ); // Assert HASH_MAP_SIZE is power of 2
-  assert( HASH_MAP_LEN >= USER_TABLE_LEN);
-
-  u32 map_first_tombstone = (u32)-1;
-  for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == map_TOMB) {
-      if(map_first_tombstone == (u32)-1) {
-        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
-        map_first_tombstone = MAP_idx;
-      }
-    } else if (MAP == map_EMPTY) {
-      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
-      return -1;
-    } else {
-      u16 USER_idx = MAP - 1;
-      assert(!USER.debug_is_free);
-      if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) { // Found
-        if (map_first_tombstone != (u32)-1) {
-          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ",
-               map_first_tombstone, USER_idx, MAP_idx);
-          MAP = map_TOMB;
-          MAP_idx = map_first_tombstone;
-          MAP = USER_idx + 1;
-        }
-        TRACE("returning MAP_idx:%x", MAP_idx);
-        return MAP_idx;
-      } else {
-        // TODO, should this really be a warning? or at-least an INFO?
-        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
-      }
-    }
-  }
-  __builtin_unreachable();
-  return -1; // unreachable
-}
-
 access_user_IDX access_user_lookup(access_HashResult hash) {
 
   u32 MAP_idx = __user_map_lookup(hash);
-  if (MAP_idx == (u32)-1) {
+  if (MAP == map_EMPTY || MAP == map_TOMB) {
     return access_user_NOT_FOUND;
   }
   u16 USER_idx = MAP - 1;
