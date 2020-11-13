@@ -169,29 +169,7 @@ static u32 __user_map_lookup(access_HashResult hash) {
 //   }
 // }
 
-// static void __delete_user(access_user_IDX USER_idx) {
-
-// }
-
-
-void access_idle_maintenance(void) {
-
-  // Scan for users that need to be pruned
-  if (*access_idle_maintenance_prev == access_user_NOT_FOUND) {
-    return;
-  }
-
-  access_user_IDX USER_idx = *access_idle_maintenance_prev;
-  //DEBUG("USER_idx:%hu", USER_idx);
-  assert(!USER.debug_is_free);
-
-  LOGCTX(" USER_idx:%x ", USER_idx );
-
-
-  // Lets remove people if they have been expired for at-least 60 days
-  u8 is_expired = access_user_days_left(USER_idx) <  -60;
-
-  if (is_expired) { // This entry is expired lets remove it
+static void __delete_user(access_user_IDX USER_idx) {
     u32 MAP_idx = __user_map_lookup(USER.hash);
     LOGCTX(" MAP_idx:%x ", MAP_idx );
 
@@ -211,7 +189,26 @@ void access_idle_maintenance(void) {
     USER.next_idx = access_users_first_free_idx;
     access_users_first_free_idx = USER_idx;
     MAP = (u16)-1;
+}
 
+
+void access_idle_maintenance(void) {
+
+  // Scan for users that need to be pruned
+  if (*access_idle_maintenance_prev == access_user_NOT_FOUND) {
+    return;
+  }
+
+  access_user_IDX USER_idx = *access_idle_maintenance_prev;
+  //DEBUG("USER_idx:%hu", USER_idx);
+  assert(!USER.debug_is_free);
+
+  LOGCTX(" USER_idx:%x ", USER_idx );
+  // Lets remove people if they have been expired for at-least 60 days
+  u8 is_expired = access_user_days_left(USER_idx) <  -60;
+
+  if (is_expired) { // This entry is expired lets remove it
+    __delete_user(USER_idx);
   } else {
     TRACE("Not expired, doing nothing");
     access_idle_maintenance_prev = &USER.next_idx;
