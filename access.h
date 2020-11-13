@@ -24,7 +24,7 @@ enum {
 };
 
 
-typedef u8 access_HashResult[64];
+typedef u8 access_HashResult[32];
 
 struct accessUser {
   u8 debug_is_free;
