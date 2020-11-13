@@ -52,6 +52,7 @@ void supr_signal_io_event(struct epoll_event epe) { int r;
           ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
         }
         if (pid == supr_child_pid) {
+          WARN("Child exited");
           supr_test_hook_pre_restart();
           supr_start_child();
         } else {
@@ -67,7 +68,7 @@ void supr_read_from_child_io_event(struct epoll_event epe) { int r;
   supr_email_add_data_finish(r);
 }
 
-// TODO: We should have a lock file to 
+// TODO: We should have a lock file to
 
 void supr_main () { int r;
   setlinebuf(stderr);
