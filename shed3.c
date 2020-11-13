@@ -391,7 +391,7 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
   IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
 
   if (admin_added) {
-//      for (access_user_IDX user = access_users_first_idx; user != access_user_NOT_FOUND; user = )
+      access_prune_not_new();
   }
 }
 
@@ -421,6 +421,7 @@ char * email_rcpt = "shed-test-dest@example.com";
 char * serial_path = "/dev/ttyAMA0";
 
 void shed_add_philantropist_hex(char* hex) {
+    admin_added = 1;
     access_HashResult hash = {};
     buf_from_hex(hash, sizeof hash, hex);
     access_user_add(hash, access_expire_day_magics_NewAdder, 0, 1);

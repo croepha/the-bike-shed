@@ -145,30 +145,6 @@ static u32 __user_map_lookup(access_HashResult hash) {
   return -1; // unreachable
 }
 
-
-// void access_prune_not_new(void) {
-//   for (access_user_IDX user_next = access_users_first_idx;;) {
-//     access_user_IDX USER_idx = user_next;
-//     user_next = USER.next_idx;
-//     if (USER_idx == access_user_NOT_FOUND) { break; }
-
-//     switch (USER.expire_day) {
-//       case access_expire_day_magics_Adder: {
-//         access_delete_user(USER_idx);
-//       } break;
-//       case access_expire_day_magics_NewAdder: {
-//         USER.expire_day = access_expire_day_magics_Adder;
-//       } break;
-//       case access_expire_day_magics_Extender: {
-//         access_delete_user(USER_idx);
-//       } break;
-//       case access_expire_day_magics_NewExtender: {
-//         USER.expire_day = access_expire_day_magics_Extender;
-//       } break;
-//     }
-//   }
-// }
-
 static void __delete_user(access_user_IDX USER_idx) {
     u32 MAP_idx = __user_map_lookup(USER.hash);
     LOGCTX(" MAP_idx:%x ", MAP_idx );
@@ -189,6 +165,29 @@ static void __delete_user(access_user_IDX USER_idx) {
     USER.next_idx = access_users_first_free_idx;
     access_users_first_free_idx = USER_idx;
     MAP = (u16)-1;
+}
+
+void access_prune_not_new(void) {
+  for (access_user_IDX user_next = access_users_first_idx;;) {
+    access_user_IDX USER_idx = user_next;
+    user_next = USER.next_idx;
+    if (USER_idx == access_user_NOT_FOUND) { break; }
+
+    switch (USER.expire_day) {
+      case access_expire_day_magics_Adder: {
+        __delete_user(USER_idx);
+      } break;
+      case access_expire_day_magics_NewAdder: {
+        USER.expire_day = access_expire_day_magics_Adder;
+      } break;
+      case access_expire_day_magics_Extender: {
+        __delete_user(USER_idx);
+      } break;
+      case access_expire_day_magics_NewExtender: {
+        USER.expire_day = access_expire_day_magics_Extender;
+      } break;
+    }
+  }
 }
 
 
