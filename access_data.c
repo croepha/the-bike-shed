@@ -242,6 +242,7 @@ static u32 __user_map_lookup(access_HashResult hash) {
     }
   }
   __builtin_unreachable();
+  ERROR("got to unreachable code");
   return -1; // unreachable
 }
 
@@ -251,10 +252,9 @@ static u32 __user_map_lookup(access_HashResult hash) {
 static char const * const _msg_no_space_left = "No space left";
 static char const * const _msg_extend_only = "User can only extend";
 static char const * const _msg_overwrite_admin = "Already admin";
+static char const * const _msg_unknown_error = "Unknown error";
 
 char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_only, u8 overwrite_admin) {
-
-  TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
   if (access_users_first_free_idx == access_user_NOT_FOUND) {
     ERROR("User list full");
@@ -267,83 +267,136 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
     }
   }
 
-  u32 map_first_tombstone = (u32)-1;
-  for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == map_TOMB) {
-      if(  map_first_tombstone == (u32)-1) {
-        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
-        map_first_tombstone = MAP_idx;
-      }
-    } else if (MAP == map_EMPTY) {
-      // pop off the free list
+  u32 MAP_idx = __user_map_lookup(hash);
+  if (MAP_idx == (u32)-1) {
+    return _msg_unknown_error;
+  }
+  if (MAP == map_EMPTY || MAP == map_TOMB) {
+    if (extend_only) {
+        ERROR("extend_only");
+        return _msg_extend_only;
+    } else {
       u16 USER_idx = access_users_first_free_idx;
       access_users_first_free_idx = USER.next_idx;
       assert(USER.debug_is_free);
 
-      if (map_first_tombstone != (u32)-1) {
-        TRACE("MAP_idx:%x USER_idx:%x Adding new, replacing tombstone instead of making new slot, got to %x ", map_first_tombstone, USER_idx, MAP_idx);
-        MAP_idx = map_first_tombstone;
-      } else {
-        TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
-      }
+      USER.debug_is_free = 0;
+      USER.next_idx = access_users_first_idx;
+      access_users_first_idx = USER_idx;
 
-      if (extend_only) {
-        ERROR("extend_only");
-        return _msg_extend_only;
-      } else {
-        USER.debug_is_free = 0;
-        USER.next_idx = access_users_first_idx;
-        access_users_first_idx = USER_idx;
+      MAP = USER_idx + 1;
+      memcpy(USER.hash, hash, sizeof USER.hash);
 
-        MAP = USER_idx + 1;
-        memcpy(USER.hash, hash, sizeof USER.hash);
-
-        USER.expire_day = expire_day;
-
-        return 0;
-      }
-
-
-    } else {
-      u16 USER_idx = MAP - 1;
-      assert(!USER.debug_is_free);
-      if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
-
-        if (map_first_tombstone != (u32)-1) {
-          TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
-          MAP = map_TOMB;
-          MAP_idx = map_first_tombstone;
-          MAP = USER_idx + 1;
-        } else {
-          TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
-        }
-
-        u8 is_admin = (
-          USER.expire_day == access_expire_day_magics_Adder       ||
-          USER.expire_day == access_expire_day_magics_NewAdder    ||
-          USER.expire_day == access_expire_day_magics_Extender    ||
-          USER.expire_day == access_expire_day_magics_NewExtender
-        );
-
-        if (is_admin && !overwrite_admin ) {
-          ERROR("overwrite_admin");
-          return _msg_overwrite_admin;
-        } else {
-          TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
-          USER.expire_day = expire_day;
-          return 0;
-        }
-      } else {
-        // TODO, should this really be a warning? or at-least an INFO?
-        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
-      }
+      USER.expire_day = expire_day;
+      return 0;
     }
+  } else {
+    u16 USER_idx = MAP - 1;
+    assert(!USER.debug_is_free);
+
+    u8 is_admin = (
+      USER.expire_day == access_expire_day_magics_Adder       ||
+      USER.expire_day == access_expire_day_magics_NewAdder    ||
+      USER.expire_day == access_expire_day_magics_Extender    ||
+      USER.expire_day == access_expire_day_magics_NewExtender
+    );
+
+    if (is_admin && !overwrite_admin ) {
+      ERROR("overwrite_admin");
+      return _msg_overwrite_admin;
+    } else {
+      TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
+      USER.expire_day = expire_day;
+      return 0;
+    }
+
   }
+
+
+
+  // TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
+
+
+  // u32 map_first_tombstone = (u32)-1;
+  // for (u32 MAP_idx = get_hash_i(hash);; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
+  //   if (MAP == map_TOMB) {
+  //     if(  map_first_tombstone == (u32)-1) {
+  //       TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
+  //       map_first_tombstone = MAP_idx;
+  //     }
+  //   } else if (MAP == map_EMPTY) {
+  //     // pop off the free list
+  //     u16 USER_idx = access_users_first_free_idx;
+  //     access_users_first_free_idx = USER.next_idx;
+  //     assert(USER.debug_is_free);
+
+  //     if (map_first_tombstone != (u32)-1) {
+  //       TRACE("MAP_idx:%x USER_idx:%x Adding new, replacing tombstone instead of making new slot, got to %x ", map_first_tombstone, USER_idx, MAP_idx);
+  //       MAP_idx = map_first_tombstone;
+  //     } else {
+  //       TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
+  //     }
+
+  //     if (extend_only) {
+  //       ERROR("extend_only");
+  //       return _msg_extend_only;
+  //     } else {
+  //       USER.debug_is_free = 0;
+  //       USER.next_idx = access_users_first_idx;
+  //       access_users_first_idx = USER_idx;
+
+  //       MAP = USER_idx + 1;
+  //       memcpy(USER.hash, hash, sizeof USER.hash);
+
+  //       USER.expire_day = expire_day;
+
+  //       return 0;
+  //     }
+
+
+  //   } else {
+  //     u16 USER_idx = MAP - 1;
+  //     assert(!USER.debug_is_free);
+  //     if (memcmp(USER.hash, hash, sizeof USER.hash) == 0) {
+
+  //       if (map_first_tombstone != (u32)-1) {
+  //         TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, USER_idx, MAP_idx);
+  //         MAP = map_TOMB;
+  //         MAP_idx = map_first_tombstone;
+  //         MAP = USER_idx + 1;
+  //       } else {
+  //         TRACE("MAP_idx:%x USER_idx:%x Adding new, in new slot", MAP_idx, USER_idx);
+  //       }
+
+  //       u8 is_admin = (
+  //         USER.expire_day == access_expire_day_magics_Adder       ||
+  //         USER.expire_day == access_expire_day_magics_NewAdder    ||
+  //         USER.expire_day == access_expire_day_magics_Extender    ||
+  //         USER.expire_day == access_expire_day_magics_NewExtender
+  //       );
+
+  //       if (is_admin && !overwrite_admin ) {
+  //         ERROR("overwrite_admin");
+  //         return _msg_overwrite_admin;
+  //       } else {
+  //         TRACE("MAP_idx:%x USER_idx:%x Update existing", MAP_idx, USER_idx);
+  //         USER.expire_day = expire_day;
+  //         return 0;
+  //       }
+  //     } else {
+  //       // TODO, should this really be a warning? or at-least an INFO?
+  //       TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, USER_idx);
+  //     }
+  //   }
+  //}
 }
 
 access_user_IDX access_user_lookup(access_HashResult hash) {
 
   u32 MAP_idx = __user_map_lookup(hash);
+  if (MAP_idx == (u32)-1) {
+    return access_user_NOT_FOUND;
+  }
   if (MAP == map_EMPTY || MAP == map_TOMB) {
     return access_user_NOT_FOUND;
   }
