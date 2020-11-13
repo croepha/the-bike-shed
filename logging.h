@@ -1,4 +1,5 @@
 #pragma once
+#include <stdarg.h>
 #include "common.h"
 
 enum _log_options {
@@ -15,6 +16,12 @@ void _log(const char* severity, const char*file, const char*func, int line,
           __attribute__((__format__ (__printf__, 8, 9)));
 
 extern __thread int log_allowed_fails;
+
+#ifndef LOGF_CARBON_COPY_IMPL
+#define LOGF_CARBON_COPY_IMPL __attribute__((weak_import))
+#endif
+void logf_carbon_copy_v(char const * fmt, va_list va) LOGF_CARBON_COPY_IMPL ;
+void logf_carbon_copy_end(void) LOGF_CARBON_COPY_IMPL ;
 
 
 #define TOKENPASTE2(a, b) a ## b

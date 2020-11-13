@@ -170,6 +170,63 @@ static void exterior_display(char * fmt, ...) {
     IO_TIMER_MS(clear_display) = now_ms() + 2000;
 }
 
+static void save_config() {
+    int r;
+
+    if (!access("/boot/shed-config", F_OK)) {
+        r = rename("/boot/shed-config", "/boot/shed-config.backup");
+        error_check( r );
+    }
+
+    int fd = open("/boot/shed-config", O_WRONLY | O_CREAT);
+    error_check( fd );
+
+    #define USER (access_users_space[USER_idx])
+    for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
+
+        if (USER.expire_day == access_expire_day_magics_Adder   ||
+            USER.expire_day == access_expire_day_magics_NewAdder) {
+            r = dprintf(fd, "UserAdder: ");
+            error_check(r);
+        } else if (USER.expire_day == access_expire_day_magics_Extender   ||
+                    USER.expire_day == access_expire_day_magics_NewExtender) {
+            r = dprintf(fd, "UserExtender: ");
+            error_check(r);
+        } else {
+            r = dprintf(fd, "User30Day: %d ", USER.expire_day);
+            error_check(r);
+        }
+
+    #define h (USER.hash)
+        r = dprintf(fd,
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
+            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
+            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
+            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
+            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
+            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
+            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
+            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
+            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]
+            );
+    #undef h
+        error_check(r);
+
+    }
+    #undef USER
+
+    r = close(fd);
+    error_check(r);
+}
+
+
 u8 sec_open = 8;
 u8 sec_closed = 9;
 
@@ -189,6 +246,7 @@ static void exterior_scan_finished() { int r;
             exterior_display("Cannot add\n%s", msg);
         } else {
             exterior_display("User Added\ndays_left:30");
+            save_config();
         }
 
         add_next_user = add_user_state_NOT_ADDING;
@@ -389,6 +447,7 @@ static struct config_download_Ctx config_download_ctx;
 
 static u64 last_config_download_sec = 0;
 
+
 u8 admin_added;
 void config_download_finished(struct config_download_Ctx *c, u8 success) {
   memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
@@ -397,61 +456,7 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
 
   if (admin_added) {
     access_prune_not_new();
-
-    int r;
-
-    if (!access("/boot/shed-config", F_OK)) {
-        r = rename("/boot/shed-config", "/boot/shed-config.backup");
-        error_check( r );
-    }
-
-    int fd = open("/boot/shed-config", O_WRONLY);
-    error_check( fd );
-
-#define USER (access_users_space[USER_idx])
-    for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
-
-        if (USER.expire_day == access_expire_day_magics_Adder   ||
-            USER.expire_day == access_expire_day_magics_NewAdder) {
-            r = dprintf(fd, "UserAdder: ");
-            error_check(r);
-        } else if (USER.expire_day == access_expire_day_magics_Extender   ||
-                   USER.expire_day == access_expire_day_magics_NewExtender) {
-            r = dprintf(fd, "UserExtender: ");
-            error_check(r);
-        } else {
-            r = dprintf(fd, "User30Day: %d ", USER.expire_day);
-            error_check(r);
-        }
-
-#define h (USER.hash)
-        r = dprintf(fd,
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
-            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
-            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
-            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
-            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
-            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]
-            );
-#undef h
-        error_check(r);
-
-    }
-#undef USER
-
-    r = close(fd);
-    error_check(r);
-
+    save_config();
   }
 }
 

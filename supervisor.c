@@ -1,3 +1,4 @@
+#define LOGF_CARBON_COPY_IMPL
 #define LOG_DEBUG
 
 //#include "config.h"
@@ -50,6 +51,17 @@ void supr_exec_child() { int r;
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
 void shed_add_philantropist_hex(char* hex) { }
+
+
+void logf_carbon_copy_v(const char *fmt, va_list va) { int r;
+  char* buf; usz buf_len; supr_email_add_data_start(&buf, &buf_len);
+  r = vsnprintf(buf, buf_len, fmt, va);
+  error_check(r);
+  supr_email_add_data_finish(r);
+}
+
+void logf_carbon_copy_end() { }
+
 
 static void config_validate_or_exit() {
     log_allowed_fails = 1000;

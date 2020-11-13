@@ -17,8 +17,26 @@ static __thread  s32 _log_ctx_len;
 
 __thread s32 log_allowed_fails;
 
-#define VLOGF(fmt, va)  vfprintf(stderr, fmt, va)
-#define  LOGF(fmt, ...)  fprintf(stderr, fmt, ##__VA_ARGS__)
+
+static void vlogf(char const * fmt, va_list va) {
+  vfprintf(stderr, fmt, va);
+  if (logf_carbon_copy_v) {
+    logf_carbon_copy_v(fmt, va);
+  }
+}
+
+__attribute__((__format__ (__printf__, 1, 2)))
+static void logf(char const * fmt, ...) {
+  va_list va;
+  va_start(va, fmt);
+  vlogf(fmt, va);
+  va_end(va);
+}
+
+
+#define VLOGF(fmt, va)   vlogf(fmt, va)
+#define  LOGF(fmt, ...)   logf(fmt, ##__VA_ARGS__)
+
 
 u64 real_now_ms(void) {
     struct timeval tv;
@@ -61,7 +79,9 @@ void _log(const char* severity, const char*file, const char*func, int line,
       LOGF("]");
     } break;
   }
-  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);}
+  LOGF("\t(%s:%03d %p:%s)\n", file, line, return_address, func);
+  if (logf_carbon_copy_end) { logf_carbon_copy_end(); }
+}
 
 int _log_context_push(char* fmt, ...) {
   va_list args;

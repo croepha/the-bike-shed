@@ -170,8 +170,8 @@ static void __delete_user(access_user_IDX USER_idx) {
 void access_prune_not_new(void) {
   for (access_user_IDX user_next = access_users_first_idx;;) {
     access_user_IDX USER_idx = user_next;
-    user_next = USER.next_idx;
     if (USER_idx == access_user_NOT_FOUND) { break; }
+    user_next = USER.next_idx;
 
     switch (USER.expire_day) {
       case access_expire_day_magics_Adder: {

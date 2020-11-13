@@ -452,4 +452,4 @@ gdbserver 0.0.0.0:6969 ./shed3.pi0wdbg.exec
 gdb-multiarch
 set sysroot /build/rootpi0w-dev/staging/
 file /build/shed3.pi0wdbg.exec
-target remote 192.168.4.31:6969
+target remote 192.168.4.31:1234
