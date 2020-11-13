@@ -16,12 +16,12 @@ void config_parse_line(char *input_str, int line_number) {
   "EmailServer:"             [ \t]* @start "smtp" "s"? "://" [-a-zA-Z0-9.+_]+ ( ":" [0-9]+ )?    @end { set_config(email_host); }
   "EmailUserPass:"           [ \t]* @start [^ :\x00]* ":" [^ \x00]*                              @end { set_config(email_user_pass); }
   "DebugSupervisorArg:"      [ \t]* @start  [^\x00]*                          @end { *end=0; config_append(tmp_arg, start); return; }
-  "Philanthropist:"          [ \t]* @start [0-9a-fA-F]{128} @end { do_philanthropist(); }
+  "UserAdder:"               [ \t]* @start [0-9a-fA-F]{128} @end { config_user_adder(); }
   "EmailAddress:"            [ \t]* @start [^ \x00]* @end { do_diagnostic("EmailAddress"             , email_from ); }
   "DestinationEmailAddress:" [ \t]* @start [^ \x00]* @end { do_diagnostic("DestinationEmailAddress"  , email_rcpt ); }
   "EmailServer:"             [ \t]* @start [^ \x00]* @end { do_diagnostic("EmailServer"              , email_host ); }
   "EmailUserPass:"           [ \t]* @start [^ \x00]* @end { do_diagnostic("EmailUserPass"            , email_user_pass ); }
-  "Philanthropist:"          [ \t]* @start [^ \x00]* @end { do_diagnostic("Philanthropist"           , philanthropist ); }
+  "UserAdder:"               [ \t]* @start [^ \x00]* @end { do_diagnostic("UserAdder"                , user_adder ); }
 
   */
 

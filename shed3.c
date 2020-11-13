@@ -165,7 +165,8 @@ static void exterior_display(char * fmt, ...) {
     IO_TIMER_MS(clear_display) = now_ms() + 2000;
 }
 
-
+u8 sec_open = 8;
+u8 sec_closed = 9;
 
 static void exterior_scan_finished() { int r;
 
@@ -196,13 +197,45 @@ static void exterior_scan_finished() { int r;
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("ACCESS DENIED\nUnknown User");
         } else {
-            s32 days_left = access_user_days_left(USER_idx);
-            if (days_left<0) {
-                exterior_display("ACCESS DENIED\nExpired");
+            u16 expire_day = access_users_space[USER_idx].expire_day;
+            if (expire_day == access_expire_day_magics_NewAdder ||
+                expire_day == access_expire_day_magics_Adder ||
+                expire_day == access_expire_day_magics_NewExtender ||
+                expire_day == access_expire_day_magics_Extender) {
+                    exterior_display("ACCESS GRANTED\n");
+                    gpio_pwm_set(1);
+                    IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
             } else {
-                exterior_display("ACCESS GRANTED\ndays_left:%d", days_left);
-                gpio_pwm_set(1);
-                IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+                s32 days_left = access_user_days_left(USER_idx);
+
+                u8 is_open = 0;
+                // TODO daylight savings time
+                s64 DAY_SECS = 24 * 60 * 60;
+                s64 pt_sec = now_sec() - (7 * 60 * 60) ;
+                s32 day_sec = pt_sec % (DAY_SECS);
+                if (sec_open < sec_closed) {
+                  if (sec_open <= day_sec && day_sec < sec_closed) {
+                    is_open = 1;
+                  }
+                } else if (sec_open > sec_closed) {
+                  if (sec_open <= day_sec || day_sec < sec_closed) {
+                    is_open = 1;
+                  }
+                }
+                u8 sec_til_open = (sec_open + DAY_SECS - day_sec) % DAY_SECS;
+                if (is_open) {
+                    if (days_left<0) {
+                        exterior_display("ACCESS DENIED\nExpired");
+                    } else {
+                        exterior_display("ACCESS GRANTED\ndays_left:%d", days_left);
+                        gpio_pwm_set(1);
+                        IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+                    }
+                } else {
+                    s32 hr = (sec_til_open / 60) / 60;
+                    s32 mn = (sec_til_open / 60) % 60;
+                    exterior_display("Sorry closed\nWait %02d:%02d", hr, mn);
+                }
             }
         }
     } else if (strcmp(exterior_option, "100") == 0) { // Email hash
@@ -289,9 +322,31 @@ static void exterior_scan_finished() { int r;
             } else if (expire_day == access_expire_day_magics_NewExtender ||
                        expire_day == access_expire_day_magics_Extender) {
 
-                add_next_user = add_user_state_ADDING_NEW;
+                add_next_user = add_user_state_EXTENDING;
                 // TODO add timer to reset this
                 exterior_display("\nWill extend next user");
+            } else {
+                exterior_display("DENIED: you don't\nhave permission");
+            }
+        }
+    } else if (strcmp(exterior_option, "301") == 0) {
+        // Force config refresh
+
+        access_HashResult hash = {};
+        access_hash(hash, (char*)exterior_rfid, exterior_pin);
+        access_user_IDX USER_idx = access_user_lookup(hash);
+
+        if (USER_idx == access_user_NOT_FOUND) {
+            exterior_display("DENIED:\nUnknown User");
+        } else {
+            u16 expire_day = access_users_space[USER_idx].expire_day;
+            if (expire_day == access_expire_day_magics_NewAdder ||
+                expire_day == access_expire_day_magics_Adder   ||
+                expire_day == access_expire_day_magics_NewExtender ||
+                expire_day == access_expire_day_magics_Extender) {
+                exterior_display("Forcing config\nrefresh");
+                INFO("Forcing config refresh");
+                config_download_timeout();
             } else {
                 exterior_display("DENIED: you don't\nhave permission");
             }
@@ -319,8 +374,7 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
 
 
 
-//u64 config_download_interval_sec = 60 * 60; // 1 Hour
-u64 config_download_interval_sec = 20;
+u64 config_download_interval_sec = 60 * 60; // 1 Hour
 //char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
 char * config_download_url = "http://192.168.4.159:9160/workspaces/the-bike-shed/shed_test_config";
 
@@ -342,7 +396,7 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
 }
 
 void config_download_timeout() {
-  DEBUG();
+  //DEBUG();
   config_download_abort(&config_download_ctx);
   last_config_download_sec = now_sec();
   memset(&config_download_ctx.line_accumulator_data, 0, sizeof config_download_ctx.line_accumulator_data);
@@ -386,7 +440,7 @@ void idle_timeout() {
     u64 const ms_per_hour = 60 * 60 * 1000;
     u64 const ms_per_day  = 24 * ms_per_hour;
 
-    u64 offset_ms = (7+4); // UTC to PT + 4 hours;
+    u64 offset_ms = (7+4) * ms_per_hour; // UTC to PT + 4 hours;
     u64 utc_ms = now_ms();
     u16 next_maint_day = ( (utc_ms - offset_ms + ms_per_day) / ms_per_day ) ;
     u16 maint_day = next_maint_day - 1;
