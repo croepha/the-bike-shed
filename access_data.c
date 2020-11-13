@@ -183,10 +183,8 @@ void access_idle_maintenance(void) {
 
   LOGCTX(" USER_idx:%x ", USER_idx );
 
-#if 0
   u32 MAP_idx = __user_map_lookup(USER.hash);
   LOGCTX(" MAP_idx:%x ", MAP_idx );
-  LOGCTX(" USER_idx:%x ", USER_idx );
 
   // Lets remove people if they have been expired for at-least 60 days
   u8 is_expired = access_user_days_left(USER_idx) <  -60;
@@ -215,74 +213,6 @@ void access_idle_maintenance(void) {
     TRACE("Not expired, doing nothing");
     access_idle_maintenance_prev = &USER.next_idx;
   }
-#endif
-
-
-
-
-#if 1
-
-  // LOGCTX(" USER_idx:%x ", USER_idx );
-  // // Lets remove people if they have been expired for at-least 60 days
-  // u8 is_expired = access_user_days_left(USER_idx) <  -60;
-  // if (is_expired) { // This entry is expired lets remove it
-  //   TRACE("Expired, freeing");
-  //   USER.debug_is_free = 1;
-  //   *access_idle_maintenance_prev = USER.next_idx;
-  //   USER.next_idx = access_users_first_free_idx;
-  //   access_users_first_free_idx = USER_idx;
-  // }
-
-  u32 map_first_tombstone = (u32)-1;
-
-  u32 map_rage_start_idx = get_hash_i(USER.hash);
-  u32 map_range_end = map_rage_start_idx;
-
-  for (u32 MAP_idx = map_rage_start_idx;; MAP_idx = get_hash_mask(MAP_idx + 1) ) {
-    if (MAP == map_TOMB) {
-      if (map_first_tombstone == (u32)-1) {
-        TRACE("MAP_idx:%x Hit first tombstone ", MAP_idx);
-        map_first_tombstone = MAP_idx;
-      }
-    } else if (MAP == map_EMPTY) {
-      TRACE("MAP_idx:%x Hash not in our map ", MAP_idx);
-      assert(0);
-      map_range_end = MAP_idx;
-      break; // Hash not in our map
-    } else {
-      map_range_end = MAP_idx;
-      if(USER_idx == MAP - 1) {
-        u8 is_expired;
-        {
-          LOGCTX(" MAP_idx:%x USER_idx:%x ", MAP_idx, MAP - 1 );
-          // Lets remove people if they have been expired for at-least 60 days
-          is_expired = access_user_days_left(USER_idx) <  -60;
-        }
-        if (is_expired) { // This entry is expired lets remove it
-          TRACE("MAP_idx:%x USER_idx:%x Expired, freeing", USER_idx, MAP - 1);
-          USER.debug_is_free = 1;
-          *access_idle_maintenance_prev = USER.next_idx;
-          USER.next_idx = access_users_first_free_idx;
-          access_users_first_free_idx = USER_idx;
-          MAP = (u16)-1;
-        } else {
-          if (map_first_tombstone != (u32)-1) {
-            TRACE("MAP_idx:%x USER_idx:%x We hit a tombstone on the way, lets go ahead and swap this entry(%x) with that one ", map_first_tombstone, MAP - 1, MAP_idx);
-            MAP = (u16)map_TOMB;
-            MAP_idx = map_first_tombstone;
-            MAP = USER_idx + 1;
-          }
-          TRACE("MAP_idx:%x USER_idx:%x Not expired, doing nothing", MAP - 1, MAP_idx);
-          access_idle_maintenance_prev = &USER.next_idx;
-        }
-        break;
-      } else {
-        // TODO, should this really be a warning? or at-least an INFO?
-        TRACE("MAP_idx:%x USER_idx:%x Collision, continuing", MAP_idx, MAP - 1);
-      }
-    }
-  }
-#endif
 
   // TODO: We could Walk the map range backwards, looking for tombstones... probably not worth it though
 
