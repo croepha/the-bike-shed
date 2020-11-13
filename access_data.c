@@ -105,30 +105,6 @@ enum {
 };
 
 
-// void access_prune_not_new(void) {
-//   for (access_user_IDX user_next = access_users_first_idx;;) {
-//     access_user_IDX USER_idx = user_next;
-//     user_next = USER.next_idx;
-//     if (USER_idx == access_user_NOT_FOUND) { break; }
-
-//     switch (USER.expire_day) {
-//       case access_expire_day_magics_Adder: {
-//         access_delete_user(USER_idx);
-//       } break;
-//       case access_expire_day_magics_NewAdder: {
-//         USER.expire_day = access_expire_day_magics_Adder;
-//       } break;
-//       case access_expire_day_magics_Extender: {
-//         access_delete_user(USER_idx);
-//       } break;
-//       case access_expire_day_magics_NewExtender: {
-//         USER.expire_day = access_expire_day_magics_Extender;
-//       } break;
-//     }
-//   }
-// }
-
-
 static u32 __user_map_lookup(access_HashResult hash) {
   TRACE_HEXBUFFER(hash, 64 / 8, "hash:");
 
@@ -170,6 +146,34 @@ static u32 __user_map_lookup(access_HashResult hash) {
 }
 
 
+// void access_prune_not_new(void) {
+//   for (access_user_IDX user_next = access_users_first_idx;;) {
+//     access_user_IDX USER_idx = user_next;
+//     user_next = USER.next_idx;
+//     if (USER_idx == access_user_NOT_FOUND) { break; }
+
+//     switch (USER.expire_day) {
+//       case access_expire_day_magics_Adder: {
+//         access_delete_user(USER_idx);
+//       } break;
+//       case access_expire_day_magics_NewAdder: {
+//         USER.expire_day = access_expire_day_magics_Adder;
+//       } break;
+//       case access_expire_day_magics_Extender: {
+//         access_delete_user(USER_idx);
+//       } break;
+//       case access_expire_day_magics_NewExtender: {
+//         USER.expire_day = access_expire_day_magics_Extender;
+//       } break;
+//     }
+//   }
+// }
+
+// static void __delete_user(access_user_IDX USER_idx) {
+
+// }
+
+
 void access_idle_maintenance(void) {
 
   // Scan for users that need to be pruned
@@ -183,14 +187,13 @@ void access_idle_maintenance(void) {
 
   LOGCTX(" USER_idx:%x ", USER_idx );
 
-  u32 MAP_idx = __user_map_lookup(USER.hash);
-  LOGCTX(" MAP_idx:%x ", MAP_idx );
 
   // Lets remove people if they have been expired for at-least 60 days
   u8 is_expired = access_user_days_left(USER_idx) <  -60;
 
   if (is_expired) { // This entry is expired lets remove it
-
+    u32 MAP_idx = __user_map_lookup(USER.hash);
+    LOGCTX(" MAP_idx:%x ", MAP_idx );
 
     if (MAP_idx == (u32)-1) {
       access_idle_maintenance_prev = &USER.next_idx;
@@ -203,8 +206,8 @@ void access_idle_maintenance(void) {
     }
 
     TRACE("Expired, freeing");
-    USER.debug_is_free = 1;
     *access_idle_maintenance_prev = USER.next_idx;
+    USER.debug_is_free = 1;
     USER.next_idx = access_users_first_free_idx;
     access_users_first_free_idx = USER_idx;
     MAP = (u16)-1;
