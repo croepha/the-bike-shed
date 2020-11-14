@@ -554,6 +554,7 @@ int main ()  {
     assert(base16_to_int('A') == 10);
     assert(base16_to_int('F') == 15);
 
+    log_allowed_fails = 100000000;
     if (!access(config_backup_path, F_OK)) {
         ERROR("Backup config file present, reading it instead main config");
         config_load_file(config_backup_path);

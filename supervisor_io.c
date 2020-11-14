@@ -62,7 +62,6 @@ void supr_signal_io_event(struct epoll_event epe) { int r;
               ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
             }
             if (pid == supr_child_pid) {
-              WARN("Child exited");
               supr_test_hook_pre_restart();
               supr_start_child();
             } else {
