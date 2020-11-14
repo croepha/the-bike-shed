@@ -38,5 +38,3 @@ static u64 now_sec() { return now_ms() / 1000; } ;
 #define SWITCH_DEFAULT_IS_UNEXPECTED { ERROR("Got unexpected switch case"); } break;
 #endif
 
-
-void shed_add_philantropist_hex(char* hex);

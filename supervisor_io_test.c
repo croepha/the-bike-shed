@@ -12,6 +12,8 @@ char buf[1024];
 
 u64 now_ms() { return real_now_ms(); }
 
+void supr_email_push() {}
+
 void supr_email_add_data_start(char**buf_, usz*buf_space_left) {
     *buf_ = buf;
     *buf_space_left = sizeof buf - 1;
@@ -34,9 +36,17 @@ char ** test_commands[] = {
     (char*[]){ "sh", "-c", "echo \"61\"; sleep .01; echo \"62\"; sleep .02; echo \"63\"; sleep .01; echo \"64\"; sleep .01; exit  1", 0},
     0};
 char *** supr_test_child_argv = test_commands;
+
+static void print_next_command() {
+    INFO("Next command:");
+    for (char** s = *supr_test_child_argv;*s; s++) {
+        INFO("\t%s", *s);
+    }
+}
 void supr_test_hook_pre_restart() {
     supr_test_child_argv++;
     if (!*supr_test_child_argv) exit(0);
+    print_next_command();
 }
 
 void supr_exec_child() { int r;
@@ -50,7 +60,10 @@ int main() { int r;
     setlinebuf(stderr);
     r = alarm(3); error_check(r);
     log_allowed_fails = 100;
+    print_next_command();
+
     supr_main();
+
 
     INFO("Reaping child procs");
     u8 had_error = 0;

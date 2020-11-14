@@ -53,9 +53,9 @@ static void _test_set2(char**set, usz set_len) {
     }
 }
 
-void shed_add_philantropist_hex(char* hex) {
-    INFO_BUFFER(hex, strlen(hex));
-}
+// void shed_add_philantropist_hex(char* hex) {
+//     INFO_BUFFER(hex, strlen(hex));
+// }
 
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdfsdfasdasd32323@GMAIL.com",

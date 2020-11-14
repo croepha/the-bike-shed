@@ -50,7 +50,7 @@ void supr_exec_child() { int r;
 }
 void supr_test_hook_pre_restart() {}
 void supr_test_hook_pre_wait() {}
-void shed_add_philantropist_hex(char* hex) { }
+// void shed_add_philantropist_hex(char* hex) { }
 
 
 void logf_carbon_copy_v(const char *fmt, va_list va) { int r;

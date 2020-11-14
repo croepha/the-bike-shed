@@ -19,6 +19,7 @@ char supr_email_buf[supr_email_buf_SIZE];
 u32 supr_email_buf_used;
 u64 supr_email_sent_epoch_sec;
 u32 supr_email_sent_bytes;
+u32 supr_email_push_requested;
 struct email_Send supr_email_ctx;
 
 enum SUPR_LOG_EMAIL_STATE_T {
@@ -56,7 +57,8 @@ static void poke_state_machine() {
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_COLLECTING: {
-      if (supr_email_buf_used >= supr_email_low_threshold_bytes ||
+      if (supr_email_push_requested ||
+          supr_email_buf_used >= supr_email_low_threshold_bytes ||
           now_epoch_sec >=
               supr_email_sent_epoch_sec + supr_email_low_threshold_secs) {
         DEBUG("one of the low thresholds are met, lets queue up an email");
@@ -120,11 +122,17 @@ void supervisor_email_io_curl_complete(CURL *easy, CURLcode result, struct Super
   } else {
     INFO("failed %s", curl_easy_strerror(result));
   }
+  supr_email_push_requested = 0;
   supr_email_sent_bytes = 0;
   email_free(&supr_email_ctx);
   supr_email_state = SUPR_LOG_EMAIL_STATE_COOLDOWN;
   poke_state_machine();
+  supr_email_done_hook();
+}
 
+void supr_email_push() {
+  supr_email_push_requested = 1;
+  poke_state_machine();
 }
 
 void logging_send_timeout() {

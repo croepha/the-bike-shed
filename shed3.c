@@ -148,6 +148,8 @@ void clear_display_timeout() { int r;
     error_check(r);
 }
 
+char* config_path = "/boot/shed-config";
+char* config_backup_path = "/boot/shed-config.backup";
 
 __attribute__((__format__ (__printf__, 1, 2)))
 static void exterior_display(char * fmt, ...) {
@@ -173,12 +175,15 @@ static void exterior_display(char * fmt, ...) {
 static void save_config() {
     int r;
 
-    if (!access("/boot/shed-config", F_OK)) {
-        r = rename("/boot/shed-config", "/boot/shed-config.backup");
+    if (!access(config_path, F_OK)) {
+        r = rename(config_path, config_backup_path);
         error_check( r );
     }
 
-    int fd = open("/boot/shed-config", O_WRONLY | O_CREAT);
+    u8 had_error = 0;
+
+    int fd = open(config_path, O_WRONLY | O_CREAT);
+    if (fd < 0) had_error = 1;
     error_check( fd );
 
     #define USER (access_users_space[USER_idx])
@@ -196,6 +201,7 @@ static void save_config() {
             r = dprintf(fd, "User30Day: %d ", USER.expire_day);
             error_check(r);
         }
+        if (r < 0) had_error = 1;
 
     #define h (USER.hash)
         r = dprintf(fd,
@@ -210,12 +216,15 @@ static void save_config() {
             );
     #undef h
         error_check(r);
-
+        if (r < 0) had_error = 1;
     }
     #undef USER
-
     r = close(fd);
+    if (r < 0) had_error = 1;
     error_check(r);
+
+    if (!had_error) unlink(config_backup_path);
+
 }
 
 
@@ -469,7 +478,7 @@ char * email_rcpt = "shed-test-dest@example.com";
 //char * serial_path = "/build/exterior_mock.pts";
 char * serial_path = "/dev/ttyAMA0";
 
-void shed_add_philantropist_hex(char* hex) {
+void config_user_adder(char* hex) {
     admin_added = 1;
     access_HashResult hash = {};
     buf_from_hex(hash, sizeof hash, hex);
@@ -544,6 +553,13 @@ int main ()  {
     assert(base16_to_int('f') == 15);
     assert(base16_to_int('A') == 10);
     assert(base16_to_int('F') == 15);
+
+    if (!access(config_backup_path, F_OK)) {
+        ERROR("Backup config file present, reading it instead main config");
+        config_load_file(config_backup_path);
+    } else {
+        config_load_file(config_path);
+    }
 
     for(;;) {
         log_allowed_fails = 100000000;

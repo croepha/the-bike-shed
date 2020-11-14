@@ -19,6 +19,11 @@ char * config_push_string(char * str);
 void config_load_file(char * file_path);
 
 
+void config_user_adder(char*) __attribute__((weak_import));
+void config_user_extender(char*) __attribute__((weak_import));
+void config_user_normal(char*, int expire_day) __attribute__((weak_import));
+
+
 #if CONFIG_DIAGNOSTICS == 1
 #else
 #endif

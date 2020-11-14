@@ -8,6 +8,7 @@
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "common.h"
 #include "io.h"
 #include "io_curl.h"
 #include "logging.h"
@@ -34,32 +35,57 @@ static void supr_start_child() { int r;
 
 // TODO: Add a signal handler to force a flush of logs
 
+static u8 already_got_die_request;
+
 void supr_signal_io_event(struct epoll_event epe) { int r;
     struct signalfd_siginfo siginfo;
     r = read(supr_signal_fd, &siginfo, sizeof siginfo);        error_check(r);
-    assert(siginfo.ssi_signo == SIGCHLD);
-    for(;;) {
-        int wstatus;
-        pid_t pid = waitpid(0, &wstatus, WNOHANG);       error_check(pid);
-        if (pid == 0) break;
-        // TODO do stuff... log wait status
-        assert(!WIFSTOPPED(wstatus));
-        assert(WIFEXITED(wstatus) || WIFSIGNALED(wstatus) );
-        if (WIFEXITED(wstatus)) {
-          ERROR("Child:%d exited: status:%d", pid, WEXITSTATUS(wstatus) );
+
+    switch (siginfo.ssi_signo) { SWITCH_DEFAULT_IS_UNEXPECTED;
+      case SIGCHLD: {
+        for(;;) {
+            int wstatus;
+            pid_t pid = waitpid(0, &wstatus, WNOHANG);       error_check(pid);
+            if (pid == 0) break;
+            // TODO do stuff... log wait status
+            assert(!WIFSTOPPED(wstatus));
+            assert(WIFEXITED(wstatus) || WIFSIGNALED(wstatus) );
+            if (WIFEXITED(wstatus)) {
+              ERROR("Child:%d exited: status:%d", pid, WEXITSTATUS(wstatus) );
+            }
+            if (WIFSIGNALED(wstatus)) {
+              ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
+            }
+            if (pid == supr_child_pid) {
+              WARN("Child exited");
+              supr_test_hook_pre_restart();
+              supr_start_child();
+            } else {
+              ERROR("Strange, pid isn't our main child... doing nothign");
+            }
         }
-        if (WIFSIGNALED(wstatus)) {
-          ERROR("Child:%d terminated signal:%d dump:%d", pid, WTERMSIG(wstatus), WCOREDUMP(wstatus) );
-        }
-        if (pid == supr_child_pid) {
-          WARN("Child exited");
-          supr_test_hook_pre_restart();
-          supr_start_child();
+      } break;
+      case SIGINT:
+      case SIGTERM: {
+        if (already_got_die_request) {
+          WARN("already_got_die_request");
+          exit(-1);
         } else {
-          ERROR("Strange, pid isn't our main child... doing nothign");
+          INFO("Force flushing before exiting");
+          already_got_die_request = 1;
+          supr_email_push();
         }
 
+      } break;
+
     }
+    assert(siginfo.ssi_signo == SIGCHLD);
+}
+
+void supr_email_done_hook() {
+  if (already_got_die_request) {
+    exit(-1);
+  }
 }
 
 void supr_read_from_child_io_event(struct epoll_event epe) { int r;
@@ -79,6 +105,8 @@ void supr_main () { int r;
     sigset_t mask;
     r = sigemptyset(&mask);                                       error_check(r);
     r = sigaddset(&mask, SIGCHLD);                                error_check(r);
+    r = sigaddset(&mask, SIGINT);                                 error_check(r);
+    r = sigaddset(&mask, SIGTERM);                                error_check(r);
     r = sigprocmask(SIG_BLOCK, &mask, NULL);                      error_check(r);
     supr_signal_fd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);      error_check(supr_signal_fd);
 

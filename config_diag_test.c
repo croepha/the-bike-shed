@@ -17,7 +17,7 @@ struct StringList tmp_arg;
 
     // for (char * c=buf; *c; c++) { *c=tolower(*c); }
 
-void shed_add_philantropist_hex(char* hex) {}
+//void shed_add_philantropist_hex(char* hex) {}
 
 
 #define test_set(set, var) INFO("Testing set: %s", #set); { LOGCTX("\t"); _test_set( set, &var); }

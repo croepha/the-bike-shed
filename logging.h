@@ -36,7 +36,7 @@ void logf_carbon_copy_end(void) LOGF_CARBON_COPY_IMPL ;
 #define LOG(severity, options, buf, buf_size, ...) \
   _log(severity, __FILE__, __FUNCTION__, __LINE__, _log_options_ ## options, (buf), buf_size, "" __VA_ARGS__)
 #if ABORT_ON_ERROR
-#define FLOG(...) ({ LOG(__VA_ARGS__); if(--log_allowed_fails <0) { abort(); }})
+#define FLOG(...) ({ LOG(__VA_ARGS__); if(--log_allowed_fails <0) { LOG("ERROR", plain,0,0, "Aborting due to error"); abort(); }})
 #else
 #define FLOG(...) LOG(__VA_ARGS__)
 #endif
