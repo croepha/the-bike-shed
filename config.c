@@ -103,15 +103,16 @@ static void __config_append(struct StringList *sl, char* str) {
     );
 }
 
+
 #if CONFIG_DIAGNOSTICS == 1
 char *   valid_config_user_adder[] = {
-    "UserAdder: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed",
+    "UserAdder: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b",
 00};
 char *   valid_config_user_extender[] = {
-    "UserExtender: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed",
+    "UserExtender: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b",
 00};
 char *   valid_config_user_normal[] = {
-    "UserNormal: 49875 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed",
+    "UserNormal: 49875 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b",
 00};
 char *   valid_config_email_from[] = {
     "EmailAddress:    asdasdfasdasd32323@gmail.com",

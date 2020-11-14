@@ -94,7 +94,7 @@ int main () {
             "DebugSupervisorArg: /bin/sh\n"
             "DebugSupervisorArg: -c\n"
             "DebugSupervisorArg: /usr/bin/ping 127.0.0.1 | ts\n"
-            "UserAdder: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b341c5d548ee9d9c2d8396f7b56198e3c6fc3c3951b57590fe996ebb4a303abed\n"
+            "UserAdder: 8129933d4568c229f34a7a29869918e2ace401766f3701ba3e05da69f994382b\n"
         , f); error_check(r);
         r = fclose(f); error_check(r);
     }

@@ -470,11 +470,11 @@ void config_download_timeout() {
 void __debug_config_download_complete_hook() {};
 struct StringList tmp_arg;
 
-char * email_from = "shed-test@example.com";
-//char * email_host = "smtp://127.0.0.1:8025";
-char * email_host = "smtp://192.168.4.159:8025";
-char * email_user_pass = "username:password";
-char * email_rcpt = "shed-test-dest@example.com";
+
+char * email_from;
+char * email_host;
+char * email_user_pass;
+char * email_rcpt;
 //char * serial_path = "/build/exterior_mock.pts";
 char * serial_path = "/dev/ttyAMA0";
 
@@ -533,9 +533,15 @@ int main ()  {
     io_curl_initialize();
     access_user_list_init();
     serial_io_initialize(serial_path);
+    gpio_pwm_initialize();
+
+    assert(email_from);
+    assert(email_host);
+    assert(email_user_pass);
+    assert(email_rcpt);
+
     config_download_timeout();
     idle_timeout();
-    gpio_pwm_initialize();
 
     {
         int r;
@@ -545,7 +551,6 @@ int main ()  {
         error_check(r);
         IO_TIMER_MS(clear_display) = now_ms() + 2000;
     }
-
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);
     assert(base16_to_int('9') == 9);
@@ -558,6 +563,7 @@ int main ()  {
     if (!access(config_backup_path, F_OK)) {
         ERROR("Backup config file present, reading it instead main config");
         config_load_file(config_backup_path);
+        save_config();
     } else {
         config_load_file(config_path);
     }
