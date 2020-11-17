@@ -145,12 +145,11 @@ static u32 __user_map_lookup(access_HashResult hash) {
   return -1; // unreachable
 }
 
-static void __delete_user(access_user_IDX USER_idx) {
+static void __delete_user(access_user_IDX USER_idx, access_user_IDX * prev) {
     u32 MAP_idx = __user_map_lookup(USER.hash);
     LOGCTX(" MAP_idx:%x ", MAP_idx );
 
     if (MAP_idx == (u32)-1) {
-      access_idle_maintenance_prev = &USER.next_idx;
       ERROR();
       return;
     }
@@ -160,7 +159,7 @@ static void __delete_user(access_user_IDX USER_idx) {
     }
 
     TRACE("Expired, freeing");
-    *access_idle_maintenance_prev = USER.next_idx;
+    *prev = USER.next_idx;
     USER.debug_is_free = 1;
     USER.next_idx = access_users_first_free_idx;
     access_users_first_free_idx = USER_idx;
@@ -168,24 +167,26 @@ static void __delete_user(access_user_IDX USER_idx) {
 }
 
 void access_prune_not_new(void) {
-  for (access_user_IDX user_next = access_users_first_idx;;) {
-    access_user_IDX USER_idx = user_next;
+  for (access_user_IDX * prev = & access_users_first_idx;;) {
+    access_user_IDX USER_idx = *prev;
     if (USER_idx == access_user_NOT_FOUND) { break; }
-    user_next = USER.next_idx;
 
     switch (USER.expire_day) {
       case access_expire_day_magics_Adder: {
-        __delete_user(USER_idx);
+        __delete_user(USER_idx, prev);
       } break;
       case access_expire_day_magics_NewAdder: {
         USER.expire_day = access_expire_day_magics_Adder;
+        prev = &USER.next_idx;
       } break;
       case access_expire_day_magics_Extender: {
-        __delete_user(USER_idx);
+        __delete_user(USER_idx, prev);
       } break;
       case access_expire_day_magics_NewExtender: {
         USER.expire_day = access_expire_day_magics_Extender;
+        prev = &USER.next_idx;
       } break;
+      default: { prev = &USER.next_idx; } break;
     }
   }
 }
@@ -207,7 +208,7 @@ void access_idle_maintenance(void) {
   u8 is_expired = access_user_days_left(USER_idx) <  -60;
 
   if (is_expired) { // This entry is expired lets remove it
-    __delete_user(USER_idx);
+    __delete_user(USER_idx, access_idle_maintenance_prev);
   } else {
     TRACE("Not expired, doing nothing");
     access_idle_maintenance_prev = &USER.next_idx;

@@ -71,6 +71,9 @@ u8 log_trace_enabled = 0;
 u32 const shed_clear_timeout_ms_DEFAULT = 2000;
 u32 shed_clear_timeout_ms = shed_clear_timeout_ms_DEFAULT;
 
+u32 const shed_door_unlock_ms_DEFAULT = 1000;
+u32 shed_door_unlock_ms = shed_door_unlock_ms_DEFAULT;
+\
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];
@@ -211,7 +214,8 @@ static void save_config() {
     if (email_rcpt) { r = dprintf(fd, "DestinationEmailAddress: %s\n", email_rcpt); error_check(r); }
     if (config_download_url) { r = dprintf(fd, "ConfigURL: %s\n", config_download_url); error_check(r); }
     if (serial_path != serial_path_DEFAULT) { r = dprintf(fd, "DebugSerialPath: %s\n", serial_path); error_check(r); }
-    if (shed_clear_timeout_ms != shed_clear_timeout_ms_DEFAULT) { r = dprintf(fd, "DebugClearTimeoutMS: %s\n", serial_path); error_check(r); }
+    if (shed_clear_timeout_ms != shed_clear_timeout_ms_DEFAULT) { r = dprintf(fd, "DebugClearTimeoutMS: %d\n", shed_clear_timeout_ms); error_check(r); }
+    if (shed_door_unlock_ms != shed_door_unlock_ms_DEFAULT) { r = dprintf(fd, "DoorUnlockMS: %d\n", shed_door_unlock_ms); error_check(r); }
 
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
@@ -296,7 +300,7 @@ static void exterior_scan_finished() { int r;
                 expire_day == access_expire_day_magics_Extender) {
                     exterior_display("ACCESS GRANTED\n");
                     gpio_pwm_set(1);
-                    IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+                    IO_TIMER_MS(shed_pwm) = now_ms() + shed_door_unlock_ms;
             } else {
                 s32 days_left = access_user_days_left(USER_idx);
 
@@ -594,14 +598,8 @@ int main (int argc, char ** argv) {
     config_download_timeout();
     idle_timeout();
 
-    {
-        int r;
-        r = dprintf(serial_fd, "TEXT_SHOW1 System restart\n");
-        error_check(r);
-        r = dprintf(serial_fd, "TEXT_SHOW2 \n");
-        error_check(r);
-        IO_TIMER_MS(clear_display) = now_ms() + 2000;
-    }
+    exterior_display("System restart\n");
+
     assert(base16_to_int('0') == 0);
     assert(base16_to_int('1') == 1);
     assert(base16_to_int('9') == 9);

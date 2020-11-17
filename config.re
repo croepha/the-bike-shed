@@ -20,6 +20,7 @@ void config_parse_line(char *input_str, int line_number) {
   "DebugSupervisorArg:"      [ \t]* @start  [^\x00]*                          @end { *end=0; config_append(tmp_arg, start); return; }
   "DebugSerialPath:"         [ \t]* @start  [^\x00]*                          @end { set_config(serial_path); }
   "DebugClearTimeoutMS:"       [ \t]* @part1 [0-9]+ @part1_end          { set_config2(shed_clear_timeout_ms, BASE10(part1)); }
+  "DoorUnlockMS:"             [ \t]* @part1 [0-9]+ @part1_end          { set_config2(shed_door_unlock_ms, BASE10(part1)); }
   "UserAdder:"               [ \t]* @start [0-9a-fA-F]{64} @end { _config_user_adder(); }
   "UserExtender:"            [ \t]* @start [0-9a-fA-F]{64} @end { _config_user_extender(); }
   "UserNormal:"              [ \t]* @part1 [0-9]+ @part1_end [ \t]+ @start [0-9a-fA-F]{64} @end { _config_user_normal(BASE10(part1)); }

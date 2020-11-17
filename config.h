@@ -42,6 +42,7 @@ extern char ** supr_child_args;
 extern char * serial_path  __attribute__((weak_import));
 extern char * config_download_url  __attribute__((weak_import));
 extern u32 shed_clear_timeout_ms  __attribute__((weak_import));
+extern u32 shed_door_unlock_ms  __attribute__((weak_import));
 
 extern struct StringList tmp_arg;
 // __attribute__((weak_import))
