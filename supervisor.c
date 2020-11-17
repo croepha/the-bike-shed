@@ -53,14 +53,28 @@ void supr_test_hook_pre_wait() {}
 // void shed_add_philantropist_hex(char* hex) { }
 
 
+
+u8 carbon_copy_did_header = 0;
 void logf_carbon_copy_v(const char *fmt, va_list va) { int r;
-  char* buf; usz buf_len; supr_email_add_data_start(&buf, &buf_len);
+  char* buf; usz buf_len;
+
+  if (!carbon_copy_did_header) {
+    carbon_copy_did_header = 1;
+    supr_email_add_data_start(&buf, &buf_len);
+    r = snprintf(buf, buf_len, "SUPERVISOR: ");
+    error_check(r);
+    supr_email_add_data_finish(r);
+  }
+
+  supr_email_add_data_start(&buf, &buf_len);
   r = vsnprintf(buf, buf_len, fmt, va);
   error_check(r);
   supr_email_add_data_finish(r);
 }
 
-void logf_carbon_copy_end() { }
+void logf_carbon_copy_end() {
+    carbon_copy_did_header = 0;
+}
 
 
 static void config_validate_or_exit() {

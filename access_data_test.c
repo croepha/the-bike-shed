@@ -108,6 +108,7 @@ int main() {
   test_req(0xffffffff, 0xffff02ff);
   test_req(0xffffffff, 0xffff03ff);
 
+  access_prune_not_new();
 
 
   INFO("First pass of maintenance, expect no frees");

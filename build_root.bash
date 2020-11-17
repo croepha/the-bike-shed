@@ -350,6 +350,8 @@ cd /mnt
 cat << EOF > autoexec.sh
 #!/bin/sh
 
+date --set "$( date -r /boot/shed-config '+%F %T' )"
+
 modprobe pwm-bcm2835
 /root/supervisor.pi0wdbg.exec /root/supervisor.config &
 

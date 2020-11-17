@@ -37,6 +37,10 @@ void config_initialize() {
     config_memory_next = config_memory;
 }
 
+// Lets set this up so that when we re-initialize, we swap between two config memories, and then
+//  we copy all old memory into new memory
+// TODO: We never reset config memeory between loading configs... we'd run out of space...
+
 void * config_push(usz len, usz alignment) {
     ssz v = (ssz)config_memory_next; v += (-v) & (alignment -1);
     char* ret = config_memory_next = (char*)v;
@@ -71,6 +75,18 @@ char* config_push_string(char * str) {
 #define _config_user_adder()  ({ *end = 0; if(config_user_adder) { config_user_adder(start); } return; })
 #define _config_user_extender() ({ *end = 0; if(config_user_extender) { config_user_extender(start); } return; })
 #define _config_user_normal(n1) ({ *end = 0; if(config_user_normal) { config_user_normal(start, n1); } return; })
+#define BASE10(part) ({ *part ## _end = 0; strtol(part, 0, 10); })
+
+#define set_config2(var, value) ({ if(__set_config2(#var, &var, line_number)) { var =  value; }; return; })
+static u8 __set_config2(char* var_name, void * var, int line_number) {
+    DEBUG("%s=%s", var_name, value);
+    if (!var) {
+        DEBUG("Ignoring config for variable: %s", var_name);
+        return 0;
+    } else {
+        return 1;
+    }
+}
 
 
 #define set_config(var) *end = 0; __set_config(#var, &var, start, line_number); return;

@@ -24,6 +24,8 @@
 
 u64 now_ms() { return real_now_ms(); }
 
+char * const serial_path_DEFAULT = "/dev/ttyAMA0";
+
 
 /*
 
@@ -65,6 +67,9 @@ SCAN_FINISHED
 #if BUILD_IS_RELEASE == 0
 u8 log_trace_enabled = 0;
 #endif
+
+u32 const shed_clear_timeout_ms_DEFAULT = 2000;
+u32 shed_clear_timeout_ms = shed_clear_timeout_ms_DEFAULT;
 
 static usz const option_LEN = 10;
 
@@ -148,8 +153,19 @@ void clear_display_timeout() { int r;
     error_check(r);
 }
 
-char* config_path = "/boot/shed-config";
-char* config_backup_path = "/boot/shed-config.backup";
+char* config_path;
+
+#define config_backup_path_SET \
+  char config_backup_path[64]; \
+  __config_backup_path(config_backup_path, sizeof config_backup_path)
+static void __config_backup_path(char* buf, usz size) {
+    ssz r = snprintf(buf, size, "%s.backup", config_path);
+    error_check(r);
+    if (r >= size) {
+        ERROR("Buf too small");
+    }
+}
+
 
 __attribute__((__format__ (__printf__, 1, 2)))
 static void exterior_display(char * fmt, ...) {
@@ -169,15 +185,18 @@ static void exterior_display(char * fmt, ...) {
     error_check(r);
     r = dprintf(serial_fd, "TEXT_SHOW2 %s\n", line2);
     error_check(r);
-    IO_TIMER_MS(clear_display) = now_ms() + 2000;
+    IO_TIMER_MS(clear_display) = now_ms() + shed_clear_timeout_ms;
 }
 
 static void save_config() {
     int r;
 
+    config_backup_path_SET;
+
     if (!access(config_path, F_OK)) {
         r = rename(config_path, config_backup_path);
         error_check( r );
+        sync();
     }
 
     u8 had_error = 0;
@@ -185,6 +204,14 @@ static void save_config() {
     int fd = open(config_path, O_WRONLY | O_CREAT);
     if (fd < 0) had_error = 1;
     error_check( fd );
+
+    if (email_from) { r = dprintf(fd, "EmailAddress: %s\n", email_from); error_check(r); }
+    if (email_host) { r = dprintf(fd, "EmailServer: %s\n", email_host); error_check(r); }
+    if (email_user_pass) { r = dprintf(fd, "EmailUserPass: %s\n", email_user_pass); error_check(r); }
+    if (email_rcpt) { r = dprintf(fd, "DestinationEmailAddress: %s\n", email_rcpt); error_check(r); }
+    if (config_download_url) { r = dprintf(fd, "ConfigURL: %s\n", config_download_url); error_check(r); }
+    if (serial_path != serial_path_DEFAULT) { r = dprintf(fd, "DebugSerialPath: %s\n", serial_path); error_check(r); }
+    if (shed_clear_timeout_ms != shed_clear_timeout_ms_DEFAULT) { r = dprintf(fd, "DebugClearTimeoutMS: %s\n", serial_path); error_check(r); }
 
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
@@ -198,7 +225,7 @@ static void save_config() {
             r = dprintf(fd, "UserExtender: ");
             error_check(r);
         } else {
-            r = dprintf(fd, "User30Day: %d ", USER.expire_day);
+            r = dprintf(fd, "UserNormal: %d ", USER.expire_day);
             error_check(r);
         }
         if (r < 0) had_error = 1;
@@ -222,6 +249,7 @@ static void save_config() {
     r = close(fd);
     if (r < 0) had_error = 1;
     error_check(r);
+    sync();
 
     if (!had_error) unlink(config_backup_path);
 
@@ -429,10 +457,10 @@ void emailed_hash_io_curl_complete(CURL *easy, CURLcode result, struct emailed_h
 }
 
 
-
 u64 config_download_interval_sec = 60 * 60; // 1 Hour
 //char * config_download_url = "http://127.0.0.1:9160/workspaces/the-bike-shed/shed_test_config";
-char * config_download_url = "http://192.168.4.159:9160/workspaces/the-bike-shed/shed_test_config";
+//char * config_download_url = "http://192.168.4.159:9160/workspaces/the-bike-shed/shed_test_config";
+char * config_download_url;
 
 char config_download_previous_etag[32];
 u64 config_download_previous_modified_time_sec;
@@ -447,7 +475,10 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
   strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
   IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
 
+  DEBUG("success:%d admin_added:%d", success, admin_added);
+
   if (admin_added) {
+    admin_added = 0;
     access_prune_not_new();
     save_config();
   }
@@ -476,7 +507,9 @@ char * email_host;
 char * email_user_pass;
 char * email_rcpt;
 //char * serial_path = "/build/exterior_mock.pts";
-char * serial_path = "/dev/ttyAMA0";
+//char * serial_path = "/dev/ttyAMA0";
+char * serial_path = serial_path_DEFAULT;
+
 
 void config_user_adder(char* hex) {
     admin_added = 1;
@@ -527,13 +560,31 @@ void idle_timeout() {
 
 
 // TODO needs maintenance
-int main ()  {
+int main (int argc, char ** argv) {
+    assert(argc == 2);
+    config_path = argv[1];
+
     setlinebuf(stderr);
+    access_user_list_init();
+
+    log_allowed_fails = 100000000;
+    config_backup_path_SET;
+    if (!access(config_backup_path, F_OK)) {
+        ERROR("Backup config file present, reading it instead main config");
+        config_load_file(config_backup_path);
+        save_config();
+    } else {
+        config_load_file(config_path);
+    }
+    access_prune_not_new(); // convert all the added into not added
+
     io_initialize();
     io_curl_initialize();
-    access_user_list_init();
     serial_io_initialize(serial_path);
     gpio_pwm_initialize();
+
+
+
 
     assert(email_from);
     assert(email_host);
@@ -558,15 +609,6 @@ int main ()  {
     assert(base16_to_int('f') == 15);
     assert(base16_to_int('A') == 10);
     assert(base16_to_int('F') == 15);
-
-    log_allowed_fails = 100000000;
-    if (!access(config_backup_path, F_OK)) {
-        ERROR("Backup config file present, reading it instead main config");
-        config_load_file(config_backup_path);
-        save_config();
-    } else {
-        config_load_file(config_path);
-    }
 
     for(;;) {
         log_allowed_fails = 100000000;

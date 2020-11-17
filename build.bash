@@ -82,10 +82,10 @@ eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 }
 
 function compile() { SOURCE="$1"; ARGS=("${@:2}")
-  _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
-  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
-  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D BUILD_IS_RELEASE=0 $pi0w_common
-  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D BUILD_IS_RELEASE=1 $pi0w_common
+  _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
+  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=1 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
+  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=0 -D BUILD_IS_RELEASE=0 $pi0w_common
+  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=0 -D BUILD_IS_RELEASE=1 $pi0w_common
 }
 
 function depends_on() {
