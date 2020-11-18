@@ -96,7 +96,6 @@ void access_user_list_init(void) {
     access_users_first_free_idx = USER_idx;
 
   }
-  access_idle_maintenance_prev = &access_users_first_idx;
 }
 
 enum {
@@ -146,8 +145,10 @@ static u32 __user_map_lookup(access_HashResult hash) {
 }
 
 static void __delete_user(access_user_IDX USER_idx, access_user_IDX * prev) {
+    LOGCTX("delete_user");
     u32 MAP_idx = __user_map_lookup(USER.hash);
     LOGCTX(" MAP_idx:%x ", MAP_idx );
+    TRACE();
 
     if (MAP_idx == (u32)-1) {
       ERROR();
@@ -158,8 +159,8 @@ static void __delete_user(access_user_IDX USER_idx, access_user_IDX * prev) {
       return;
     }
 
-    TRACE("Expired, freeing");
     *prev = USER.next_idx;
+    assert(!USER.debug_is_free);
     USER.debug_is_free = 1;
     USER.next_idx = access_users_first_free_idx;
     access_users_first_free_idx = USER_idx;
@@ -167,6 +168,7 @@ static void __delete_user(access_user_IDX USER_idx, access_user_IDX * prev) {
 }
 
 void access_prune_not_new(void) {
+  LOGCTX(" prune");
   for (access_user_IDX * prev = & access_users_first_idx;;) {
     access_user_IDX USER_idx = *prev;
     if (USER_idx == access_user_NOT_FOUND) { break; }
@@ -196,14 +198,15 @@ void access_idle_maintenance(void) {
 
   // Scan for users that need to be pruned
   if (*access_idle_maintenance_prev == access_user_NOT_FOUND) {
+    access_idle_maintenance_prev = 0;
     return;
   }
 
   access_user_IDX USER_idx = *access_idle_maintenance_prev;
+  LOGCTX(" USER_idx:%x ", USER_idx );
   //DEBUG("USER_idx:%hu", USER_idx);
   assert(!USER.debug_is_free);
 
-  LOGCTX(" USER_idx:%x ", USER_idx );
   // Lets remove people if they have been expired for at-least 60 days
   u8 is_expired = access_user_days_left(USER_idx) <  -60;
 
@@ -228,6 +231,8 @@ static char const * const _msg_overwrite_admin = "Already admin";
 static char const * const _msg_unknown_error = "Unknown error";
 
 char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_only, u8 overwrite_admin) {
+  LOGCTX(" add");
+
 
   if (access_users_first_free_idx == access_user_NOT_FOUND) {
     ERROR("User list full");
@@ -241,6 +246,10 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
   }
 
   u32 MAP_idx = __user_map_lookup(hash);
+
+  TRACE_HEXBUFFER(hash, sizeof(access_HashResult), "expire_day:%d extend_only:%d overwrite_admin:%d map_idx:%d",
+     expire_day, extend_only, overwrite_admin, MAP_idx);
+
   if (MAP_idx == (u32)-1) {
     return _msg_unknown_error;
   }
@@ -288,6 +297,7 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 }
 
 access_user_IDX access_user_lookup(access_HashResult hash) {
+  LOGCTX(" lookup");
 
   u32 MAP_idx = __user_map_lookup(hash);
   if (MAP_idx == (u32)-1) {

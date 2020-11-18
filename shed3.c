@@ -65,7 +65,7 @@ SCAN_FINISHED
 
 
 #if BUILD_IS_RELEASE == 0
-u8 log_trace_enabled = 0;
+u8 log_trace_enabled = 1;
 #endif
 
 u32 const shed_clear_timeout_ms_DEFAULT = 2000;
@@ -475,6 +475,7 @@ static u64 last_config_download_sec = 0;
 
 u8 admin_added;
 void config_download_finished(struct config_download_Ctx *c, u8 success) {
+  LOGCTX(" download_finished");
   memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
   strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
   IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
@@ -522,6 +523,18 @@ void config_user_adder(char* hex) {
     access_user_add(hash, access_expire_day_magics_NewAdder, 0, 1);
 }
 
+void config_user_extender(char* hex) {
+    admin_added = 1;
+    access_HashResult hash = {};
+    buf_from_hex(hash, sizeof hash, hex);
+    access_user_add(hash, access_expire_day_magics_NewExtender, 0, 1);
+}
+
+void config_user_normal(char* hex, u16 expire_day) {
+    access_HashResult hash = {};
+    buf_from_hex(hash, sizeof hash, hex);
+    access_user_add(hash, expire_day, 0, 1);
+}
 
 
 //   access_idle_maintenance_prev = &access_users_first_idx;
@@ -532,6 +545,7 @@ void config_user_adder(char* hex) {
 
 u16 last_maintenance_day;
 void idle_timeout() {
+    LOGCTX(" idle_timeout");
     // Lets do maintenance at 4AM PT, should probaby be the slowest time at NB
     u64 const ms_per_hour = 60 * 60 * 1000;
     u64 const ms_per_day  = 24 * ms_per_hour;
@@ -544,7 +558,7 @@ void idle_timeout() {
 
     DEBUG("%"PRIu64" %hu", next_maint_ms, maint_day);
 
-    if (*access_idle_maintenance_prev != (u16)-1) {
+    if (access_idle_maintenance_prev && *access_idle_maintenance_prev != (u16)-1) {
         access_idle_maintenance();
         io_idle_has_work = 1;
     } else if (maint_day != last_maintenance_day) {
@@ -581,6 +595,7 @@ int main (int argc, char ** argv) {
         config_load_file(config_path);
     }
     access_prune_not_new(); // convert all the added into not added
+    admin_added = 0;
 
     io_initialize();
     io_curl_initialize();

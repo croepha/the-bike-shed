@@ -21,6 +21,7 @@ static void __line_handler(char* line) {
 }
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
+  LOGCTX(" config_download");
   struct config_download_Ctx *c = (struct config_download_Ctx *)userp;
   CURLcode cr;
   int response_code;
@@ -108,7 +109,7 @@ void config_download_abort(struct config_download_Ctx *c) {
   }
 }
 
-static u8 download_is_successful(CURLcode result, CURL* easy) { CURLcode cr;
+static u8 is_download_successful(CURLcode result, CURL *easy) { CURLcode cr;
   if (result == CURLE_OK) {
     long proto;
     cr = curl_easy_getinfo(easy, CURLINFO_PROTOCOL, &proto);
@@ -139,9 +140,9 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
                                   struct config_download_Ctx *c) {
   assert(easy == c->easy);
   DEBUG("c:%p", c);
-  LOGCTX(" test_sort:id:%02d", c->id);
+  LOGCTX(" config_download test_sort:id:%02d", c->id);
   __debug_config_download_complete_hook();
-  u8 is_success = download_is_successful(result, easy);
+  u8 is_success = is_download_successful(result, easy);
   if (is_success == 2) {
     INFO("Download finished successfully (not modified)");
   } else if (is_success) {

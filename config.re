@@ -2,6 +2,7 @@
 
 
 void config_parse_line(char *input_str, int line_number) {
+  LOGCTX(" parse");
 
   char * YYMARKER, *YYCURSOR = input_str, * start = 0, * end = 0;
 
