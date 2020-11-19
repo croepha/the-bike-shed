@@ -18,10 +18,13 @@ static __thread  s32 _log_ctx_len;
 __thread s32 log_allowed_fails;
 
 
+static u8 prevent_carbon_copy_recurse;
 static void vlogf(char const * fmt, va_list va) {
   vfprintf(stderr, fmt, va);
-  if (logf_carbon_copy_v) {
+  if (!prevent_carbon_copy_recurse &&  logf_carbon_copy_v) {
+    prevent_carbon_copy_recurse = 1;
     logf_carbon_copy_v(fmt, va);
+    prevent_carbon_copy_recurse = 0;
   }
 }
 
