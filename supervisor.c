@@ -91,7 +91,8 @@ static void config_validate_or_exit() {
 }
 
 int main (int argc, char ** argv) {
-    mlockall( MCL_CURRENT | MCL_FUTURE );
+    int r = mlockall( MCL_CURRENT | MCL_FUTURE );
+    error_check(r);
 
     assert(argc == 2);
     setlinebuf(stderr);

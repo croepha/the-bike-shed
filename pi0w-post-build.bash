@@ -6,7 +6,7 @@ set -e
 cat << EOF > ${TARGET_DIR}/bin/_run_autoexec.sh
 #!/bin/sh
 mkdir -p /boot
-mount /dev/mmcblk0p1 /boot
+mount -o sync /dev/mmcblk0p1 /boot
 sh /boot/autoexec.sh
 EOF
 

@@ -66,7 +66,7 @@ SCAN_FINISHED
 
 
 #if BUILD_IS_RELEASE == 0
-u8 log_trace_enabled = 1;
+u8 log_trace_enabled = 0;
 #endif
 
 u32 const shed_clear_timeout_ms_DEFAULT = 2000;
@@ -580,7 +580,8 @@ void idle_timeout() {
 
 // TODO needs maintenance
 int main (int argc, char ** argv) {
-    mlockall( MCL_CURRENT | MCL_FUTURE );
+    int r = mlockall( MCL_CURRENT | MCL_FUTURE );
+    error_check(r);
     assert(argc == 2);
     config_path = argv[1];
 
@@ -612,7 +613,10 @@ int main (int argc, char ** argv) {
     assert(email_user_pass);
     assert(email_rcpt);
 
-    config_download_timeout();
+    // Wait 5 seconds to start downloading config,
+    //  internet might not be available right away
+    IO_TIMER_MS(config_download) = now_ms() + 5000;
+
     idle_timeout();
 
     exterior_display("System restart\n");
