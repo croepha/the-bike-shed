@@ -319,7 +319,7 @@ static void exterior_scan_finished() { int r;
                     is_open = 1;
                   }
                 }
-                u8 sec_til_open = (sec_open + DAY_SECS - day_sec) % DAY_SECS;
+                u32 sec_til_open = (sec_open + DAY_SECS - day_sec) % DAY_SECS;
                 if (is_open) {
                     if (days_left<0) {
                         exterior_display("ACCESS DENIED\nExpired");
