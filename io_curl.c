@@ -83,14 +83,14 @@ void io_curl_process_events() {
     if (curl_msg->msg == CURLMSG_DONE) {
       result = curl_msg->data.result;
       easy = curl_msg->easy_handle;
-      error_check_curl(result);
       CURLMcode mr = curl_multi_remove_handle(multi, easy);
       error_check_curlm(mr);
 
       enum _io_curl_type * private;
       CURLcode cr = curl_easy_getinfo(easy, CURLINFO_PRIVATE, &private);
       error_check_curl(cr);
-#define _(name) case _io_curl_type_ ## name: { assert(__ ## name ## _io_curl_complete); __ ## name ## _io_curl_complete(easy, result, private); } break;
+#define _(name) case _io_curl_type_ ## name: { LOGCTX(" io_curl:" #name ); error_check_curl(result); \
+ assert(__ ## name ## _io_curl_complete); __ ## name ## _io_curl_complete(easy, result, private); } break;
       switch (*private) { _IO_CURL_TYPES
         case _io_curl_type_INVALID: case _io_curl_type_COUNT:
         SWITCH_DEFAULT_IS_UNEXPECTED;

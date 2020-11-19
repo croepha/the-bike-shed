@@ -93,7 +93,7 @@ void io_process_events() { start:;
 
   if (!epoll_ret) {
     switch (running_timer) {
-      #define _(name) case _io_timer_ ## name: { DEBUG(#name "_timeout"); \
+      #define _(name) case _io_timer_ ## name: { LOGCTX(" timeout:"#name); DEBUG(); \
          io_timers_epoch_ms[_io_timer_ ## name] = -1; assert(name ## _timeout);   name ## _timeout(); } break;
       _IO_TIMERS
       #undef  _
@@ -108,7 +108,7 @@ void io_process_events() { start:;
       io_EPData data = {.data = epe.data};
       log_ep_event(epe);
       switch (data.my_data.event_type) {
-        #define _(name) case _io_socket_type_ ## name ## _fd: { DEBUG(#name "_io_event"); assert(name ## _io_event); name ## _io_event(epe); } break;
+        #define _(name) case _io_socket_type_ ## name ## _fd: { LOGCTX(" io_event:"#name); DEBUG(); assert(name ## _io_event); name ## _io_event(epe); } break;
         _IO_SOCKET_TYPES
         #undef  _
         default: ERROR("Unandled switch case: %d", data.my_data.event_type);

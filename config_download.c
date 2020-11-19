@@ -21,7 +21,6 @@ static void __line_handler(char* line) {
 }
 
 static size_t _write_function(void *contents, size_t size, size_t nmemb, void*userp) {
-  LOGCTX(" config_download");
   struct config_download_Ctx *c = (struct config_download_Ctx *)userp;
   CURLcode cr;
   int response_code;
@@ -140,7 +139,7 @@ static void config_download_io_curl_complete(CURL *easy, CURLcode result,
                                   struct config_download_Ctx *c) {
   assert(easy == c->easy);
   DEBUG("c:%p", c);
-  LOGCTX(" config_download test_sort:id:%02d", c->id);
+  LOGCTX(" test_sort:id:%02d", c->id);
   __debug_config_download_complete_hook();
   u8 is_success = is_download_successful(result, easy);
   if (is_success == 2) {

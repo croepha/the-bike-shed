@@ -159,6 +159,12 @@ static void __delete_user(access_user_IDX USER_idx, access_user_IDX * prev) {
       return;
     }
 
+    if (access_idle_maintenance_prev == &USER.next_idx) {
+      TRACE("access_idle_maintenance_prev == &USER.next_idx");
+      access_idle_maintenance_prev = prev;
+    }
+
+
     *prev = USER.next_idx;
     assert(!USER.debug_is_free);
     USER.debug_is_free = 1;

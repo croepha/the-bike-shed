@@ -3,6 +3,7 @@
 
 //#include "config.h"
 
+#include <sys/mman.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -90,6 +91,8 @@ static void config_validate_or_exit() {
 }
 
 int main (int argc, char ** argv) {
+    mlockall( MCL_CURRENT | MCL_FUTURE );
+
     assert(argc == 2);
     setlinebuf(stderr);
     config_load_file(*++argv);

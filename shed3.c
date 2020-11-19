@@ -4,6 +4,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -579,6 +580,7 @@ void idle_timeout() {
 
 // TODO needs maintenance
 int main (int argc, char ** argv) {
+    mlockall( MCL_CURRENT | MCL_FUTURE );
     assert(argc == 2);
     config_path = argv[1];
 
