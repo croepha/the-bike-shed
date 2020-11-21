@@ -23,6 +23,11 @@ void config_user_adder(char*) __attribute__((weak_import));
 void config_user_extender(char*) __attribute__((weak_import));
 void config_user_normal(char*, u16 expire_day) __attribute__((weak_import));
 
+// Backup config variable from old memory to current memory
+void config_memory_copy(char** var);
+extern u8 config_memory_dirty;
+
+
 
 #if CONFIG_DIAGNOSTICS == 1
 #else

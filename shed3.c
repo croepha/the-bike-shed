@@ -155,6 +155,8 @@ void clear_display_timeout() { int r;
     error_check(r);
     r = dprintf(serial_fd, "TEXT_SHOW2 \n");
     error_check(r);
+    r = dprintf(serial_fd, "SLEEP\n");
+    error_check(r);
 }
 
 char* config_path;
@@ -476,18 +478,32 @@ static u64 last_config_download_sec = 0;
 
 u8 admin_added;
 void config_download_finished(struct config_download_Ctx *c, u8 success) {
-  LOGCTX(" download_finished");
-  memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
-  strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
-  IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
+    LOGCTX(" download_finished");
+    memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
+    strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
+    IO_TIMER_MS(config_download) = (last_config_download_sec + config_download_interval_sec) * 1000;
 
-  DEBUG("success:%d admin_added:%d", success, admin_added);
+    DEBUG("success:%d admin_added:%d", success, admin_added);
 
-  if (admin_added) {
-    admin_added = 0;
-    access_prune_not_new();
-    save_config();
-  }
+    if (config_memory_dirty) {
+        config_memory_copy(&email_from);
+        config_memory_copy(&email_host);
+        config_memory_copy(&email_user_pass);
+        config_memory_copy(&email_user_pass);
+        config_memory_copy(&email_rcpt);
+        config_memory_copy(&config_download_url);
+        config_memory_copy(&serial_path);
+    }
+    config_memory_dirty = 2;
+
+    if (success) {
+        if (admin_added) {
+            admin_added = 0;
+            access_prune_not_new();
+        }
+        save_config();
+    }
+
 }
 
 void config_download_timeout() {
@@ -495,6 +511,7 @@ void config_download_timeout() {
   config_download_abort(&config_download_ctx);
   last_config_download_sec = now_sec();
   memset(&config_download_ctx.line_accumulator_data, 0, sizeof config_download_ctx.line_accumulator_data);
+  config_memory_dirty = 0;
   __config_download_start(
     &config_download_ctx,
     config_download_url,
@@ -588,6 +605,8 @@ int main (int argc, char ** argv) {
     setlinebuf(stderr);
     access_user_list_init();
 
+    config_initialize();
+
     log_allowed_fails = 100000000;
     config_backup_path_SET;
     if (!access(config_backup_path, F_OK)) {
@@ -597,6 +616,8 @@ int main (int argc, char ** argv) {
     } else {
         config_load_file(config_path);
     }
+    config_memory_dirty = 2;
+
     access_prune_not_new(); // convert all the added into not added
     admin_added = 0;
 

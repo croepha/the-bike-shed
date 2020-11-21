@@ -28,20 +28,47 @@ void string_list_copy_to_array(char** str_array, struct StringList * sl) {
 }
 
 usz const config_memory_SIZE = 1<<11;
-char config_memory[config_memory_SIZE];
-char * const config_memory_end = config_memory + config_memory_SIZE;
-char * config_memory_next = config_memory;
+char config_memory1[config_memory_SIZE];
+char config_memory2[config_memory_SIZE];
+char * _config_memory;
+char * config_memory_end;
+char * config_memory_next;
 
 
 void config_initialize() {
-    config_memory_next = config_memory;
+    // Swap config memory each time we initialize
+    if (_config_memory != config_memory1) {
+        _config_memory = config_memory1;
+    } else {
+        _config_memory = config_memory2;
+    }
+    config_memory_next = _config_memory;
+    config_memory_end = _config_memory + config_memory_SIZE;
 }
+
+void config_memory_copy(char** var) {
+    if (*var) {
+        if (_config_memory <= *var && *var < config_memory_end) {
+        } else {
+            *var = config_push_string(*var);
+        }
+    }
+}
+
+u8 config_memory_dirty;
 
 // Lets set this up so that when we re-initialize, we swap between two config memories, and then
 //  we copy all old memory into new memory
 // TODO: We never reset config memeory between loading configs... we'd run out of space...
 
 void * config_push(usz len, usz alignment) {
+    if (config_memory_dirty == 0) {
+        config_memory_dirty = 1;
+        config_initialize();
+    } else {
+        assert(config_memory_dirty == 1);
+    }
+
     ssz v = (ssz)config_memory_next; v += (-v) & (alignment -1);
     char* ret = config_memory_next = (char*)v;
     config_memory_next += len;
