@@ -19,6 +19,9 @@ Development
 
 For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1CowKULMx8
 
+NOTE: These proceedures are broken, they assume you have the build root SDK built
+TODO: Write instructions on building the build root SDK
+
 ### [VSCode](https://code.visualstudio.com/)
 
 0. Install and setup docker:
@@ -187,3 +190,24 @@ Same list sorted by pins
     GREEN           EXTERIOR+DATA   PIN6    |
     BROWN-STRIPE    INTERIOR-GND    PIN7    |
     BROWN           INTERIOR-GND    PIN8    |
+
+
+
+#### Why does the build need Docker?
+
+Good question.  Because of the nature of this project we need a number of
+compilers and realted tools installed, doing this via docker is a simple
+way to have a consistent build environment for anyone who wants to develop
+
+More detail:
+- We're using buildroot to build the custom linux base system, that by itself
+  requires a number of random dependencies
+- We are doing a bunch of testing, I wanted an easy way to mock out SMTP and WEB services
+  so this means installing some python things and installing nginx
+
+I don't like it:
+  Have you actually tried it? its super easy to get setup...
+But... I still don't like it:
+  PRs welcome, but please don't break existing workflows
+
+
