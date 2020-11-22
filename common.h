@@ -28,7 +28,7 @@ u64 real_now_ms(void);
 void supr_email_add_data_start(char**buf_, usz*buf_space_left);
 void supr_email_add_data_finish(usz new_space_used);
 
-u8 time_is_open(u32 day_sec_open, u32 day_sec_close, u64 now_ms);
+u32 secs_til_open(u32 day_sec_open, u32 day_sec_close, u64 now_ms);
 static u64 const SEC_PER_HOUR = 60 * 60;
 static u64 const MS_PER_DAY   = 1000 * 60 * 60 * 24;
 

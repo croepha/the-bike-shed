@@ -30,18 +30,24 @@ static void test_is_open(u32 day_sec_open, u32 day_sec_close) {
         struct tm * mt = localtime(&mtt);
         strftime(ftime, sizeof(ftime), "%Z %Y-%m-%d %H:%M:%S", mt);
 
-        u8 sim_open = time_is_open(day_sec_open, day_sec_close, sim_ms);
-        if (sim_open && last_state != state_open) {
+        u32 secs_til_open_ = secs_til_open(day_sec_open, day_sec_close, sim_ms);
+        if (!secs_til_open_ && last_state != state_open) {
             last_state = state_open;
             INFO("%s %"PRIu64" NOW OPEN", ftime, sim_ms);
-        } else if (!sim_open && last_state != state_closed) {
+        } else if (secs_til_open_ && last_state != state_closed) {
             last_state = state_closed;
             INFO("%s %"PRIu64" NOW CLOSED", ftime, sim_ms);
+        }
+
+        if (0 <  secs_til_open_ && secs_til_open_ < 10) {
+            INFO("%s %"PRIu64" Secs till open %u", ftime, sim_ms, secs_til_open_);
         }
     }
 }
 
 int main () {
-    test_is_open(6 * SEC_PER_HOUR, 7 * SEC_PER_HOUR);
-    test_is_open(7 * SEC_PER_HOUR, 6 * SEC_PER_HOUR);
+    test_is_open( 6 * SEC_PER_HOUR,  7 * SEC_PER_HOUR);
+    test_is_open( 7 * SEC_PER_HOUR,  6 * SEC_PER_HOUR);
+    test_is_open(16 * SEC_PER_HOUR, 17 * SEC_PER_HOUR);
+    test_is_open(17 * SEC_PER_HOUR, 16 * SEC_PER_HOUR);
 }

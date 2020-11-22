@@ -313,7 +313,7 @@ static void exterior_scan_finished() { int r;
             } else {
                 s32 days_left = access_user_days_left(USER_idx);
 
-                u8 is_open = 0;
+                u8 is_open = 0;  // time_is_open(day_sec_open, day_sec_close, now_ms());
                 // TODO daylight savings time
                 s64 DAY_SECS = 24 * 60 * 60;
                 s64 pt_sec = now_sec() - (7 * 60 * 60) ;
