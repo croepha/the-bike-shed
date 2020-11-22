@@ -313,23 +313,9 @@ static void exterior_scan_finished() { int r;
             } else {
                 s32 days_left = access_user_days_left(USER_idx);
 
-                u8 is_open = 0;  // time_is_open(day_sec_open, day_sec_close, now_ms());
-                // TODO daylight savings time
-                s64 DAY_SECS = 24 * 60 * 60;
-                s64 pt_sec = now_sec() - (7 * 60 * 60) ;
-                s32 day_sec = pt_sec % (DAY_SECS);
-                if (day_sec_open < day_sec_close) {
-                  if (day_sec_open <= day_sec && day_sec < day_sec_close) {
-                    is_open = 1;
-                  }
-                } else if (day_sec_open > day_sec_close) {
-                  if (day_sec_open <= day_sec || day_sec < day_sec_close) {
-                    is_open = 1;
-                  }
-                }
-                u32 sec_til_open =
-                    (day_sec_open + DAY_SECS - day_sec) % DAY_SECS;
-                if (is_open) {
+                u32 secs_till_open_ = secs_til_open(day_sec_open, day_sec_close, now_ms());
+
+                if (!secs_till_open_) {
                     if (days_left<0) {
                         exterior_display("ACCESS DENIED\nExpired");
                     } else {
@@ -338,8 +324,8 @@ static void exterior_scan_finished() { int r;
                         IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
                     }
                 } else {
-                    s32 hr = (sec_til_open / 60) / 60;
-                    s32 mn = (sec_til_open / 60) % 60;
+                    s32 hr = (secs_till_open_ / 60) / 60;
+                    s32 mn = (secs_till_open_ / 60) % 60;
                     exterior_display("Sorry closed\nWait %02d:%02d", hr, mn);
                 }
             }

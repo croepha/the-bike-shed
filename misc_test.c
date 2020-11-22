@@ -26,9 +26,9 @@ static void test_is_open(u32 day_sec_open, u32 day_sec_close) {
 
         setenv("TZ", "PST8PDT", 1);
         tzset();
-        time_t mtt = sim_ms / 1000;
-        struct tm * mt = localtime(&mtt);
-        strftime(ftime, sizeof(ftime), "%Z %Y-%m-%d %H:%M:%S", mt);
+        time_t utc_sec = sim_ms / 1000;
+        struct tm * tm = localtime(&utc_sec);
+        strftime(ftime, sizeof(ftime), "%Z %Y-%m-%d %H:%M:%S", tm);
 
         u32 secs_til_open_ = secs_til_open(day_sec_open, day_sec_close, sim_ms);
         if (!secs_til_open_ && last_state != state_open) {
