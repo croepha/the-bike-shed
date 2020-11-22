@@ -181,6 +181,8 @@ depends_on logging
 link_exec access_hash_test    -l pthread
 do_test access_hash_test /build/access_hash_test.fast.exec
 
+do_test test_shed /build/shed3.dbg.exec
+
 reset
 compile logging
 

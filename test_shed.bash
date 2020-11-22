@@ -13,7 +13,7 @@ config_dl_location=/build/shed-test-local-dl-config
 exterior_serial_file=/build/exterior_mock.pts2.file
 exterior_serial_dev=/build/exterior_mock.pts2
 email_rcpt_log=/build/email_mock_shed-test-local@tmp-test.test
-shed=/build/shed3.dbg.exec
+shed=$1
 shed_out_file=/build/shed-test-local-out
 test_out_file=/build/shed-test-local-test-out
 test_out_file_expected=/build/shed-test-local-test-out.expected
@@ -32,12 +32,16 @@ function dump_state() (
     set +x
     echo "==  Shed output:"
     cat $shed_out_file | t | sed -E 's/Day:[0-9]+/Day:FILTERED/' |
-       sed -E 's/Child:[0-9]+/Child:XXXX/' | sed '/^DEBUG:.*$/d'
+       sed -E 's/Child:[0-9]+/Child:XXXX/' | sed '/^DEBUG:.*$/d' |
+       sed -E 's/expires: [0-9]+ [0-9]+/expires: FILTERED FILTERED/' |
+       sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
     truncate --size=0 $shed_out_file
     echo "==  Config on disk:"
-    cat $config_location |  sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/'
+    cat $config_location |  sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' | sort
     echo "==  Serial output:"
-    cat $exterior_serial_file | tr -d '\000' | sed -E 's/Day:[0-9]+/Day:FILTERED/'
+    cat $exterior_serial_file | tr -d '\000' | sed -E 's/Day:[0-9]+/Day:FILTERED/' |
+       sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
+       awk '{$1=$1};1'
     truncate --size=0 $exterior_serial_file
     echo "Emails:"
     cat $email_rcpt_log |
@@ -57,7 +61,7 @@ function wait_line() {
 
 function start_shed() {
     echo "Starting: $shed $config_location"
-    $shed $config_location &> $shed_out_file & shed_pid=$!
+    SHED_TRACE=1 $shed $config_location &> $shed_out_file & shed_pid=$!
 }
 
 cat << EOF > $nginx_config
@@ -107,6 +111,7 @@ EmailAddress: tmp-from@testtest.test
 EmailServer:  smtp://127.0.0.1:8025
 EmailUserPass:  user:pass
 DestinationEmailAddress: shed-test-local@tmp-test.test
+ConfigDownloadStartupDelayMS: 0
 EOF
 
 set_dl_config ''
@@ -119,7 +124,7 @@ echo "--- First Sartup"
 start_shed
 wait_line $shed_out_file 'Download finished'
 wait_line $shed_out_file 'Maintenance Finished'
-wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+wait_line $exterior_serial_file 'SLEEP'
 dump_state
 
 echo "--- Making an unknown option"
@@ -317,10 +322,10 @@ EOF
 dump_state
 
 } # main
+exit -1
+# main > $test_out_file
+# echo "Do:" cp $test_out_file $test_out_file_expected
+# echo code --diff $test_out_file_expected $test_out_file
+# # diff -u10 --text $test_out_file_expected $test_out_file
 
-main > $test_out_file
-echo "Do:" cp $test_out_file $test_out_file_expected
-echo code --diff $test_out_file_expected $test_out_file
-# diff -u10 --text $test_out_file_expected $test_out_file
-
-# main | ts -i '%.T'
+ main | ts -i '%.T'

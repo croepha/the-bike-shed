@@ -74,7 +74,12 @@ u32 shed_clear_timeout_ms = shed_clear_timeout_ms_DEFAULT;
 
 u32 const shed_door_unlock_ms_DEFAULT = 1000;
 u32 shed_door_unlock_ms = shed_door_unlock_ms_DEFAULT;
-\
+
+
+u32 const config_download_startup_delay_ms_DEFAULT = 5000;
+u32 config_download_startup_delay_ms = config_download_startup_delay_ms_DEFAULT;
+
+
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];
@@ -219,6 +224,7 @@ static void save_config() {
     if (serial_path != serial_path_DEFAULT) { r = dprintf(fd, "DebugSerialPath: %s\n", serial_path); error_check(r); }
     if (shed_clear_timeout_ms != shed_clear_timeout_ms_DEFAULT) { r = dprintf(fd, "DebugClearTimeoutMS: %d\n", shed_clear_timeout_ms); error_check(r); }
     if (shed_door_unlock_ms != shed_door_unlock_ms_DEFAULT) { r = dprintf(fd, "DoorUnlockMS: %d\n", shed_door_unlock_ms); error_check(r); }
+    if (config_download_startup_delay_ms != config_download_startup_delay_ms_DEFAULT) { r = dprintf(fd, "ConfigDownloadStartupDelayMS: %d\n", config_download_startup_delay_ms); error_check(r); }
 
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
@@ -563,7 +569,6 @@ void config_user_normal(char* hex, u16 expire_day) {
 
 u16 last_maintenance_day;
 void idle_timeout() {
-    LOGCTX(" idle_timeout");
     // Lets do maintenance at 4AM PT, should probaby be the slowest time at NB
     u64 const ms_per_hour = 60 * 60 * 1000;
     u64 const ms_per_day  = 24 * ms_per_hour;
@@ -597,6 +602,14 @@ void idle_timeout() {
 
 // TODO needs maintenance
 int main (int argc, char ** argv) {
+
+#if BUILD_IS_RELEASE == 0
+    if (getenv("SHED_TRACE")) {
+        INFO("Tracing enabled");
+        log_trace_enabled = 1;
+    }
+#endif
+
     int r = mlockall( MCL_CURRENT | MCL_FUTURE );
     error_check(r);
     assert(argc == 2);
@@ -636,7 +649,7 @@ int main (int argc, char ** argv) {
 
     // Wait 5 seconds to start downloading config,
     //  internet might not be available right away
-    IO_TIMER_MS(config_download) = now_ms() + 5000;
+    IO_TIMER_MS(config_download) = now_ms() + config_download_startup_delay_ms;
 
     idle_timeout();
 
