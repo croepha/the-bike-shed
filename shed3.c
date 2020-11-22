@@ -269,8 +269,8 @@ static void save_config() {
 }
 
 
-u8 sec_open = 8;
-u8 sec_closed = 9;
+u32 day_sec_open = 8 * SEC_PER_HOUR;
+u32 day_sec_close = 9 * SEC_PER_HOUR;
 
 static void exterior_scan_finished() { int r;
 
@@ -318,16 +318,17 @@ static void exterior_scan_finished() { int r;
                 s64 DAY_SECS = 24 * 60 * 60;
                 s64 pt_sec = now_sec() - (7 * 60 * 60) ;
                 s32 day_sec = pt_sec % (DAY_SECS);
-                if (sec_open < sec_closed) {
-                  if (sec_open <= day_sec && day_sec < sec_closed) {
+                if (day_sec_open < day_sec_close) {
+                  if (day_sec_open <= day_sec && day_sec < day_sec_close) {
                     is_open = 1;
                   }
-                } else if (sec_open > sec_closed) {
-                  if (sec_open <= day_sec || day_sec < sec_closed) {
+                } else if (day_sec_open > day_sec_close) {
+                  if (day_sec_open <= day_sec || day_sec < day_sec_close) {
                     is_open = 1;
                   }
                 }
-                u32 sec_til_open = (sec_open + DAY_SECS - day_sec) % DAY_SECS;
+                u32 sec_til_open =
+                    (day_sec_open + DAY_SECS - day_sec) % DAY_SECS;
                 if (is_open) {
                     if (days_left<0) {
                         exterior_display("ACCESS DENIED\nExpired");

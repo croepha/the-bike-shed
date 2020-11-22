@@ -161,12 +161,19 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-compile    misc
 compile    io_core
 compile    io_curl
 compile    io_curl_test
 depends_on config_download
 link_exec  io_curl_test -l curl -l crypto
+
+
+reset
+compile    misc
+compile    misc_test
+depends_on logging
+link_exec   misc_test
+do_test misc_test /build/misc_test.dbg.exec
 
 reset
 compile argon2/ref       -Iargon2
@@ -181,7 +188,7 @@ depends_on logging
 link_exec access_hash_test    -l pthread
 do_test access_hash_test /build/access_hash_test.fast.exec
 
-do_test test_shed /build/shed3.dbg.exec
+# do_test test_shed /build/shed3.dbg.exec
 
 reset
 compile logging
