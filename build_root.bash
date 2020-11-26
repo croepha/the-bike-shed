@@ -4,6 +4,10 @@
 # VARIANT="pi0w-dev" bash build_root.bash save_configs
 # VARIANT="pi0w-dev" bash build_root.bash full_build
 
+# VARIANT="pi0w-dev" bash build_root.bash make linux-menuconfig
+# VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
+# VARIANT="pi0w-dev" bash build_root.bash make linux-update-defconfig
+
 export FORCE_UNSAFE_CONFIGURE=1
 export GIT_WORK_TREE=/workspaces/the-bike-shed/
 export GIT_DIR=$GIT_WORK_TREE/.git

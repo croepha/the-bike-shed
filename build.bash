@@ -136,6 +136,9 @@ build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bas
 EOF
 }
 
+do_test mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash
+
+
 # cat << EOF >> /build/build.ninja
 # build /build/email_test.test_results: test /workspaces/the-bike-shed/email_test.bash /build/email_test.dbg.exec email_test.expected_output
 # EOF
@@ -149,11 +152,13 @@ compile    helloworld -D SOME_DEFINE=234234
 link_exec  helloworld
 
 reset
+depends_on logging
 compile    mount_squash_root
 link_exec  mount_squash_root
 
 reset
 FLAVOR=static
+compile    logging    -fno-sanitize=address
 compile    mount_squash_root -fno-sanitize=address
 link_exec  mount_squash_root -fno-sanitize=address -static
 

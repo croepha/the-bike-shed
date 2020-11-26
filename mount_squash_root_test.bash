@@ -1,75 +1,65 @@
+#!/bin/bash
+
+unset  LSAN_OPTIONS
+export LSAN_OPTIONS
 set -eEuo pipefail
-set -x
+# set -x
 
-SDCARD_DEV=/dev/loop3
+D=/build/mount_squash_root_test2
+EXEC=/build/mount_squash_root.dbg.exec
 
-mkdir -p /tmp/physical
-mount --move /build/dev-root-test2/mnt/physical/ /tmp/physical || true
-umount -R /build/dev-root-test2 || true
-umount /dev/loop0  || true
-losetup -d /dev/loop0 || true
-umount -R /build/dev-root-test2 || true
-umount /dev/loop3  || true
-losetup -d /dev/loop3 || true
+function cleanup() {
+{
+mkdir -p $D/tmprm0
+mount --move $D/initramfs/mnt/physical $D/tmprm0 || true
 losetup -D
+umount -R   $D/initramfs/ $D/tmprm0  $D/* || true
+umount -R   $D/initramfs/* || true
+} &> /dev/null
+}
 
-# Create a simulation of the physical root (cleanup from last run):
-umount /build/dev-sdcard-tmp/ || true
-losetup -d $SDCARD_DEV || true
-# Create a simulation of the physical root (The SDCard...):
-truncate -s 512M /build/dev-sdcard.img
-mkfs.vfat /build/dev-sdcard.img
-mkdir -p /build/dev-sdcard-tmp/
-losetup $SDCARD_DEV /build/dev-sdcard.img
-mount $SDCARD_DEV /build/dev-sdcard-tmp/
-cd /build/dev-sdcard-tmp/
-cp /workspaces/the-bike-shed/build/root-dev.squashfs .
-cd /
-umount /build/dev-sdcard-tmp/
-# at this point $SDCARD_DEV is our simulated sdcard
+cleanup
 
-# Simulate a pre-mounted initramfs (cleanup from last run):
-mkdir -p /build/dev-root-test2/
-cd /build/dev-root-test2/
-umount proc/  || true
-umount dev/   || true
-cd /
-umount /build/dev-root-test2/ || true
-# Simulate a pre-mounted initramfs
-mount -t tmpfs none /build/dev-root-test2/
-cd /build/dev-root-test2/
-mkdir -p lib64/ lib/ proc/ usr/bin dev/ physical/ newroot/
-mount -t proc none proc/
-mount -t devtmpfs dev2 dev/
-cp /build/mount_squash_root.exec .
-cp /usr/bin/llvm-symbolizer-10 usr/bin
-cp \
-  /lib/x86_64-linux-gnu/libLLVM-10.so.1 \
-  /lib/x86_64-linux-gnu/libbsd.so.0 \
-  /lib/x86_64-linux-gnu/libc.so.6 \
-  /lib/x86_64-linux-gnu/libdl.so.2 \
-  /lib/x86_64-linux-gnu/libedit.so.2 \
-  /lib/x86_64-linux-gnu/libffi.so.7 \
-  /lib/x86_64-linux-gnu/libgcc_s.so.1 \
-  /lib/x86_64-linux-gnu/libm.so.6 \
-  /lib/x86_64-linux-gnu/libpthread.so.0 \
-  /lib/x86_64-linux-gnu/librt.so.1 \
-  /lib/x86_64-linux-gnu/libstdc++.so.6 \
-  /lib/x86_64-linux-gnu/libtinfo.so.6 \
-  /lib/x86_64-linux-gnu/libz.so.1 \
-  lib/
-cp \
-  /lib64/ld-linux-x86-64.so.2 \
-  lib64/
+mount   | grep "$D" && exit -1
+losetup | grep "$D" && exit -1
 
 
-# Cleanup from last run....
-losetup -d /dev/loop0 || true
-#strace
-# lldb-server-10 g :5001 --  \
-exec \
-  /usr/sbin/chroot . ./mount_squash_root.exec vfat $SDCARD_DEV /root-dev.squashfs
+rm -rf $D
+mkdir -p \
+  $D/initramfs/dev  \
+  $D/initramfs/proc \
+  $D/initramfs/sys  \
+  $D/initramfs/physical  \
+  $D/initramfs/newroot  \
+  $D/boot  \
+  $D/squash1 \
+  $D/squash1/dev \
+  $D/squash1/mnt/physical \
 
 
-#code --reuse-window --file-uri 'vscode://vadimcn.vscode-lldb/launch/config?{"type": "lldb","request": "custom","name": "attach 5001","targetCreateCommands": ["target create /usr/sbin/chroot"],"processCreateCommands": ["gdb-remote 127.0.0.1:5001"],}'
+truncate -s 512M $D/boot.img
+mkfs.vfat $D/boot.img > /dev/null
+
+BOOT_DEV=$( losetup -f --show $D/boot.img )
+
+mount $BOOT_DEV $D/boot
+
+cp /usr/bin/busybox $D/squash1/
+
+/build/rootpi0w-dev/host/bin/mksquashfs $D/squash1/ $D/boot/squash1 -quiet -no-progress
+
+for f in $(ldd $EXEC | sed -nE 's/[^\/]*(\/[^ ]*).*/\1/p'); do {
+  mkdir -p $D/initramfs/$(dirname $f)
+  cp $f $D/initramfs/$f
+}; done
+
+cp $EXEC $D/initramfs/init1.exec
+
+mount -t devtmpfs none $D/initramfs/dev
+mount -o bind /proc $D/initramfs/proc
+mount -o bind /sys  $D/initramfs/sys
+
+chroot $D/initramfs/ /init1.exec vfat $BOOT_DEV squash1
+cleanup
+
 

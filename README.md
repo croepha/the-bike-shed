@@ -113,6 +113,7 @@ are <strike>striked out</strike>.
   - ☐ Encrypt the list of IPs in the master-config
 
 - ☐ Make buildroot config
+- ☐ Change from using NTP to something else... NTP has some security issues
 
 [a2d]: https://en.wikipedia.org/wiki/Argon2
 

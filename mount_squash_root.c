@@ -41,7 +41,11 @@ switch_root newroot init [arg...]
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mount.h>
-#include <assert.h>
+
+#define LOG_DEBUG
+
+#include "logging.h"
+
 
 int debug_get_errno(void);
 int debug_get_errno(void) { return errno; }
@@ -57,57 +61,62 @@ int main(int argc, char**argv) { int r;
   // mount -o rw -t argv[1] argv[2] /phsyical
   // TODO??: MS_LAZYTIME
   r = mount(phsyical_dev, "/physical", phsyical_fstype, MS_NOATIME, 0);
-  assert(!r);
+  error_check(r);
 
   // TODO: Why not actually specify the loop device?
   int lcfd = open("/dev/loop-control", O_RDWR | O_CLOEXEC);
+  error_check(lcfd);
   assert(lcfd!=-1);
 
-  //  Create /dev/loop0
-  r = ioctl(lcfd, LOOP_CTL_ADD, 0);
-  assert(!r || errno == EEXIST);
+  //  Create /dev/loop
+  int loop_num = ioctl(lcfd, LOOP_CTL_GET_FREE, 0);
+  error_check(loop_num);
 
-  int loop0 = open("/dev/loop0", O_RDWR | O_CLOEXEC);
-  assert(loop0!=-1);
+  char full_loop_path[128];
+  snprintf(full_loop_path, sizeof full_loop_path, "/dev/loop%d", loop_num);
+  DEBUG("loop_path %s", full_loop_path);
+  int loop0 = open(full_loop_path, O_RDWR | O_CLOEXEC);
+  error_check(loop0);
 
   char full_squash_path[128];
   snprintf(full_squash_path, sizeof full_squash_path, "/physical/%s", squash_path);
   int squash_fd = open(full_squash_path, O_RDONLY | O_CLOEXEC);
-  assert(squash_fd != -1);
+  error_check(squash_fd);
   r = ioctl(loop0, LOOP_SET_FD, squash_fd);
-  assert(!r);
+  error_check(r);
 
   // TODO??: MS_LAZYTIME
-  r = mount("/dev/loop0", "/newroot", "squashfs", MS_NOATIME | MS_RDONLY, 0);
-  assert(!r);
+  r = mount(full_loop_path, "/newroot", "squashfs", MS_NOATIME | MS_RDONLY, 0);
+  error_check(r);
 
   r = chdir("/newroot");
-  assert(!r);
+  error_check(r);
 
   // TODO: Remove stuff from / ?
 
   r = mount("none", "/newroot/mnt", "tmpfs", 0, NULL);
-  assert(!r);
+  error_check(r);
 
   r = mkdir("/newroot/mnt/physical", 0777);
-  assert(!r);
+  error_check(r);
 
   r = mount("/physical", "/newroot/mnt/physical", NULL, MS_MOVE, NULL);
-  assert(!r);
+  error_check(r);
 
   r = mount("/dev", "/newroot/dev", NULL, MS_MOVE, NULL);
-  assert(!r);
+  error_check(r);
 
   r = mount(".", "/", NULL, MS_MOVE, NULL);
-  assert(!r);
+  error_check(r);
 
   r = chroot(".");
-  assert(!r);
+  error_check(r);
 
   r = chdir("/");
-  assert(!r);
+  error_check(r);
 
-  system("ls");
+  r = execl("/busybox", "echo", "asdfasdf", 0);
+  error_check(r);
 
   printf("Asdfasd DONE ? f\n");
 
