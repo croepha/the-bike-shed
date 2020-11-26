@@ -136,7 +136,16 @@ build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bas
 EOF
 }
 
-do_test mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash
+function do_test2() {
+  NAME=$1
+  EXEC=$2
+  OTHER_DEPS=$3
+cat << EOF >> /build/build.ninja
+build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output | $OTHER_DEPS
+EOF
+}
+
+do_test2 mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash /build/mount_squash_root.dbg.exec
 
 
 # cat << EOF >> /build/build.ninja

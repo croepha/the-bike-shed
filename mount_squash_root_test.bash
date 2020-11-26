@@ -59,7 +59,7 @@ mount -t devtmpfs none $D/initramfs/dev
 mount -o bind /proc $D/initramfs/proc
 mount -o bind /sys  $D/initramfs/sys
 
-chroot $D/initramfs/ /init1.exec vfat $BOOT_DEV squash1
+chroot $D/initramfs/ /init1.exec $BOOT_DEV squash1
 cleanup
 
 

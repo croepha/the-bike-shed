@@ -51,8 +51,7 @@ int debug_get_errno(void);
 int debug_get_errno(void) { return errno; }
 
 int main(int argc, char**argv) { int r;
-  assert(argc == 4);
-  char* phsyical_fstype = *++argv;
+  assert(argc == 3);
   char* phsyical_dev    = *++argv;
   char* squash_path     = *++argv;
 
@@ -60,7 +59,7 @@ int main(int argc, char**argv) { int r;
 
   // mount -o rw -t argv[1] argv[2] /phsyical
   // TODO??: MS_LAZYTIME
-  r = mount(phsyical_dev, "/physical", phsyical_fstype, MS_NOATIME, 0);
+  r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME, 0);
   error_check(r);
 
   // TODO: Why not actually specify the loop device?
@@ -88,6 +87,7 @@ int main(int argc, char**argv) { int r;
   // TODO??: MS_LAZYTIME
   r = mount(full_loop_path, "/newroot", "squashfs", MS_NOATIME | MS_RDONLY, 0);
   error_check(r);
+
 
   r = chdir("/newroot");
   error_check(r);
