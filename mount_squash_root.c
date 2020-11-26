@@ -56,7 +56,7 @@ int main(int argc, char**argv) { int r;
   char* phsyical_dev    = *++argv;
   char* squash_path     = *++argv;
 
-  printf("ASDFASDF\n");
+  INFO("ASDFASDF");
 
   // mount -o rw -t argv[1] argv[2] /phsyical
   // TODO??: MS_LAZYTIME
@@ -118,7 +118,7 @@ int main(int argc, char**argv) { int r;
   r = execl("/busybox", "echo", "asdfasdf", 0);
   error_check(r);
 
-  printf("Asdfasd DONE ? f\n");
+  INFO("Asdfasd DONE ? f");
 
   // char loopback_dev[1024];
   // loopback_setup(squash_path, loopback_dev, sizeof loopback_dev);
