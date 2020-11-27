@@ -373,9 +373,6 @@ link_exec shed3 -l curl -l pthread
 
 # output/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
 
-reset
-compile    shed
-link_exec  shed
 
 export NINJA_STATUS="[%f/%t %e] "
 ninja -f /build/build.ninja -t compdb > compile_commands.json
