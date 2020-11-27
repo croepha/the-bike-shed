@@ -114,6 +114,7 @@ are <strike>striked out</strike>.
 
 - ☐ Make buildroot config
 - ☐ Change from using NTP to something else... NTP has some security issues
+- ☐ Enable hardware watchdog: https://diode.io/raspberry%20pi/running-forever-with-the-raspberry-pi-hardware-watchdog-20202/
 
 [a2d]: https://en.wikipedia.org/wiki/Argon2
 
