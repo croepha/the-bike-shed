@@ -67,42 +67,44 @@ int main() { int r;
   fflush(stderr);
 
 
-  pid_t child = fork();
-  error_check(child);
-  if (!child) {
-    //int follower = open("/build/exterior_mock.pts2", O_RDWR);
+  {
+    pid_t child = fork();
+    error_check(child);
+    if (!child) {
+      //int follower = open("/build/exterior_mock.pts2", O_RDWR);
 
-    r = alarm(10); error_check(r);
+      r = alarm(10); error_check(r);
 
-    DEBUG("fd:%d follower:%d", fd, follower);
+      DEBUG("fd:%d follower:%d", fd, follower);
 
-    char sbuf[1024];
-    int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
-    error_check(sbuf_len);
-    assert(sbuf_len < sizeof sbuf);
-    ssz sb = write(follower, sbuf, sbuf_len);
-    error_check(sb);
-    assert(sb == sbuf_len);
-
-    for (int i = 0; i<5; i++) { LOGCTX("forked:");
-      char rbuf[512];
-      DEBUG("follower:%d", follower);
-      //dump_fds();
-
-      ssz read_count = read(follower, rbuf, sizeof rbuf -1);
-      error_check(read_count);
-      INFO_BUFFER(rbuf, read_count, "Child did read: len:%zd rbuf:", read_count);
-      rbuf[read_count] = 0;
-      sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
+      char sbuf[1024];
+      int sbuf_len = snprintf(sbuf, sizeof sbuf, "INITIAL\n");
       error_check(sbuf_len);
       assert(sbuf_len < sizeof sbuf);
-      sb = write(follower, sbuf, sbuf_len);
+      ssz sb = write(follower, sbuf, sbuf_len);
       error_check(sb);
       assert(sb == sbuf_len);
+
+      for (int i = 0; i<5; i++) { LOGCTX("forked:");
+        char rbuf[512];
+        DEBUG("follower:%d", follower);
+        //dump_fds();
+
+        ssz read_count = read(follower, rbuf, sizeof rbuf -1);
+        error_check(read_count);
+        INFO_BUFFER(rbuf, read_count, "Child did read: len:%zd rbuf:", read_count);
+        rbuf[read_count] = 0;
+        sbuf_len = snprintf(sbuf, sizeof sbuf, "REPLY: %s\n", rbuf);
+        error_check(sbuf_len);
+        assert(sbuf_len < sizeof sbuf);
+        sb = write(follower, sbuf, sbuf_len);
+        error_check(sb);
+        assert(sb == sbuf_len);
+      }
+      r = close(follower);
+      error_check(r);
+      exit(0);
     }
-    r = close(follower);
-    error_check(r);
-    exit(0);
   }
   r = close(follower);
   error_check(r);
@@ -134,10 +136,7 @@ int main() { int r;
 
   }
 
-  wait(child_pid);
 
-
-  INFO("Reaping child procs");
   u8 had_error = 0;
   for (;;) {
     int wstatus;
