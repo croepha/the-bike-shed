@@ -1,3 +1,6 @@
+
+// This is the main process that runs on the PI0
+
 #define LOG_DEBUG
 #include <string.h>
 #include <stdarg.h>
@@ -28,7 +31,7 @@ u64 now_ms() { return real_now_ms(); }
 char * const serial_path_DEFAULT = "/dev/ttyAMA0";
 
 
-/*
+/* Some example exterior serial input
 
 SCAN_START
 OPTION 001
@@ -638,8 +641,6 @@ int main (int argc, char ** argv) {
     io_curl_initialize();
     serial_io_initialize(serial_path);
     gpio_pwm_initialize();
-
-
 
 
     assert(email_from);
