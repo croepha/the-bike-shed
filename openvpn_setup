@@ -13,6 +13,7 @@ mkdir -p /secrets
 echo '
 daemon
 dev tun
+keepalive 1 30
 proto tcp-server
 port 9161
 ifconfig 10.8.0.1 10.8.0.2
