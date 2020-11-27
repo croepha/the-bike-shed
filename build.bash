@@ -22,9 +22,9 @@ if [ ! -v SHOULD_CLEAN ]; then {
 }; fi
 
 # Setup the pseudo serial interface for mock testing the exterior interface
-if ! pgrep -f exterior_mock.pts > /dev/null; then {
-tmux new -d 'nohup socat -d -d -v PTY,link=/build/exterior_mock.pts2,rawer,echo=0 PTY,link=/build/exterior_mock.pts,rawer,echo=0 0<&- >> /build/exterior_mock.log 2>&1 '
-}; fi
+# if ! pgrep -f exterior_mock.pts > /dev/null; then {
+# tmux new -d 'nohup socat -d -d -v PTY,link=/build/exterior_mock.pts2,rawer,echo=0 PTY,link=/build/exterior_mock.pts,rawer,echo=0 0<&- >> /build/exterior_mock.log 2>&1 '
+# }; fi
 
 
 # Second nginx... TODO: Clean this up, consolidate into a single nginx instance for all testing

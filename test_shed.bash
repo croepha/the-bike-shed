@@ -12,18 +12,28 @@ set -u
 
 D=/build/"$TEST_INSTANCE"
 
-config_location=/build/shed-test-local-config
-config_dl_location=/build/shed-test-local-dl-config
-exterior_serial_file=/build/exterior_mock.pts2.file
-exterior_serial_dev=/build/exterior_mock.pts2
+config_location=$D/config
+config_dl_location=$D/dl-config
+exterior_serial_file=$D/exterior.pts.file
+exterior_serial_dev=$D/exterior.pts
+interior_serial_dev=$D/interior.pts
+exterior_serial_log=$D/exterior_mock.log
+
 email_rcpt_log=/build/email_mock_shed-test-local@tmp-test.test
 shed=$1
 shed_out_file=/build/shed-test-local-out
 
-#pkill -f "$exterior_serial_dev" || true
-
+mkdir -p $D
 groupadd "$TEST_INSTANCE" 2>/dev/null || true
+
+
 iptables -D OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT --reject-with tcp-reset
+pkill -f "$exterior_serial_dev" || true
+
+# 0<&- >> $exterior_serial_log 2&>1
+socat -d -d -v PTY,link="$exterior_serial_dev",rawer,echo=0 PTY,link="$interior_serial_dev",rawer,echo=0 >> $exterior_serial_log 2>&1  &
+sleep .1
+
 
 cat << EOF > /build/mk_day_sec.py
 from datetime import timedelta, datetime
@@ -132,7 +142,7 @@ cat $exterior_serial_dev > $exterior_serial_file & serial_copy_pid=$!
 # kill $shed_pid; wait $shed_pid
 
 cat << EOF > $config_location
-DebugSerialPath: /build/exterior_mock.pts
+DebugSerialPath: $interior_serial_dev
 DebugClearTimeoutMS: 0
 DoorUnlockMS: 0
 ConfigURL: http://127.0.0.1:9161$config_dl_location
@@ -401,6 +411,8 @@ echo "====================================================="
 echo "=== final state"
 echo
 dump_state
+
+pkill -f "$exterior_serial_dev"
 
 return
 
