@@ -1,5 +1,3 @@
-
-
 #include <time.h>
 #include <inttypes.h>
 #include "logging.h"
