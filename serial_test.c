@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include <pty.h>
 
 
 
@@ -34,9 +35,20 @@ int main() { int r;
   r = alarm(3); error_check(r);
 
   // Clean out the pipes
-  system("timeout .1 cat /build/exterior_mock.pts2 > /dev/null; timeout .1 cat /build/exterior_mock.pts > /dev/null");
 
-  char* tty_path = "/build/exterior_mock.pts";
+  //system("timeout .1 cat /build/exterior_mock.pts2 > /dev/null; timeout .1 cat /build/exterior_mock.pts > /dev/null");
+
+  int follower = -1;
+  int aslave_fd = -1;
+  r = openpty(&follower, &aslave_fd, 0, 0, 0);
+  error_check(r);
+  char tty_path[512] = "";
+  r = ttyname_r(aslave_fd, tty_path, sizeof tty_path);
+  error_check(r);
+  close(aslave_fd);
+
+
+  //char* tty_path = "/build/exterior_mock.pts";
   printf("ASDFASDF\n");
 
   fd = serial_open_115200_8n1(tty_path);
@@ -51,13 +63,15 @@ int main() { int r;
   r = epoll_wait(epoll_fd, &epe, 1, 0);
   error_check(r);
 
+  fflush(stdout);
+  fflush(stderr);
 
 
   {
     pid_t child = fork();
     error_check(child);
     if (!child) {
-      int follower = open("/build/exterior_mock.pts2", O_RDWR);
+      //int follower = open("/build/exterior_mock.pts2", O_RDWR);
 
       r = alarm(10); error_check(r);
 
@@ -92,6 +106,7 @@ int main() { int r;
       exit(0);
     }
   }
+
 
   // struct line_accumulator_Data line_data = {};
 
