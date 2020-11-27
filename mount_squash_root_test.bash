@@ -28,7 +28,6 @@ rm -rf $D
 mkdir -p \
   $D/initramfs/dev  \
   $D/initramfs/proc \
-  $D/initramfs/sys  \
   $D/initramfs/physical  \
   $D/initramfs/newroot  \
   $D/boot  \
@@ -55,9 +54,9 @@ for f in $(ldd $EXEC | sed -nE 's/[^\/]*(\/[^ ]*).*/\1/p'); do {
 
 cp $EXEC $D/initramfs/init1.exec
 
-mount -t devtmpfs none $D/initramfs/dev
+# mount -t devtmpfs none $D/initramfs/dev
 mount -o bind /proc $D/initramfs/proc
-mount -o bind /sys  $D/initramfs/sys
+# mount -o bind /sys  $D/initramfs/sys
 
 chroot $D/initramfs/ /init1.exec $BOOT_DEV squash1
 cleanup

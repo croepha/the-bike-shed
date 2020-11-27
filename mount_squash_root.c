@@ -15,6 +15,13 @@ https://github.com/landley/toybox/blob/6a73e13d75d31da2c3f1145d8487725f0073a4b8/
 https://github.com/landley/toybox/blob/6a73e13d75d31da2c3f1145d8487725f0073a4b8/toys/lsb/mount.c
 https://github.com/landley/toybox/blob/b7265da4ccdfe4d256e72dc1b2a0f6b54e087ad2/toys/other/losetup.c
 
+
+{
+mkdir -p /build/pi0initramfs/{dev,physical,newroot}
+cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
+VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
+}
+
 */
 #if 0
 
@@ -29,7 +36,7 @@ switch_root newroot init [arg...]
 
 #endif
 #define _GNU_SOURCE
-
+#include <sys/sysmacros.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -41,21 +48,50 @@ switch_root newroot init [arg...]
 #include <string.h>
 #include <stdlib.h>
 #include <sys/mount.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #define LOG_DEBUG
 
 #include "logging.h"
 
-
 int debug_get_errno(void);
 int debug_get_errno(void) { return errno; }
 
 int main(int argc, char**argv) { int r;
+
+  sleep(2);
+
+
+  r = mount("none", "/dev", "devtmpfs", 0, 0);
+  error_check(r);
+
+  // mknod("/dev/console", S_IFCHR|0622, makedev(0x5, 0x1));
+  stdout = stderr = fopen("/dev/console", "w");
+
+  setbuf(stderr, 0);
+  setbuf(stdout, 0);
+
+  INFO("Args:");
+  for(int i=0; i< argc; i++) {
+    INFO("%d: %s", i, argv[i]);
+  }
+
+  INFO("Dirs");
+  DIR *d = opendir("/dev");
+  struct dirent *dir;
+  if (d) {
+    while ((dir = readdir(d)) != NULL) {
+      fprintf(stderr, "%s ", dir->d_name);
+    }
+    closedir(d);
+  }
+  fprintf(stderr, "\n");
+
   assert(argc == 3);
   char* phsyical_dev    = *++argv;
   char* squash_path     = *++argv;
 
-  INFO("ASDFASDF");
 
   // mount -o rw -t argv[1] argv[2] /phsyical
   // TODO??: MS_LAZYTIME
@@ -115,7 +151,7 @@ int main(int argc, char**argv) { int r;
   r = chdir("/");
   error_check(r);
 
-  r = execl("/busybox", "echo", "asdfasdf", 0);
+  r = execl("/sbin/init", "init", 0);
   error_check(r);
 
   INFO("Asdfasd DONE ? f");
