@@ -48,7 +48,7 @@ close_at_sec="$( mk_day_sec 1 )"
 
 function set_dl_config() {
     echo "$1" > $config_dl_location
-    echo "Setting dl config:"
+    echo "-- Setting dl config:"
     cat $config_dl_location | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | 
         sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/'
@@ -59,7 +59,7 @@ function set_dl_config() {
 function dump_state() (
     set +x
 
-    echo "==  Shed output:"
+    echo "-- Shed output:"
     cat $shed_out_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
         sed -E 's/Child:[0-9]+/Child:XXXX/' |
@@ -68,7 +68,7 @@ function dump_state() (
     } || cat; }
     truncate --size=0 $shed_out_file
 
-    echo "==  Config on disk:"
+    echo "-- Config on disk:"
     cat $config_location |  { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' |
         sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' |
@@ -76,7 +76,7 @@ function dump_state() (
         sort
     } || cat; }
 
-    echo "==  Serial output:"
+    echo "-- Serial output:"
     cat $exterior_serial_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
         sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
@@ -86,7 +86,7 @@ function dump_state() (
     } || cat; }       
     truncate --size=0 $exterior_serial_file
 
-    echo "Emails:"
+    echo "-- Emails:"
     cat $email_rcpt_log | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day: [0-9]+/Day:FILTERED/' |
         sed -E $'s/b\'Date: .*/b\'Date: FILTERED/' |
@@ -160,18 +160,27 @@ EOF
 
 set_dl_config ''
 
-
-echo "--- Before run"
+echo
+echo "====================================================="
+echo "=== Before run"
+echo
 dump_state
 
-echo "--- First Sartup"
+echo
+echo "====================================================="
+echo "=== First Sartup"
+echo
 start_shed
 wait_line $shed_out_file 'Download finished'
 wait_line $shed_out_file 'Maintenance Finished'
 wait_line $exterior_serial_file 'SLEEP'
 dump_state
 
-echo "--- Making an unknown option"
+
+echo
+echo "====================================================="
+echo "=== Making an unknown option"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 001
@@ -183,7 +192,11 @@ wait_line $shed_out_file 'Got an unknown option'
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
-echo "--- 00 Requesting hash email"
+
+echo
+echo "====================================================="
+echo "=== 00 Requesting hash email"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 100
@@ -196,7 +209,11 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 wait_line $email_rcpt_log 'END MESSAGE'
 dump_state
 
-echo "--- 00 badge in, expect unknown user"
+
+echo
+echo "====================================================="
+echo "=== 00 badge in, expect unknown user"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -207,7 +224,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- Adding 00 hash to dl config, restarting shed"
+echo
+echo "====================================================="
+echo "=== Adding 00 hash to dl config, restarting shed"
+echo
 
 set_dl_config '
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
@@ -225,7 +245,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- 00 badge in, expect granted"
+echo
+echo "====================================================="
+echo "=== 00 badge in, expect granted"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -236,8 +259,10 @@ wait_line $shed_out_file 'GPIO_FAKE value:0'
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
-
-echo "--- 11 badge in, expect unknown user"
+echo
+echo "====================================================="
+echo "=== 11 badge in, expect unknown user"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -248,7 +273,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- 11 badge in, request email"
+echo
+echo "====================================================="
+echo "=== 11 badge in, request email"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 100
@@ -261,13 +289,19 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 wait_line $email_rcpt_log 'END MESSAGE'
 dump_state
 
-echo "--- add 11 hash to dl"
+echo
+echo "====================================================="
+echo "=== add 11 hash to dl"
+echo
 set_dl_config '
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 '
 
-echo "--- 00 badge, opt 301, expect download"
+echo
+echo "====================================================="
+echo "=== 00 badge, opt 301, expect download"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 301
@@ -281,7 +315,10 @@ sleep 0.01
 dump_state
 
 
-echo "--- 11 badge, expect access granted"
+echo
+echo "====================================================="
+echo "=== 11 badge, expect access granted"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -293,7 +330,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- 11 badge, opt 200, expect add next"
+echo
+echo "====================================================="
+echo "=== 11 badge, opt 200, expect add next"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 200
@@ -305,7 +345,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- 22 badge, opt 200, expect add next"
+echo
+echo "====================================================="
+echo "=== 22 badge, opt 200, expect add next"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -316,7 +359,11 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 sleep 0.01
 dump_state
 
-echo "--- force kill, restart"
+
+echo
+echo "====================================================="
+echo "=== force kill, restart"
+echo
 
 nginx -s stop -c "$nginx_config"
 kill -9 $shed_pid
@@ -327,7 +374,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- 22 badge, expect access granted"
+echo
+echo "====================================================="
+echo "=== 22 badge, expect access granted"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 PIN 123456
@@ -339,7 +389,10 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-echo "--- get time back"
+echo
+echo "====================================================="
+echo "=== get time back"
+echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
 OPTION 302
@@ -358,7 +411,10 @@ kill $serial_copy_pid
 wait $serial_copy_pid
 serial_copy_pid=-1
 
-echo "--- final state"
+echo
+echo "====================================================="
+echo "=== final state"
+echo
 dump_state
 
 return
