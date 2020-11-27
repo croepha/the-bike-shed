@@ -286,12 +286,14 @@ static void exterior_scan_finished() { int r;
     u8 exterior_rfid[rfid_LEN] = {};
     buf_from_hex(exterior_rfid, sizeof exterior_rfid, exterior_rfid_text);
 
+    access_HashResult hash = {};
+    access_hash(hash, (char*)exterior_rfid, exterior_pin);
+    access_user_IDX USER_idx = access_user_lookup(hash);
+
     if (add_next_user != add_user_state_NOT_ADDING) {
         // TODO enforce pin complexity?
 
         u8 extending = add_next_user == add_user_state_EXTENDING;
-        access_HashResult hash = {};
-        access_hash(hash, (char*)exterior_rfid, exterior_pin);
         char const * msg = access_user_add(hash, access_now_day() + 30, extending, 0);
         if (msg) {
             exterior_display("Cannot add\n%s", msg);
@@ -304,10 +306,6 @@ static void exterior_scan_finished() { int r;
 
     } else if (strcmp(exterior_option, "") == 0) { // Accesss request
 
-
-        access_HashResult hash = {};
-        access_hash(hash, (char*)exterior_rfid, exterior_pin);
-        access_user_IDX USER_idx = access_user_lookup(hash);
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("ACCESS DENIED\nUnknown User");
         } else {
@@ -319,8 +317,8 @@ static void exterior_scan_finished() { int r;
                     exterior_display("ACCESS GRANTED\n");
                     unlock_door();
             } else {
-                s32 days_left = access_user_days_left(USER_idx);
 
+                s32 days_left = access_user_days_left(USER_idx);
                 u32 secs_till_open_ = secs_til_open(day_sec_open, day_sec_close, now_ms());
 
                 if (!secs_till_open_) {
@@ -355,9 +353,8 @@ static void exterior_scan_finished() { int r;
                 u16 idx = emailed_hash_idx++;
                 exterior_display("Request sending %s\nDay:%hu Idx:%hu", cancel_text, day, idx);
 
-                access_HashResult h;
-                access_hash(h, (char*)exterior_rfid, (char*)exterior_pin);
-                INFO_HEXBUFFER(h, sizeof h, "Requested send   Day:%hu Idx:%hu :", day, idx);
+                INFO_HEXBUFFER(hash, sizeof hash, "Requested send   Day:%hu Idx:%hu :", day, idx);
+                u8* h = hash;
                 r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
                     "Day: %hu Idx: %hu\n"
                     "Hash: "
@@ -395,10 +392,6 @@ static void exterior_scan_finished() { int r;
     } else if (strcmp(exterior_option, "200") == 0) {
         // add new user or extend existing one
 
-        access_HashResult hash = {};
-        access_hash(hash, (char*)exterior_rfid, exterior_pin);
-        access_user_IDX USER_idx = access_user_lookup(hash);
-
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("DENIED:\nUnknown User");
         } else {
@@ -422,10 +415,6 @@ static void exterior_scan_finished() { int r;
         }
     } else if (strcmp(exterior_option, "301") == 0) {
         // Force config refresh
-
-        access_HashResult hash = {};
-        access_hash(hash, (char*)exterior_rfid, exterior_pin);
-        access_user_IDX USER_idx = access_user_lookup(hash);
 
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("DENIED:\nUnknown User");

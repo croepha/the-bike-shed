@@ -1,15 +1,13 @@
 #!/bin/bash
 
+# This is a test that tries to test all the major functions of
+#  the main shed process without needing to run on real hardware.
+#  The serial interface is emulated with a set of PTYs.  After we
+#  do each operation we dump all of the persistent state.
 
-
-#set -eEuo pipefail
 set -u
 
-#bash test_shed.bash > /build/shed-test-local-out
-#diff -u10 --text /build/test-shed-local-test-out.expected /build/test-shed-local-test-out
-
-
-#set -x
+# RAW_OUTPUT=1 bash -x test_shed.bash 2>&1 |  ts -i '%.s' | ts -s '%.s' > build/t 
 
 nginx_config=/build/shed-test-nginx-config
 nginx_pidfile=/build/shed-test-nginx-pidfile
@@ -20,11 +18,9 @@ exterior_serial_dev=/build/exterior_mock.pts2
 email_rcpt_log=/build/email_mock_shed-test-local@tmp-test.test
 shed=$1
 shed_out_file=/build/shed-test-local-out
-test_out_file=/build/shed-test-local-test-out
-test_out_file_expected=/build/shed-test-local-test-out.expected
 
 
-nginx -s stop -c "$nginx_config"  || true
+nginx -s stop -c "$nginx_config" &>/dev/null || true 
 
 cat << EOF > /build/mk_day_sec.py
 from datetime import timedelta, datetime
@@ -423,9 +419,4 @@ return
 } # main
 # exit -1
 main
-# main > $test_out_file
-# echo "Do:" cp $test_out_file $test_out_file_expected
-# echo code --diff $test_out_file_expected $test_out_file
-# # diff -u10 --text $test_out_file_expected $test_out_file
 
-# main | ts -i '%.T'
