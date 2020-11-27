@@ -80,6 +80,9 @@ u32 const config_download_startup_delay_ms_DEFAULT = 5000;
 u32 config_download_startup_delay_ms = config_download_startup_delay_ms_DEFAULT;
 
 
+u32 day_sec_open;
+u32 day_sec_close;
+
 static usz const option_LEN = 10;
 
 char exterior_option [option_LEN];
@@ -199,6 +202,7 @@ static void exterior_display(char * fmt, ...) {
     IO_TIMER_MS(clear_display) = now_ms() + shed_clear_timeout_ms;
 }
 
+
 static void save_config() {
     int r;
 
@@ -225,6 +229,8 @@ static void save_config() {
     if (shed_clear_timeout_ms != shed_clear_timeout_ms_DEFAULT) { r = dprintf(fd, "DebugClearTimeoutMS: %d\n", shed_clear_timeout_ms); error_check(r); }
     if (shed_door_unlock_ms != shed_door_unlock_ms_DEFAULT) { r = dprintf(fd, "DoorUnlockMS: %d\n", shed_door_unlock_ms); error_check(r); }
     if (config_download_startup_delay_ms != config_download_startup_delay_ms_DEFAULT) { r = dprintf(fd, "ConfigDownloadStartupDelayMS: %d\n", config_download_startup_delay_ms); error_check(r); }
+    r = dprintf(fd, "OpenAtSec: %u\n", day_sec_open); error_check(r);
+    r = dprintf(fd, "CloseAtSec: %u\n", day_sec_close); error_check(r);
 
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
@@ -269,8 +275,6 @@ static void save_config() {
 }
 
 
-u32 day_sec_open = 8 * SEC_PER_HOUR;
-u32 day_sec_close = 9 * SEC_PER_HOUR;
 
 static void exterior_scan_finished() { int r;
 

@@ -25,6 +25,7 @@ Starting: /build/shed3.dbg.exec /build/shed-test-local-config
  WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
  INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
 ==  Config on disk:
+CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -34,6 +35,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: 0
 ==  Serial output:
 TEXT_SHOW1 System restart
 TEXT_SHOW2
@@ -45,6 +47,7 @@ Emails:
 ==  Shed output:
 ERROR: io_event:serial Got an unknown option from the exterior: 001	(./shed3.c exterior_scan_finished)
 ==  Config on disk:
+CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -54,6 +57,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: 0
 ==  Serial output:
 TEXT_SHOW1
 TEXT_SHOW2 Unkown option
@@ -67,6 +71,7 @@ TRACE: io_event:serial start	(./access_hash.c __access_hash)
 TRACE: io_event:serial finish	(./access_hash.c __access_hash)
  INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./shed3.c exterior_scan_finished)
 ==  Config on disk:
+CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -76,6 +81,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: 0
 ==  Serial output:
 TEXT_SHOW1 Request sending
 TEXT_SHOW2 Day:FILTERED Idx:0
@@ -103,6 +109,7 @@ TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
 ==  Config on disk:
+CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -112,6 +119,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: 0
 ==  Serial output:
 TEXT_SHOW1 ACCESS DENIED
 TEXT_SHOW2 Unknown User
@@ -123,6 +131,8 @@ Emails:
 Setting dl config:
 
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+OpenAtSec: FILTERED
+CloseAtSec: FILTERED
 
 Starting: /build/shed3.dbg.exec /build/shed-test-local-config
 ==  Shed output:
@@ -139,6 +149,7 @@ TRACE: timeout:idle USER_idx:1fff  expires: FILTERED FILTERED 	(./access_data.c 
 TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
  INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -148,6 +159,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
 TEXT_SHOW1 System restart
@@ -165,6 +177,7 @@ TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_ma
  INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
  INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -174,6 +187,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
 TEXT_SHOW1 ACCESS GRANTED
@@ -189,6 +203,7 @@ TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -198,6 +213,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
 TEXT_SHOW1 ACCESS DENIED
@@ -212,6 +228,7 @@ TRACE: io_event:serial start	(./access_hash.c __access_hash)
 TRACE: io_event:serial finish	(./access_hash.c __access_hash)
  INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./shed3.c exterior_scan_finished)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -221,6 +238,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
 TEXT_SHOW1 Request sending
@@ -265,6 +283,7 @@ TRACE: io_event:io_curl parse add MAP_idx:36182 Hash not in our map 	(./access_d
 TRACE: io_event:io_curl parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:221570 [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./access_data.c access_user_add)
  WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -274,6 +293,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
@@ -292,6 +312,7 @@ TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_ma
  INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
  INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -301,6 +322,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
@@ -317,6 +339,7 @@ TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -326,6 +349,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 ==  Serial output:
@@ -343,6 +367,7 @@ TRACE: io_event:serial add hash: [8ae74f6df0f03067]	(./access_data.c __user_map_
 TRACE: io_event:serial add MAP_idx:3e78a Hash not in our map 	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial add expire_day:FILTERED extend_only:0 overwrite_admin:0 map_idx:255882 [8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431]	(./access_data.c access_user_add)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -352,6 +377,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
@@ -387,6 +413,7 @@ TRACE: timeout:idle USER_idx:1fff  expires: FILTERED FILTERED 	(./access_data.c 
 TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
  INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -396,6 +423,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
@@ -415,6 +443,7 @@ TRACE: io_event:serial lookup hash: [8ae74f6df0f03067]	(./access_data.c __user_m
 TRACE: io_event:serial lookup returning MAP_idx:3e78a	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -424,6 +453,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
@@ -437,6 +467,7 @@ Emails:
 --- final state
 ==  Shed output:
 ==  Config on disk:
+CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
 ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
 DebugClearTimeoutMS: 0
@@ -446,6 +477,7 @@ DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
+OpenAtSec: FILTERED
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431

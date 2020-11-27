@@ -12,6 +12,8 @@ char * email_user_pass;
 char * email_rcpt;
 char ** supr_child_args;
 struct StringList tmp_arg;
+u32 day_sec_open;
+u32 day_sec_close;
 
 
 

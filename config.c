@@ -212,6 +212,18 @@ char * invalid_config_email_user_pass[] = {
     "EmailUserPass: adfasdfasdf",
     "EmailUserPass: 12341231234",
 0};
+char *   valid_config_day_sec_open[] = {
+    "OpenAtSec:  4000",
+0};
+char * invalid_config_day_sec_open[] = {
+    "OpenAtSec: ",
+0};
+char *   valid_config_day_sec_close[] = {
+    "CloseAtSec:  4000",
+0};
+char * invalid_config_day_sec_close[] = {
+    "CloseAtSec: ",
+0};
 
 #define do_diagnostic(long_string, short_var) *end=0; \
   __do_diagnostic(long_string, start, valid_config_ ## short_var, line_number); return;

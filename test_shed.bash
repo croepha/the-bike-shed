@@ -25,12 +25,32 @@ test_out_file_expected=/build/shed-test-local-test-out.expected
 
 nginx -s stop -c "$nginx_config"  || true
 
+cat << EOF > /build/mk_day_sec.py
+from datetime import timezone, timedelta, datetime
+import sys
+PST = timezone(timedelta(hours=-8))
+target = datetime.now(PST) + timedelta(hours=int(sys.argv[1]))
+day_start = target.replace(hour=0, minute=0, second=0, microsecond=0)
+print(int((target-day_start).total_seconds()))
+EOF
+
+
+function mk_day_sec() {
+    python3 /build/mk_day_sec.py $1
+}
+
+open_at_sec="$( mk_day_sec -1 )"
+close_at_sec="$( mk_day_sec 1 )"
+
+
 function set_dl_config() {
     echo "$1" > $config_dl_location
     echo "Setting dl config:"
-    cat $config_dl_location
-}
+    cat $config_dl_location |
+        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | \
+        sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/'
 
+}
 
 function dump_state() (
     set +x
@@ -42,7 +62,11 @@ function dump_state() (
         sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
     truncate --size=0 $shed_out_file
     echo "==  Config on disk:"
-    cat $config_location |  sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' | sort
+    cat $config_location |  \
+        sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' | \
+        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | \
+        sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/' | \
+        sort
     echo "==  Serial output:"
     cat $exterior_serial_file | tr -d '\000' | sed -E 's/Day:[0-9]+/Day:FILTERED/' |
        sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
@@ -172,6 +196,8 @@ echo "--- Adding 00 hash to dl config, restarting shed"
 
 set_dl_config '
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+OpenAtSec: '"$open_at_sec"'
+CloseAtSec: '"$close_at_sec"'
 '
 
 kill $shed_pid
