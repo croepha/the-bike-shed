@@ -45,6 +45,8 @@ void __access_hash(access_HashResult result, struct access_HashPayload * payload
     u32 const t_cost = 1;
     u32 const parallelism = 1;
 
+    TRACE("start");
+
     argon2_context context = {     // low-level API
         result,  /* output array, at least HASHLEN in size */
         sizeof(access_HashResult), /* digest length */
@@ -65,5 +67,6 @@ void __access_hash(access_HashResult result, struct access_HashPayload * payload
         ERROR("argon2 error:%s", argon2_error_message(rc));
         memset(result, 0, sizeof(access_HashResult));
     }
+    TRACE("finish");
 }
 

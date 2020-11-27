@@ -8,6 +8,7 @@
 #include "logging.h"
 #include "access.h"
 
+u8 log_trace_enabled = 1;
 
 static void access_hash_test(char * salt, char * rfid, char *  pin) {
     struct access_HashPayload payload = {};

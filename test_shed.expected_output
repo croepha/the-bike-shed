@@ -63,6 +63,8 @@ SLEEP
 Emails:
 --- 00 Requesting hash email
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
  INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./shed3.c exterior_scan_finished)
 ==  Config on disk:
 ConfigDownloadStartupDelayMS: 0
@@ -96,6 +98,8 @@ b'Hash: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2'
 ------------ END MESSAGE ------------
 --- 00 badge in, expect unknown user
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
 ==  Config on disk:
@@ -154,6 +158,8 @@ SLEEP
 Emails:
 --- 00 badge in, expect granted
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
  INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
@@ -178,6 +184,8 @@ SLEEP
 Emails:
 --- 11 badge in, expect unknown user
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
 ==  Config on disk:
@@ -200,6 +208,8 @@ SLEEP
 Emails:
 --- 11 badge in, request email
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
  INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./shed3.c exterior_scan_finished)
 ==  Config on disk:
 ConfigDownloadStartupDelayMS: 0
@@ -240,6 +250,8 @@ UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 
 --- 00 badge, opt 301, expect download
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
  INFO: io_event:serial Forcing config refresh	(./shed3.c exterior_scan_finished)
@@ -273,6 +285,8 @@ SLEEP
 Emails:
 --- 11 badge, expect access granted
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
  INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
@@ -298,6 +312,8 @@ SLEEP
 Emails:
 --- 11 badge, opt 200, expect add next
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
 ==  Config on disk:
@@ -321,6 +337,8 @@ SLEEP
 Emails:
 --- 22 badge, opt 200, expect add next
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial add hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial add MAP_idx:3e78a Hash not in our map 	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial add expire_day:FILTERED extend_only:0 overwrite_admin:0 map_idx:255882 [8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431]	(./access_data.c access_user_add)
@@ -391,6 +409,8 @@ Emails:
 --- 22 badge, expect access granted
 wait_line "/build/shed-test-local-out" "GPIO_FAKE value:0" MISS
 ==  Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:3e78a	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
