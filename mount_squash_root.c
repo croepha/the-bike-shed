@@ -17,6 +17,7 @@ https://github.com/landley/toybox/blob/b7265da4ccdfe4d256e72dc1b2a0f6b54e087ad2/
 
 
 {
+rm -rvf  /build/pi0initramfs
 mkdir -p /build/pi0initramfs/{dev,physical,newroot}
 cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
 VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
