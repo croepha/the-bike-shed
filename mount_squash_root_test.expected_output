@@ -1,2 +1,2 @@
- INFO: ASDFASDF	(./mount_squash_root.c main)
-asdfasdf
+ INFO: Exec init	(./mount_squash_root.c main)
+This is the fake init...

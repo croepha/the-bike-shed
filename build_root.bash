@@ -44,6 +44,10 @@ function full_build() ($_F
     fi
     make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
 
+    rm -rvf  /build/pi0initramfs
+    mkdir -p /build/pi0initramfs/{dev,physical,newroot}
+    cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
+
     make all
 
     rm -vf                    $_o/$VARIANT-*

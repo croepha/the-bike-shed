@@ -1,21 +1,15 @@
 
 /*
 
-TODO: Better document function of file
-TODO: Cleanup
+This is to make a self-contained, statically compilable binary that sets up
+the squashfs mount on boot, this allows us to basically just have a single 
+vfat parition on the sdcard, and we don't have to fool around with partitions
+or extracting the root fs on upgrades... with a little more setup we can get
+inplace system upgrades by just copying a new squashfs image over
 
-This is a bit of a mess, Copied a bunch of code from Landley's toybox, in the middle
-of stripping it down.
+This binary gets embedded into the linux kernel via the initramfs overlay feature
 
-The goal here is to make a self-contained, statically compilable binary that sets up
-the squashfs mount on boot
-
-REFS:
-https://github.com/landley/toybox/blob/6a73e13d75d31da2c3f1145d8487725f0073a4b8/toys/other/switch_root.c
-https://github.com/landley/toybox/blob/6a73e13d75d31da2c3f1145d8487725f0073a4b8/toys/lsb/mount.c
-https://github.com/landley/toybox/blob/b7265da4ccdfe4d256e72dc1b2a0f6b54e087ad2/toys/other/losetup.c
-
-
+For quick iterations, this is a shortcut to rebuild a new kernel: 
 {
 rm -rvf  /build/pi0initramfs
 mkdir -p /build/pi0initramfs/{dev,physical,newroot}
@@ -24,18 +18,7 @@ VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
 }
 
 */
-#if 0
 
-kernel boots with a ramfs root
-mkdir -p /newroot /fat
-mount sdcard fat into /fat
-mount -o loop /fat/root.squashfs /newroot
-switchroot oldroot:/mnt newroot:/newroot /init
-
-switch_root newroot init [arg...]
-
-
-#endif
 #define _GNU_SOURCE
 #include <sys/sysmacros.h>
 #include <sys/types.h>
@@ -52,120 +35,121 @@ switch_root newroot init [arg...]
 #include <sys/types.h>
 #include <dirent.h>
 
-#define LOG_DEBUG
+//#define LOG_DEBUG
 
 #include "logging.h"
 
+// For some reason getting the errno with a debugger is a huge pain in the 
+//  ass... so we just define a function that we can call that returns it 
 int debug_get_errno(void);
 int debug_get_errno(void) { return errno; }
 
 int main(int argc, char**argv) { int r;
 
-  sleep(2);
+  //  root (/) is the initramfs tmpfs, it should contain:
+  //    /init       -- this binary 
+  //    /dev/       -- empty
+  //    /physical/  -- empty
+  //    /newroot/   -- empty
 
-
+  // Mount devtmpfs on /dev
   r = mount("none", "/dev", "devtmpfs", 0, 0);
   error_check(r);
 
-  // mknod("/dev/console", S_IFCHR|0622, makedev(0x5, 0x1));
-  stdout = stderr = fopen("/dev/console", "w");
+  // Setup standard output, since we're the first process we 
+  //  can't rely on fd0 to be console
+  if (access("/dev/console", W_OK) == 0) {
+    // if /dev/console doesn't exist, then we are probably running in a test, 
+    //  so we probably just want to print to fd0
+    stdout = stderr = fopen("/dev/console", "we");
+  }
 
+  // If were printing something, then its probably an exceptional
+  //   situation, lets turn off all the buffering so that the output
+  //   isn't lost if were crashing..
   setbuf(stderr, 0);
   setbuf(stdout, 0);
-
-  INFO("Args:");
-  for(int i=0; i< argc; i++) {
-    INFO("%d: %s", i, argv[i]);
-  }
-
-  INFO("Dirs");
-  DIR *d = opendir("/dev");
-  struct dirent *dir;
-  if (d) {
-    while ((dir = readdir(d)) != NULL) {
-      fprintf(stderr, "%s ", dir->d_name);
-    }
-    closedir(d);
-  }
-  fprintf(stderr, "\n");
 
   assert(argc == 3);
   char* phsyical_dev    = *++argv;
   char* squash_path     = *++argv;
 
-
-  // mount -o rw -t argv[1] argv[2] /phsyical
+  // mount -o rw,sync -t vfat <squash_path> /phsyical
+  //   We are mounting with sync because we don't want 
+  //   any writes to be lost on power loss, this is ok
+  //   because we are not a write heavy application, we 
+  //   only do writes at rare critical times
   // TODO??: MS_LAZYTIME
   r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME | MS_SYNCHRONOUS | MS_DIRSYNC , 0);
   error_check(r);
 
-  // TODO: Why not actually specify the loop device?
   int lcfd = open("/dev/loop-control", O_RDWR | O_CLOEXEC);
   error_check(lcfd);
-  assert(lcfd!=-1);
 
-  //  Create /dev/loop
+  //  Create /dev/loopXXX
   int loop_num = ioctl(lcfd, LOOP_CTL_GET_FREE, 0);
   error_check(loop_num);
 
+  // Open /dev/loopXXX
   char full_loop_path[128];
   snprintf(full_loop_path, sizeof full_loop_path, "/dev/loop%d", loop_num);
   DEBUG("loop_path %s", full_loop_path);
   int loop0 = open(full_loop_path, O_RDWR | O_CLOEXEC);
   error_check(loop0);
 
+  // Open (<physical_dev>)/<squash_path>
   char full_squash_path[128];
   snprintf(full_squash_path, sizeof full_squash_path, "/physical/%s", squash_path);
   int squash_fd = open(full_squash_path, O_RDONLY | O_CLOEXEC);
   error_check(squash_fd);
+  // Mount (<physical_dev>)/<squash_path> to /dev/loopXXX
   r = ioctl(loop0, LOOP_SET_FD, squash_fd);
   error_check(r);
 
   // TODO??: MS_LAZYTIME
+  // Mount /dev/loopXXX (which is the root squashfs) onto /newroot
   r = mount(full_loop_path, "/newroot", "squashfs", MS_NOATIME | MS_RDONLY, 0);
   error_check(r);
 
-
-  r = chdir("/newroot");
+  r = unlink("/init"); // cleanup a little bit
   error_check(r);
 
-  // TODO: Remove stuff from / ?
-
+  // Mount a writable tmpfs on (root squash)/mnt since root squash is read only
   r = mount("none", "/newroot/mnt", "tmpfs", 0, NULL);
   error_check(r);
 
+  // mkdir (root squash)/mnt/physical
   r = mkdir("/newroot/mnt/physical", 0777);
   error_check(r);
 
+  // Move /physical/ mount to (root squash)/mnt/physical/
   r = mount("/physical", "/newroot/mnt/physical", NULL, MS_MOVE, NULL);
   error_check(r);
 
+  // Move /dev/ mount to (root squash)/dev/
   r = mount("/dev", "/newroot/dev", NULL, MS_MOVE, NULL);
   error_check(r);
 
+  // Move /newroot/ mount to /
+  r = chdir("/newroot");
+  error_check(r);
   r = mount(".", "/", NULL, MS_MOVE, NULL);
   error_check(r);
 
+  // I'm not an expert, but I think these are needed to make /. and /.. 
+  //  point to eachother, and also to make sure that the execution environment
+  //  has realized that we are no longer at /newroot
   r = chroot(".");
   error_check(r);
-
   r = chdir("/");
   error_check(r);
 
-  // r = mount("none", "/lib/modules", "tmpfs", 0, NULL);
-  // error_check(r);
-
+  INFO("Exec init");
+  
+  fflush(stdout);
+  fflush(stderr);
   r = execl("/sbin/init", "init", 0);
   error_check(r);
 
-  INFO("Asdfasd DONE ? f");
-
-  // char loopback_dev[1024];
-  // loopback_setup(squash_path, loopback_dev, sizeof loopback_dev);
-  // printf("GOT LOOPBACK_DEV: %s\n", loopback_dev);
-
-    // mount -o loop -t squashfs /fat/root.squashfs newroot
-    // switch_root  new_root:/newroot old_root:/mnt
-    // exec /init
 }
 

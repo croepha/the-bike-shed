@@ -31,7 +31,7 @@ mkdir -p \
   $D/initramfs/physical  \
   $D/initramfs/newroot  \
   $D/boot  \
-  $D/squash1 \
+  $D/squash1/sbin \
   $D/squash1/dev \
   $D/squash1/mnt/physical \
 
@@ -43,22 +43,27 @@ BOOT_DEV=$( losetup -f --show $D/boot.img )
 
 mount $BOOT_DEV $D/boot
 
-cp /usr/bin/busybox $D/squash1/
+cat << EOF > $D/fake_init.c
+#include <stdio.h>
+int main () {
+  printf("This is the fake init...\n");
+}
+EOF
+clang $D/fake_init.c --static -o $D/squash1/sbin/init
+
 
 /build/rootpi0w-dev/host/bin/mksquashfs $D/squash1/ $D/boot/squash1 -quiet -no-progress
 
-for f in $(ldd $EXEC | sed -nE 's/[^\/]*(\/[^ ]*).*/\1/p'); do {
+for f in $( ldd $EXEC | sed -nE 's/[^\/]*(\/[^ ]*).*/\1/p'); do {
   mkdir -p $D/initramfs/$(dirname $f)
   cp $f $D/initramfs/$f
 }; done
 
-cp $EXEC $D/initramfs/init1.exec
+cp $EXEC $D/initramfs/init
 
-# mount -t devtmpfs none $D/initramfs/dev
 mount -o bind /proc $D/initramfs/proc
-# mount -o bind /sys  $D/initramfs/sys
 
-chroot $D/initramfs/ /init1.exec $BOOT_DEV squash1
+chroot $D/initramfs/ /init $BOOT_DEV squash1
 cleanup
 
 
