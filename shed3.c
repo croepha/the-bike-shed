@@ -354,20 +354,22 @@ static void exterior_scan_finished() { int r;
                 exterior_display("Request sending %s\nDay:%hu Idx:%hu", cancel_text, day, idx);
 
                 INFO_HEXBUFFER(hash, sizeof hash, "Requested send   Day:%hu Idx:%hu :", day, idx);
-                u8* h = hash;
-                r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
-                    "Day: %hu Idx: %hu\n"
-                    "Hash: "
-                    "%02x%02x%02x%02x%02x%02x%02x%02x"
-                    "%02x%02x%02x%02x%02x%02x%02x%02x"
-                    "%02x%02x%02x%02x%02x%02x%02x%02x"
-                    "%02x%02x%02x%02x%02x%02x%02x%02x",
-                    day, idx,
-                    h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-                    h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-                    h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-                    h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]
-                    );
+                {
+                    u8* h = hash;
+                    r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
+                        "Day: %hu Idx: %hu\n"
+                        "Hash: "
+                        "%02x%02x%02x%02x%02x%02x%02x%02x"
+                        "%02x%02x%02x%02x%02x%02x%02x%02x"
+                        "%02x%02x%02x%02x%02x%02x%02x%02x"
+                        "%02x%02x%02x%02x%02x%02x%02x%02x",
+                        day, idx,
+                        h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
+                        h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
+                        h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
+                        h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]
+                        );
+                }
                 if (r == -1 || r >= sizeof emailed_hash_buf - 1) {
                     ERROR("emailed_hash_buf snprintf r:%d", r);
                     emailed_hash_buf_used = 0;
