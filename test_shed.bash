@@ -4,7 +4,7 @@ set -u
 #bash test_shed.bash > /build/shed-test-local-out
 #diff -u10 --text /build/test-shed-local-test-out.expected /build/test-shed-local-test-out
 
-#set -x
+set -x
 
 nginx_config=/build/shed-test-nginx-config
 nginx_pidfile=/build/shed-test-nginx-pidfile
