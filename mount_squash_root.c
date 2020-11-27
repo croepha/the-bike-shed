@@ -2,19 +2,20 @@
 /*
 
 This is to make a self-contained, statically compilable binary that sets up
-the squashfs mount on boot, this allows us to basically just have a single 
+the squashfs mount on boot, this allows us to basically just have a single
 vfat parition on the sdcard, and we don't have to fool around with partitions
 or extracting the root fs on upgrades... with a little more setup we can get
 inplace system upgrades by just copying a new squashfs image over
 
 This binary gets embedded into the linux kernel via the initramfs overlay feature
 
-For quick iterations, this is a shortcut to rebuild a new kernel: 
+For quick iterations, this is a shortcut to rebuild a new kernel:
 {
 rm -rvf  /build/pi0initramfs
 mkdir -p /build/pi0initramfs/{dev,physical,newroot}
 cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
 VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
+# Copy /build/rootpi0w-dev/images/zImage to sdcard
 }
 
 */
@@ -39,15 +40,15 @@ VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
 
 #include "logging.h"
 
-// For some reason getting the errno with a debugger is a huge pain in the 
-//  ass... so we just define a function that we can call that returns it 
+// For some reason getting the errno with a debugger is a huge pain in the
+//  ass... so we just define a function that we can call that returns it
 int debug_get_errno(void);
 int debug_get_errno(void) { return errno; }
 
 int main(int argc, char**argv) { int r;
 
   //  root (/) is the initramfs tmpfs, it should contain:
-  //    /init       -- this binary 
+  //    /init       -- this binary
   //    /dev/       -- empty
   //    /physical/  -- empty
   //    /newroot/   -- empty
@@ -56,10 +57,10 @@ int main(int argc, char**argv) { int r;
   r = mount("none", "/dev", "devtmpfs", 0, 0);
   error_check(r);
 
-  // Setup standard output, since we're the first process we 
+  // Setup standard output, since we're the first process we
   //  can't rely on fd0 to be console
   if (access("/dev/console", W_OK) == 0) {
-    // if /dev/console doesn't exist, then we are probably running in a test, 
+    // if /dev/console doesn't exist, then we are probably running in a test,
     //  so we probably just want to print to fd0
     stdout = stderr = fopen("/dev/console", "we");
   }
@@ -75,12 +76,22 @@ int main(int argc, char**argv) { int r;
   char* squash_path     = *++argv;
 
   // mount -o rw,sync -t vfat <squash_path> /phsyical
-  //   We are mounting with sync because we don't want 
+  //   We are mounting with sync because we don't want
   //   any writes to be lost on power loss, this is ok
-  //   because we are not a write heavy application, we 
+  //   because we are not a write heavy application, we
   //   only do writes at rare critical times
   // TODO??: MS_LAZYTIME
-  r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME | MS_SYNCHRONOUS | MS_DIRSYNC , 0);
+
+  for (;;) {
+    r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME | MS_SYNCHRONOUS | MS_DIRSYNC, 0);
+    if (r == -1 && errno == ENOENT) {
+      INFO("MISSING PHYSICAL %s Trying again soon", phsyical_dev);
+      sleep(1);
+      continue;
+    } else {
+      break;
+    }
+  }
   error_check(r);
 
   int lcfd = open("/dev/loop-control", O_RDWR | O_CLOEXEC);
@@ -136,7 +147,7 @@ int main(int argc, char**argv) { int r;
   r = mount(".", "/", NULL, MS_MOVE, NULL);
   error_check(r);
 
-  // I'm not an expert, but I think these are needed to make /. and /.. 
+  // I'm not an expert, but I think these are needed to make /. and /..
   //  point to eachother, and also to make sure that the execution environment
   //  has realized that we are no longer at /newroot
   r = chroot(".");
@@ -145,7 +156,7 @@ int main(int argc, char**argv) { int r;
   error_check(r);
 
   INFO("Exec init");
-  
+
   fflush(stdout);
   fflush(stderr);
   r = execl("/sbin/init", "init", 0);
