@@ -67,3 +67,4 @@ chroot $D/initramfs/ /init $BOOT_DEV squash1
 cleanup
 
 
+    

@@ -85,15 +85,15 @@ int main(int argc, char**argv) { int r;
 
   int progress_report = 0;
 
-  printf("\n");
+  fprintf(stderr, "\n");
 
   for (;;) {
     if (progress_report == 0 || progress_report > 5000) {
-      printf("\rWaiting for physical: ");
+      fprintf(stderr, "\rWaiting for physical: ");
       progress_report = 0;
     }
     if (progress_report % 50 == 0) {
-      printf(".");
+      fprintf(stderr, ".");
     }
     progress_report++;
     r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME | MS_SYNCHRONOUS | MS_DIRSYNC, 0);
@@ -102,6 +102,8 @@ int main(int argc, char**argv) { int r;
     }
     usleep(1000);
   }
+  fprintf(stderr, " Done\n");
+
   error_check(r);
 
   int lcfd = open("/dev/loop-control", O_RDWR | O_CLOEXEC);

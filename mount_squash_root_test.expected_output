@@ -1,3 +1,4 @@
 
-Waiting for physical: .60016013.426:  INFO: Exec init	(./mount_squash_root.c:168 0x2f99d9:main)
+Waiting for physical: . Done
+ INFO: Exec init	(./mount_squash_root.c main)
 This is the fake init...
