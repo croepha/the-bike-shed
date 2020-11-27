@@ -590,6 +590,8 @@ void idle_timeout() {
 // TODO needs maintenance
 int main (int argc, char ** argv) {
 
+    setlinebuf(stderr);
+
 #if BUILD_IS_RELEASE == 0
     if (getenv("SHED_TRACE")) {
         INFO("Tracing enabled");
@@ -597,12 +599,15 @@ int main (int argc, char ** argv) {
     }
 #endif
 
+    // This is an attempt to prevent memory allocations from being overcommitted,
+    //  but I think this doesn't actually do that, it just prevents swaping out
+    //  and we don't use a swap file anyway.... TODO: Research a better way to do this
     int r = mlockall( MCL_CURRENT | MCL_FUTURE );
     error_check(r);
+
     assert(argc == 2);
     config_path = argv[1];
 
-    setlinebuf(stderr);
     access_user_list_init();
 
     config_initialize();

@@ -55,11 +55,9 @@ rule link_br_exec
  command = ${pi0w_host_prefix}-gcc $in -o $out $extra
  description = LINKBR $out
 
-
 rule re
  command = re2c -W --tags $in -o $out
  description = RE $out
-
 
 EOF
 
