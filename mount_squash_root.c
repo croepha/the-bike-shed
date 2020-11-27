@@ -152,6 +152,9 @@ int main(int argc, char**argv) { int r;
   r = chdir("/");
   error_check(r);
 
+  // r = mount("none", "/lib/modules", "tmpfs", 0, NULL);
+  // error_check(r);
+
   r = execl("/sbin/init", "init", 0);
   error_check(r);
 

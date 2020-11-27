@@ -57,7 +57,7 @@ function full_build() ($_F
     tar cJv -C $_b/host    . -f  $_o/$VARIANT-host.tar.xz
     tar cJv -C $_b/staging . -f  $_o/$VARIANT-staging.tar.xz
     rm -f /build/$VARIANT-full_build.working
-)   
+)
 
 function save_configs() ($_F
     make savedefconfig
@@ -358,6 +358,8 @@ date --set "$( date -r /boot/shed-config '+%F %T' )"
 
 modprobe pwm-bcm2835
 /root/supervisor.pi0wdbg.exec /root/supervisor.config &
+
+/usr/sbin/telnetd -l sh
 
 hostname shed-unconfigured
 modprobe brcmfmac

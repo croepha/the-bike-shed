@@ -3,14 +3,8 @@
 set -u
 set -e
 
-cat << EOF > ${TARGET_DIR}/bin/_run_autoexec.sh
-#!/bin/sh
-mkdir -p /boot
-mount -o sync /dev/mmcblk0p1 /boot
-sh /mnt/physical/boot/autoexec.sh
-EOF
-
-chmod +x ${TARGET_DIR}/bin/_run_autoexec.sh
+rm ${TARGET_DIR}/etc/init.d/S60openvpn
+rm ${TARGET_DIR}/etc/init.d/S50telnet
 
 cat << EOF > ${TARGET_DIR}/etc/inittab
 ::sysinit:/bin/mount -t proc proc /proc
@@ -27,7 +21,8 @@ null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 # Put a getty on the serial port
 # remove console::respawn:/sbin/getty -L  console 0 vt100 # GENERIC_SERIAL
 tty1::respawn:/bin/sh /mnt/physical/autoexec.sh
-tty2::respawn:/sbin/getty -L  tty2 0 vt100 # HDMI console
+tty2::respawn:/bin/sh
+tty3::respawn:/sbin/getty -L  tty3 0 vt100
 
 # Stuff to do for the 3-finger salute
 #::ctrlaltdel:/sbin/reboot
