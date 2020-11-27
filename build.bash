@@ -15,7 +15,7 @@ mkdir -p /build/
 # pkill email_mock
 ./email_test_server.py
 # nginx -s stop
-pgrep nginx > /dev/null || nginx
+nginx -s reload &>/dev/null || nginx -c $nginx_config
 
 if [ ! -v SHOULD_CLEAN ]; then {
         SHOULD_CLEAN=0

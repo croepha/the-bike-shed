@@ -86,7 +86,8 @@ static void download_test() {
 
   struct config_download_Ctx c1 = {.id = 1};
   char* url = "http://127.0.0.1:9160/workspaces/the-bike-shed/build/test_file1";
-  char* url2 = "http://127.0.0.1:9161/workspaces/the-bike-shed/build/test_file1";
+  // We expect "Couldn't connect to server" for url2
+  char* url2 = "http://127.0.0.1:1/workspaces/the-bike-shed/build/test_file1";
   dl(&c1, url, 0, 0);
 
   log_allowed_fails = 1000;
