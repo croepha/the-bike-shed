@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eEuo pipefail
 
-set -x
+# set -x
 
 EXEC=$1
 CHECK_FILE=$2

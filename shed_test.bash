@@ -27,10 +27,10 @@ mkdir -p $D
 groupadd "$TEST_INSTANCE" 2>/dev/null || true
 
 
-iptables -D OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT --reject-with tcp-reset
+iptables -D OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT --reject-with tcp-reset &>/dev/null || true
+
 pkill -f "$exterior_serial_dev" || true
 
-# 0<&- >> $exterior_serial_log 2&>1
 socat -d -d -v PTY,link="$exterior_serial_dev",rawer,echo=0 PTY,link="$interior_serial_dev",rawer,echo=0 >> $exterior_serial_log 2>&1  &
 sleep .1
 

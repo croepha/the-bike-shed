@@ -212,7 +212,7 @@ depends_on logging
 link_exec access_hash_test    -l pthread
 do_test access_hash_test /build/access_hash_test.fast.exec
 
-do_test test_shed /workspaces/the-bike-shed/test_shed.bash /build/shed3.dbg.exec
+do_test shed_test /workspaces/the-bike-shed/shed_test.bash /build/shed3.dbg.exec
 
 
 reset

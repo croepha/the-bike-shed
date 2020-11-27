@@ -7,9 +7,9 @@
 -- Shed output:
 -- Config on disk:
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -21,7 +21,7 @@ EmailUserPass:  user:pass
 =====================================================
 === First Sartup
 
-Starting: /build/shed3.dbg.exec /build/test_shed/config
+Starting: /build/shed3.dbg.exec /build/shed_test/config
 -- Shed output:
  INFO: Tracing enabled	(./shed3.c main)
  WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
@@ -32,9 +32,9 @@ Starting: /build/shed3.dbg.exec /build/test_shed/config
 -- Config on disk:
 CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -61,9 +61,9 @@ ERROR: io_event:serial Got an unknown option from the exterior: 001	(./shed3.c e
 -- Config on disk:
 CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -90,9 +90,9 @@ TRACE: io_event:serial lookup MAP_idx:2dbd2 Hash not in our map 	(./access_data.
 -- Config on disk:
 CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -131,9 +131,9 @@ TRACE: io_event:serial lookup MAP_idx:2dbd2 Hash not in our map 	(./access_data.
 -- Config on disk:
 CloseAtSec: 0
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -157,7 +157,7 @@ UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 OpenAtSec: FILTERED
 CloseAtSec: FILTERED
 
-Starting: /build/shed3.dbg.exec /build/test_shed/config
+Starting: /build/shed3.dbg.exec /build/shed_test/config
 -- Shed output:
  INFO: Tracing enabled	(./shed3.c main)
  WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
@@ -174,9 +174,9 @@ TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c a
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -205,9 +205,9 @@ TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_ma
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -234,9 +234,9 @@ TRACE: io_event:serial lookup MAP_idx:36182 Hash not in our map 	(./access_data.
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -264,9 +264,9 @@ TRACE: io_event:serial lookup MAP_idx:36182 Hash not in our map 	(./access_data.
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -325,9 +325,9 @@ TRACE: io_event:io_curl parse add expire_day:FILTERED extend_only:0 overwrite_ad
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -357,9 +357,9 @@ TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_ma
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -387,9 +387,9 @@ TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_ma
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -420,9 +420,9 @@ TRACE: io_event:serial add expire_day:FILTERED extend_only:0 overwrite_admin:0 m
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -443,7 +443,7 @@ SLEEP
 =====================================================
 === force kill, restart
 
-Starting: /build/shed3.dbg.exec /build/test_shed/config
+Starting: /build/shed3.dbg.exec /build/shed_test/config
 -- Shed output:
  INFO: Tracing enabled	(./shed3.c main)
  WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
@@ -469,9 +469,9 @@ TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c a
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -503,9 +503,9 @@ TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -534,9 +534,9 @@ TRACE: io_event:serial lookup MAP_idx:39038 Hash not in our map 	(./access_data.
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
@@ -561,9 +561,9 @@ SLEEP
 -- Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
-ConfigURL: http://127.0.0.1:9161/build/test_shed/dl-config
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
 DebugClearTimeoutMS: 0
-DebugSerialPath: /build/test_shed/interior.pts
+DebugSerialPath: /build/shed_test/interior.pts
 DestinationEmailAddress: shed-test-local@tmp-test.test
 DoorUnlockMS: 0
 EmailAddress: tmp-from@testtest.test
