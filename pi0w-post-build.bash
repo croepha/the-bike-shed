@@ -3,8 +3,8 @@
 set -u
 set -e
 
-rm ${TARGET_DIR}/etc/init.d/S60openvpn
-rm ${TARGET_DIR}/etc/init.d/S50telnet
+rm -f ${TARGET_DIR}/etc/init.d/S60openvpn
+rm -f ${TARGET_DIR}/etc/init.d/S50telnet
 
 cat << EOF > ${TARGET_DIR}/etc/inittab
 ::sysinit:/bin/mount -t proc proc /proc
