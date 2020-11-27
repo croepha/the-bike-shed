@@ -157,10 +157,6 @@ do_test2 mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test
 # -static
 
 reset
-compile    helloworld -D SOME_DEFINE=234234
-link_exec  helloworld
-
-reset
 depends_on logging
 compile    mount_squash_root
 link_exec  mount_squash_root
@@ -373,19 +369,6 @@ link_exec shed3 -l curl -l pthread
 # use +ARCH-linux-gcc+, +ARCH-linux-objdump+, +ARCH-linux-ld+, etc.
 
 # pi0w_common="--sysroot=/build/pi0w-dev-staging/ $pi0w_target_flags"
-
-
-reset
-compile   hello_pwm
-link_exec hello_pwm
-
-reset
-compile   hello_led
-link_exec hello_led
-
-reset
-compile   hello_lcd
-link_exec hello_lcd
 
 
 
