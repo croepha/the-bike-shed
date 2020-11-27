@@ -82,15 +82,25 @@ int main(int argc, char**argv) { int r;
   //   only do writes at rare critical times
   // TODO??: MS_LAZYTIME
 
+
+  int progress_report = 0;
+
+  printf("\n");
+
   for (;;) {
+    if (progress_report == 0 || progress_report > 5000) {
+      printf("\rWaiting for physical: ");
+      progress_report = 0;
+    }
+    if (progress_report % 50 == 0) {
+      printf(".");
+    }
+    progress_report++;
     r = mount(phsyical_dev, "/physical", "vfat", MS_NOATIME | MS_SYNCHRONOUS | MS_DIRSYNC, 0);
-    if (r == -1 && errno == ENOENT) {
-      INFO("MISSING PHYSICAL %s Trying again soon", phsyical_dev);
-      sleep(1);
-      continue;
-    } else {
+    if (!(r == -1 && errno == ENOENT)) {
       break;
     }
+    usleep(1000);
   }
   error_check(r);
 
