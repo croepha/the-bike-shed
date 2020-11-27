@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # This is a test that tries to test all the major functions of
 #  the main shed process without needing to run on real hardware.
 #  The serial interface is emulated with a set of PTYs.  After we
@@ -9,8 +10,8 @@ set -u
 
 # RAW_OUTPUT=1 bash -x test_shed.bash 2>&1 |  ts -i '%.s' | ts -s '%.s' > build/t 
 
-nginx_config=/build/shed-test-nginx-config
-nginx_pidfile=/build/shed-test-nginx-pidfile
+D=/build/"$TEST_INSTANCE"
+
 config_location=/build/shed-test-local-config
 config_dl_location=/build/shed-test-local-dl-config
 exterior_serial_file=/build/exterior_mock.pts2.file
@@ -19,8 +20,10 @@ email_rcpt_log=/build/email_mock_shed-test-local@tmp-test.test
 shed=$1
 shed_out_file=/build/shed-test-local-out
 
+#pkill -f "$exterior_serial_dev" || true
 
-nginx -s stop -c "$nginx_config" &>/dev/null || true 
+groupadd "$TEST_INSTANCE" 2>/dev/null || true
+iptables -D OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT --reject-with tcp-reset
 
 cat << EOF > /build/mk_day_sec.py
 from datetime import timedelta, datetime
@@ -101,23 +104,9 @@ function wait_line() {
 
 function start_shed() {
     echo "Starting: $shed $config_location"
-    SHED_TRACE=1 $shed $config_location &> $shed_out_file & shed_pid=$!
+    SHED_TRACE=1 sg "$TEST_INSTANCE" "exec $shed $config_location" &> $shed_out_file & shed_pid=$!
+    #SHED_TRACE=1 $shed $config_location &> $shed_out_file & shed_pid=$!
 }
-
-cat << EOF > $nginx_config
-pid $nginx_pidfile;
-events { worker_connections 768; }
-http {
-    server {
-        listen 9161;
-        autoindex on;
-        root /;
-    }
-}
-EOF
-nginx -c $nginx_config
-
-
 
 # function fail_cleanup() {
 #     echo "Doing cleanup"
@@ -231,7 +220,7 @@ OpenAtSec: '"$open_at_sec"'
 CloseAtSec: '"$close_at_sec"'
 '
 
-kill $shed_pid
+pkill -P $shed_pid
 wait $shed_pid
 shed_pid=-1
 start_shed
@@ -361,8 +350,8 @@ echo "====================================================="
 echo "=== force kill, restart"
 echo
 
-nginx -s stop -c "$nginx_config"
-kill -9 $shed_pid
+iptables -A OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT  --reject-with tcp-reset
+pkill -9 -P $shed_pid
 wait $shed_pid 2> /dev/null
 start_shed
 wait_line $shed_out_file 'Maintenance Finished'
@@ -400,7 +389,7 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
-kill $shed_pid
+pkill -P $shed_pid
 wait $shed_pid
 shed_pid=-1
 kill $serial_copy_pid

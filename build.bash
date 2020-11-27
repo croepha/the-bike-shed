@@ -27,6 +27,28 @@ tmux new -d 'nohup socat -d -d -v PTY,link=/build/exterior_mock.pts2,rawer,echo=
 }; fi
 
 
+# Second nginx... TODO: Clean this up, consolidate into a single nginx instance for all testing
+nginx_config=/build/shed-test-nginx-config
+nginx_pidfile=/build/shed-test-nginx-pidfile
+
+nginx -s stop -c "$nginx_config" &>/dev/null || true 
+cat << EOF > $nginx_config
+pid $nginx_pidfile;
+events { worker_connections 768; }
+http {
+    server {
+        listen 9161;
+        autoindex on;
+        root /;
+    }
+}
+EOF
+nginx -s reload -c "$nginx_config" &>/dev/null || nginx -c $nginx_config
+
+
+
+
+
 echo "/tmp/core.%e.%t.%p" > /proc/sys/kernel/core_pattern
 # sudo cat ~/Library/Containers/com.docker.docker/Data/vms/0/tty
 # screen $( sudo cat ~/Library/Containers/com.docker.docker/Data/vms/0/tty )
@@ -123,7 +145,7 @@ function reset() {
 
 cat << 'EOF' >> /build/build.ninja
 rule test
- command = $in $out 
+ command = TEST_INSTANCE=$TEST_INSTANCE $in $out 
  description = TEST $out
 EOF
 
@@ -132,6 +154,7 @@ function do_test() {
   EXEC=$2
 cat << EOF >> /build/build.ninja
 build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output ${@:3}
+  TEST_INSTANCE="$1"
 EOF
 }
 
