@@ -1,0 +1,437 @@
+nginx: [error] open() "/build/shed-test-nginx-pidfile" failed (2: No such file or directory)
+Setting dl config:
+
+--- Before run
+==  Shed output:
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer:  smtp://127.0.0.1:8025
+EmailUserPass:  user:pass
+==  Serial output:
+Emails:
+--- First Sartup
+Starting: /build/shed3.dbg.exec /build/shed-test-local-config
+==  Shed output:
+ INFO: Tracing enabled	(./shed3.c main)
+ WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
+ INFO: GPIO_FAKE	(./pwm.c gpio_pwm_initialize)
+ INFO: Maintenance Starting	(./shed3.c idle_timeout)
+ WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+ INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+==  Serial output:
+TEXT_SHOW1 System restart
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- Making an unknown option
+==  Shed output:
+ERROR: io_event:serial Got an unknown option from the exterior: 001	(./shed3.c exterior_scan_finished)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+==  Serial output:
+TEXT_SHOW1
+TEXT_SHOW2 Unkown option
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 00 Requesting hash email
+==  Shed output:
+ INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./shed3.c exterior_scan_finished)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+==  Serial output:
+TEXT_SHOW1 Request sending
+TEXT_SHOW2 Day:FILTERED Idx:0
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+===> MAIL FROM:<tmp-from@testtest.test>
+===> RCPT TO:<shed-test-local@tmp-test.test>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=FILTERED']
+b'Date: FILTERED
+b'From: <tmp-from@testtest.test>'
+b'To: <shed-test-local@tmp-test.test>'
+b'Subject: Hash Send'
+b'X-Peer: 127.0.0.1'
+b''
+b'Day:FILTERED Idx: 0'
+b'Hash: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2'
+------------ END MESSAGE ------------
+--- 00 badge in, expect unknown user
+==  Shed output:
+TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+==  Serial output:
+TEXT_SHOW1 ACCESS DENIED
+TEXT_SHOW2 Unknown User
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- Adding 00 hash to dl config, restarting shed
+Setting dl config:
+
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+
+Starting: /build/shed3.dbg.exec /build/shed-test-local-config
+==  Shed output:
+ INFO: Tracing enabled	(./shed3.c main)
+ WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
+ INFO: GPIO_FAKE	(./pwm.c gpio_pwm_initialize)
+ INFO: Maintenance Starting	(./shed3.c idle_timeout)
+ WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: io_event:io_curl parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+ WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: timeout:idle USER_idx:1fff  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+ INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 System restart
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 00 badge in, expect granted
+==  Shed output:
+TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 11 badge in, expect unknown user
+==  Shed output:
+TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 ACCESS DENIED
+TEXT_SHOW2 Unknown User
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 11 badge in, request email
+==  Shed output:
+ INFO: io_event:serial Requested send   Day:FILTERED Idx:0 : [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./shed3.c exterior_scan_finished)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 Request sending
+TEXT_SHOW2 Day:FILTERED Idx:0
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+===> MAIL FROM:<tmp-from@testtest.test>
+===> RCPT TO:<shed-test-local@tmp-test.test>
+---------- MESSAGE FOLLOWS ----------
+mail options: ['SIZE=FILTERED']
+b'Date: FILTERED
+b'From: <tmp-from@testtest.test>'
+b'To: <shed-test-local@tmp-test.test>'
+b'Subject: Hash Send'
+b'X-Peer: 127.0.0.1'
+b''
+b'Day:FILTERED Idx: 0'
+b'Hash: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0'
+------------ END MESSAGE ------------
+--- add 11 hash to dl
+Setting dl config:
+
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+
+--- 00 badge, opt 301, expect download
+==  Shed output:
+TRACE: io_event:serial lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial Forcing config refresh	(./shed3.c exterior_scan_finished)
+ WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: io_event:io_curl parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+TRACE: io_event:io_curl parse add MAP_idx:2dbd2 USER_idx:1fff Update existing	(./access_data.c access_user_add)
+TRACE: io_event:io_curl parse add hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:io_curl parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:221570 [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./access_data.c access_user_add)
+ WARN: io_event:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 Forcing config
+TEXT_SHOW2 refresh
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 11 badge, expect access granted
+==  Shed output:
+TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 11 badge, opt 200, expect add next
+==  Shed output:
+TRACE: io_event:serial lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+==  Serial output:
+TEXT_SHOW1
+TEXT_SHOW2 Will add next user
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 22 badge, opt 200, expect add next
+==  Shed output:
+TRACE: io_event:serial add hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial add MAP_idx:3e78a Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial add expire_day:FILTERED extend_only:0 overwrite_admin:0 map_idx:255882 [8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431]	(./access_data.c access_user_add)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+==  Serial output:
+TEXT_SHOW1 User Added
+TEXT_SHOW2 days_left:30
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- force kill, restart
+Starting: /build/shed3.dbg.exec /build/shed-test-local-config
+==  Shed output:
+ INFO: Tracing enabled	(./shed3.c main)
+ WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
+TRACE: parse add hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:3e78a Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:255882 [8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431]	(./access_data.c access_user_add)
+TRACE: parse add hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:221570 [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./access_data.c access_user_add)
+TRACE: parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED extend_only:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+ INFO: GPIO_FAKE	(./pwm.c gpio_pwm_initialize)
+ INFO: Maintenance Starting	(./shed3.c idle_timeout)
+ERROR: io_curl:config_download Error   CURLcode:7:Couldn't connect to server	(./io_curl.c io_curl_process_events)
+TRACE: timeout:idle USER_idx:1ffd  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1ffd  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+TRACE: timeout:idle USER_idx:1ffe  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1ffe  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+TRACE: timeout:idle USER_idx:1fff  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+ INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+==  Serial output:
+TEXT_SHOW1 System restart
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- 22 badge, expect access granted
+wait_line "/build/shed-test-local-out" "GPIO_FAKE value:0" MISS
+==  Shed output:
+TRACE: io_event:serial lookup hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:3e78a	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+==  Serial output:
+TEXT_SHOW1 Sorry closed
+TEXT_SHOW2 Wait FILTERED
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
+--- final state
+==  Shed output:
+==  Config on disk:
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+==  Serial output:
+Emails:
+ INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
+ INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
+ INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
+ERROR: io_curl:config_download test_sort:id:00 CURL_ERROR:Couldn't connect to server	(./config_download.c is_download_successful)

@@ -3,10 +3,10 @@
 unset  LSAN_OPTIONS
 export LSAN_OPTIONS
 set -eEuo pipefail
-# set -x
+#set -x
 
 D=/build/mount_squash_root_test2
-EXEC=/build/mount_squash_root.dbg.exec
+EXEC=$1
 
 function cleanup() {
 {

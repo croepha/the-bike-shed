@@ -1,10 +1,14 @@
+#!/bin/bash
+
+
+
 #set -eEuo pipefail
 set -u
 
 #bash test_shed.bash > /build/shed-test-local-out
 #diff -u10 --text /build/test-shed-local-test-out.expected /build/test-shed-local-test-out
 
-set -x
+# set -x
 
 nginx_config=/build/shed-test-nginx-config
 nginx_pidfile=/build/shed-test-nginx-pidfile
@@ -18,6 +22,8 @@ shed_out_file=/build/shed-test-local-out
 test_out_file=/build/shed-test-local-test-out
 test_out_file_expected=/build/shed-test-local-test-out.expected
 
+
+nginx -s stop -c "$nginx_config"  || true
 
 function set_dl_config() {
     echo "$1" > $config_dl_location
@@ -171,6 +177,7 @@ UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 
 kill $shed_pid
 wait $shed_pid
+shed_pid=-1
 start_shed
 wait_line $shed_out_file 'Download finished'
 wait_line $shed_out_file 'Maintenance Finished'
@@ -271,10 +278,9 @@ dump_state
 
 echo "--- force kill, restart"
 
-kill "$( cat $nginx_pidfile )"
-wait "$( cat $nginx_pidfile )"
+nginx -s stop -c "$nginx_config"
 kill -9 $shed_pid
-wait $shed_pid
+wait $shed_pid 2> /dev/null
 start_shed
 wait_line $shed_out_file 'Maintenance Finished'
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
@@ -295,8 +301,10 @@ dump_state
 
 kill $shed_pid
 wait $shed_pid
+shed_pid=-1
 kill $serial_copy_pid
 wait $serial_copy_pid
+serial_copy_pid=-1
 
 echo "--- final state"
 dump_state
@@ -322,10 +330,11 @@ EOF
 dump_state
 
 } # main
-exit -1
+# exit -1
+main
 # main > $test_out_file
 # echo "Do:" cp $test_out_file $test_out_file_expected
 # echo code --diff $test_out_file_expected $test_out_file
 # # diff -u10 --text $test_out_file_expected $test_out_file
 
- main | ts -i '%.T'
+# main | ts -i '%.T'

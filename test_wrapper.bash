@@ -1,9 +1,12 @@
 #!/bin/bash
 set -eEuo pipefail
 
+#set -x
+
 EXEC=$1
 CHECK_FILE=$2
-OUT_FILE=$3
+# Middle arguments are passed to exec below
+OUT_FILE=${@: -1} # Last argument
 
 rm -f $OUT_FILE*
 
@@ -15,7 +18,7 @@ function fail() {
 }
 trap fail ERR
 export LSAN_OPTIONS=suppressions=suppressions,print_suppressions=0
-$EXEC 2>&1 | tee "$OUT_FILE.raw" |
+$EXEC "${@:3:$#-3}" 2>&1 | tee "$OUT_FILE.raw" |
   sed -E $'s/^([0-9a-f]+[.][0-9]{3}: (DEBUG| INFO| WARN|ERROR|FATAL):.*)\t(.*)$/\\1\e[999C\e[50D\\3/' >/dev/null # Right justify location info
 
 # remove timestamp, and also line number and addresses, if they shift around, we dont want the test to fail...

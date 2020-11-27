@@ -49,7 +49,7 @@ rule cc_br
  command = ${pi0w_host_prefix}-gcc -Werror -Wshadow-Wall ./$in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
- description = CCBR $out
+ description = CCBR $out 
 
 rule link_br_exec
  command = ${pi0w_host_prefix}-gcc $in -o $out $extra
@@ -123,7 +123,7 @@ function reset() {
 
 cat << 'EOF' >> /build/build.ninja
 rule test
- command = $in $out
+ command = $in $out 
  description = TEST $out
 EOF
 
@@ -131,20 +131,12 @@ function do_test() {
   NAME=$1
   EXEC=$2
 cat << EOF >> /build/build.ninja
-build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output
+build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output ${@:3}
 EOF
 }
 
-function do_test2() {
-  NAME=$1
-  EXEC=$2
-  OTHER_DEPS=$3
-cat << EOF >> /build/build.ninja
-build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bash $EXEC $NAME.expected_output | $OTHER_DEPS
-EOF
-}
 
-do_test2 mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash /build/mount_squash_root.dbg.exec
+do_test mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash /build/mount_squash_root.dbg.exec
 
 
 # cat << EOF >> /build/build.ninja
@@ -197,7 +189,8 @@ depends_on logging
 link_exec access_hash_test    -l pthread
 do_test access_hash_test /build/access_hash_test.fast.exec
 
-do_test test_shed /build/shed3.dbg.exec
+do_test test_shed /workspaces/the-bike-shed/test_shed.bash /build/shed3.dbg.exec
+
 
 reset
 compile logging
