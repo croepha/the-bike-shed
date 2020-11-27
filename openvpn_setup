@@ -1,0 +1,43 @@
+
+
+
+mkdir -p /secrets
+
+(
+    [ -e /secrets/openvpn_key.static ] && exit -1
+    openvpn --genkey --secret /secrets/openvpn_key.static
+)
+
+
+{
+echo '
+daemon
+dev tun
+proto tcp-server
+port 9161
+ifconfig 10.8.0.1 10.8.0.2
+cipher AES-128-CBC
+<secret>'
+cat /secrets/openvpn_key.static
+echo '</secret>'
+} > /secrets/openvpn_server.conf
+
+{
+echo '
+port 9161
+daemon
+proto tcp-client
+remote 192.168.4.159
+dev tun
+ifconfig 10.8.0.2 10.8.0.1
+cipher AES-128-CBC
+<secret>'
+cat /secrets/openvpn_key.static
+echo '</secret>'
+} > /secrets/openvpn_client.conf
+
+# server side:
+# openvpn /secrets/openvpn_server.conf
+
+# client side < copy over /secrets/openvpn_client.conf >
+# modprobe tun; openvpn /mnt/physical/openvpn_client.conf
