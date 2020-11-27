@@ -465,6 +465,30 @@ TEXT_SHOW1
 TEXT_SHOW2
 SLEEP
 Emails:
+--- get time back
+==  Shed output:
+==  Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed-test-local-dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/exterior_mock.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+==  Serial output:
+TEXT_SHOW1 Current Time
+TEXT_SHOW2 FILTERED
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+Emails:
 --- final state
 ==  Shed output:
 ==  Config on disk:

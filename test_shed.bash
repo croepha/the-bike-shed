@@ -58,6 +58,7 @@ function set_dl_config() {
 
 function dump_state() (
     set +x
+
     echo "==  Shed output:"
     cat $shed_out_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
@@ -66,6 +67,7 @@ function dump_state() (
         sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
     } || cat; }
     truncate --size=0 $shed_out_file
+
     echo "==  Config on disk:"
     cat $config_location |  { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' |
@@ -73,23 +75,25 @@ function dump_state() (
         sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/' |
         sort
     } || cat; }
+
     echo "==  Serial output:"
     cat $exterior_serial_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
         sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
+        sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
+        sed -E 's/TEXT_SHOW2[ ]+[0-9][0-9]:[0-9][0-9]/TEXT_SHOW2 FILTERED/' |
         awk '{$1=$1};1'
-    } || cat; }
-#
-       
+    } || cat; }       
     truncate --size=0 $exterior_serial_file
+
     echo "Emails:"
     cat $email_rcpt_log | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day: [0-9]+/Day:FILTERED/' |
         sed -E $'s/b\'Date: .*/b\'Date: FILTERED/' |
         sed -E $'s/mail options: [\'SIZE=[0-9]+\']/mail options: [\'SIZE=FILTERED\']/'
     } || cat; }
-    rm -f $email_rcpt_log
-    touch $email_rcpt_log
+    truncate --size=0 $email_rcpt_log
+
     set -x
 )
 
@@ -335,6 +339,18 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
+echo "--- get time back"
+cat << EOF > $exterior_serial_dev
+SCAN_START
+OPTION 302
+PIN 0000
+RFID 000002030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+
 kill $shed_pid
 wait $shed_pid
 shed_pid=-1
@@ -347,23 +363,6 @@ dump_state
 
 return
 
-cat << EOF > $exterior_serial_dev
-SCAN_START
-OPTION 200
-PIN 123456
-RFID 000102030405060708090a0b0c0d0e0f1011121314151617
-SCAN_FINISHED
-EOF
-dump_state
-
-
-cat << EOF > $exterior_serial_dev
-SCAN_START
-PIN 123456
-RFID 010102030405060708090a0b0c0d0e0f1011121314151617
-SCAN_FINISHED
-EOF
-dump_state
 
 } # main
 # exit -1

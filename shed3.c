@@ -443,10 +443,10 @@ static void exterior_scan_finished() { int r;
             }
         }
     } else if (strcmp(exterior_option, "302") == 0) {
-        s32 now_sec = now_ms() / 1000 ;
-        s32 now_hr = (now_sec / 60) / 60;
-        s32 now_mn = (now_sec / 60) % 60;
-        exterior_display("Current Time\n %02d:%02d ", now_hr, now_mn);
+        struct tm _tm;
+        time_t now_sec = now_ms() / 1000;
+        localtime_r(&now_sec, &_tm);
+        exterior_display("Current Time\n %02d:%02d ", _tm.tm_hour, _tm.tm_min);
     } else {
         exterior_display("\nUnkown option");
         ERROR("Got an unknown option from the exterior: %s", exterior_option);
