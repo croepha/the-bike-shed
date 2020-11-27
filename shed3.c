@@ -324,9 +324,9 @@ static void exterior_scan_finished() { int r;
                         IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
                     }
                 } else {
-                    s32 hr = (secs_till_open_ / 60) / 60;
-                    s32 mn = (secs_till_open_ / 60) % 60;
-                    exterior_display("Sorry closed\nWait %02d:%02d", hr, mn);
+                    s32 sto_hr = (secs_till_open_ / 60) / 60;
+                    s32 sto_mn = (secs_till_open_ / 60) % 60;
+                    exterior_display("Sorry closed\n Wait %02d:%02d", sto_hr, sto_mn);
                 }
             }
         }
@@ -435,6 +435,11 @@ static void exterior_scan_finished() { int r;
                 exterior_display("DENIED: you don't\nhave permission");
             }
         }
+    } else if (strcmp(exterior_option, "302") == 0) {
+        s32 now_sec = now_ms() / 1000 ;
+        s32 now_hr = (now_sec / 60) / 60;
+        s32 now_mn = (now_sec / 60) % 60;
+        exterior_display("Current Time\n %02d:%02d ", now_hr, now_mn);
     } else {
         exterior_display("\nUnkown option");
         ERROR("Got an unknown option from the exterior: %s", exterior_option);
