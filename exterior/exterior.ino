@@ -24,6 +24,8 @@ typedef   size_t  usz;
 #define SS_PIN   21 // Slave select pin
 
 const int RS = 14, EN = 13, d4 = 15 /*18*/, d5 = 2/*5*/, d6 = 0, d7 = 4;
+const int LCD_BL_pin = 5;
+const int LCD_BL_chan = 0;
 
 volatile int pressed_col = -1;
 
@@ -61,6 +63,7 @@ struct line_accumulator_Data {
   char data[line_accumulator_Data_SIZE];
 };
 
+long till_autosleep_ms = 0;
 
 void line_accumulator(struct line_accumulator_Data * leftover, char* data, usz data_len, void(*line_handler)(char*)) {
   for (;;) {
@@ -108,6 +111,9 @@ void setup() {
 	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
 	mfrc522.PCD_DumpVersionToSerial();
 
+  ledcSetup(LCD_BL_chan, 5000, 16);
+  ledcAttachPin(LCD_BL_pin, LCD_BL_chan);
+
   InteriorSerial.printf("EXTERIOR_RESTART\n");
 
 }
@@ -118,6 +124,9 @@ void pullup_rows() {
 #undef _  
 }
 
+
+unsigned int backlight_level = 0;
+unsigned int backlight_level_MAX = 32 * 4 * 256;
 
 void got_interior_line(char*line) {
   
@@ -130,6 +139,8 @@ void got_interior_line(char*line) {
     setup_keypad();
     delay(10);
     pressed_col = -1;    
+    backlight_level = backlight_level_MAX;
+    till_autosleep_ms = 5000;
   } else if (strncmp(line, "TEXT_SHOW2 ", 11) == 0) {
     #define _(n) pinMode(n, OUTPUT);
     row_pins
@@ -139,6 +150,10 @@ void got_interior_line(char*line) {
     setup_keypad();
     delay(10);
     pressed_col = -1;        
+    backlight_level = backlight_level_MAX;
+    till_autosleep_ms = 5000;
+  } else if (strncmp(line, "SLEEP", 5) == 0) {
+    till_autosleep_ms = 0;
   } else {
     Serial.printf("got_interior_line unkown %s\n", line);  
   }
@@ -185,7 +200,11 @@ void draw_input_lines() {
   pressed_col = -1;  
 }
 
+
 void got_keypad_input(char key) {
+  till_autosleep_ms = 5000;
+  backlight_level = backlight_level_MAX;
+  
   if (key == '*') {
     reset_input();
   } else if (entering_option) {
@@ -214,7 +233,34 @@ void got_keypad_input(char key) {
   
 }
 
+
+
+unsigned long last_uptime_ms = 0;
+
 void loop() {
+
+  unsigned long uptime_delta_ms_old = last_uptime_ms;
+  last_uptime_ms = millis();
+  long uptime_delta_ms = last_uptime_ms - uptime_delta_ms_old;
+  if (uptime_delta_ms > 10000) { uptime_delta_ms = 10; } // Overflow or reset...
+  if (till_autosleep_ms > 0) {
+    till_autosleep_ms -= uptime_delta_ms;
+    if (till_autosleep_ms <= 0) {
+       till_autosleep_ms = 0;
+       reset_input();
+    }
+  }
+  
+  ledcWrite(LCD_BL_chan, backlight_level);
+  if (till_autosleep_ms <= 0 && backlight_level > 0) {
+    unsigned long delta_level = (backlight_level_MAX / 1000) * uptime_delta_ms;
+    if (delta_level > backlight_level) {
+      backlight_level = 0;    
+    } else {
+      backlight_level -= delta_level;          
+    }
+  }
+  
   delay(1);
   if (pressed_col != -1) {
     int hit_col = pressed_col;
