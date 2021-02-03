@@ -31,16 +31,15 @@ function set_dl_config() {
     cat $config_dl_location
 }
 
-function t() { tr -d '\000' | sed -E 's/^[0-9a-f]+[.][0-9]{3}: ((DEBUG|TRACE| INFO| WARN|ERROR|FATAL):.*)\((.*):.* .*:(.*)\)$/\1(\3 \4)/'; }
-
 
 function dump_state() (
     set +x
     echo "==  Shed output:"
-    cat $shed_out_file | t | sed -E 's/Day:[0-9]+/Day:FILTERED/' |
-       sed -E 's/Child:[0-9]+/Child:XXXX/' | sed '/^DEBUG:.*$/d' |
-       sed -E 's/expires: [0-9]+ [0-9]+/expires: FILTERED FILTERED/' |
-       sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
+    cat $shed_out_file | tr -d '\000' |
+        sed -E 's/Day:[0-9]+/Day:FILTERED/' |
+        sed -E 's/Child:[0-9]+/Child:XXXX/' |
+        sed -E 's/expires: [0-9]+ [0-9]+/expires: FILTERED FILTERED/' |
+        sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
     truncate --size=0 $shed_out_file
     echo "==  Config on disk:"
     cat $config_location |  sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' | sort
