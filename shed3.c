@@ -275,6 +275,11 @@ static void save_config() {
 }
 
 
+static void unlock_door() {
+    gpio_pwm_set(1);
+    DEBUG("shed_door_unlock_ms:%u", shed_door_unlock_ms);
+    IO_TIMER_MS(shed_pwm) = now_ms() + shed_door_unlock_ms;
+}
 
 static void exterior_scan_finished() { int r;
 
@@ -312,8 +317,7 @@ static void exterior_scan_finished() { int r;
                 expire_day == access_expire_day_magics_NewExtender ||
                 expire_day == access_expire_day_magics_Extender) {
                     exterior_display("ACCESS GRANTED\n");
-                    gpio_pwm_set(1);
-                    IO_TIMER_MS(shed_pwm) = now_ms() + shed_door_unlock_ms;
+                    unlock_door();
             } else {
                 s32 days_left = access_user_days_left(USER_idx);
 
@@ -324,8 +328,7 @@ static void exterior_scan_finished() { int r;
                         exterior_display("ACCESS DENIED\nExpired");
                     } else {
                         exterior_display("ACCESS GRANTED\ndays_left:%d", days_left);
-                        gpio_pwm_set(1);
-                        IO_TIMER_MS(shed_pwm) = now_ms() + 1000;
+                        unlock_door();
                     }
                 } else {
                     s32 sto_hr = (secs_till_open_ / 60) / 60;
@@ -608,10 +611,15 @@ int main (int argc, char ** argv) {
     }
 #endif
 
+    int r = putenv("TZ=:America/Los_Angeles");
+    error_check(r);
+    tzset();
+
+
     // This is an attempt to prevent memory allocations from being overcommitted,
     //  but I think this doesn't actually do that, it just prevents swaping out
     //  and we don't use a swap file anyway.... TODO: Research a better way to do this
-    int r = mlockall( MCL_CURRENT | MCL_FUTURE );
+    r = mlockall( MCL_CURRENT | MCL_FUTURE );
     error_check(r);
 
     assert(argc == 2);

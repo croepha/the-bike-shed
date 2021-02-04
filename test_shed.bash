@@ -26,10 +26,11 @@ test_out_file_expected=/build/shed-test-local-test-out.expected
 nginx -s stop -c "$nginx_config"  || true
 
 cat << EOF > /build/mk_day_sec.py
-from datetime import timezone, timedelta, datetime
+from datetime import timedelta, datetime
+import pytz
 import sys
-PST = timezone(timedelta(hours=-8))
-target = datetime.now(PST) + timedelta(hours=int(sys.argv[1]))
+PT = pytz.timezone('America/Los_Angeles')
+target = datetime.now(PT) + timedelta(hours=int(sys.argv[1]))
 day_start = target.replace(hour=0, minute=0, second=0, microsecond=0)
 print(int((target-day_start).total_seconds()))
 EOF
@@ -42,41 +43,50 @@ function mk_day_sec() {
 open_at_sec="$( mk_day_sec -1 )"
 close_at_sec="$( mk_day_sec 1 )"
 
+[ -v RAW_OUTPUT ] || RAW_OUTPUT=0
 
 function set_dl_config() {
     echo "$1" > $config_dl_location
     echo "Setting dl config:"
-    cat $config_dl_location |
-        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | \
+    cat $config_dl_location | { [ $RAW_OUTPUT = 0 ] && {
+        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | 
         sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/'
+    } || cat; }
 
 }
 
 function dump_state() (
     set +x
     echo "==  Shed output:"
-    cat $shed_out_file | tr -d '\000' |
+    cat $shed_out_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
         sed -E 's/Child:[0-9]+/Child:XXXX/' |
         sed -E 's/expires: [0-9]+ [0-9]+/expires: FILTERED FILTERED/' |
         sed -E 's/expire_day:[0-9]+ /expire_day:FILTERED /'
+    } || cat; }
     truncate --size=0 $shed_out_file
     echo "==  Config on disk:"
-    cat $config_location |  \
-        sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' | \
-        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | \
-        sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/' | \
+    cat $config_location |  { [ $RAW_OUTPUT = 0 ] && {
+        sed -E 's/UserNormal: [0-9]+/UserNormal: FILTERED/' |
+        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' |
+        sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/' |
         sort
+    } || cat; }
     echo "==  Serial output:"
-    cat $exterior_serial_file | tr -d '\000' | sed -E 's/Day:[0-9]+/Day:FILTERED/' |
-       sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
-       awk '{$1=$1};1'
+    cat $exterior_serial_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
+        sed -E 's/Day:[0-9]+/Day:FILTERED/' |
+        sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
+        awk '{$1=$1};1'
+    } || cat; }
+#
+       
     truncate --size=0 $exterior_serial_file
     echo "Emails:"
-    cat $email_rcpt_log |
+    cat $email_rcpt_log | { [ $RAW_OUTPUT = 0 ] && {
         sed -E 's/Day: [0-9]+/Day:FILTERED/' |
         sed -E $'s/b\'Date: .*/b\'Date: FILTERED/' |
         sed -E $'s/mail options: [\'SIZE=[0-9]+\']/mail options: [\'SIZE=FILTERED\']/'
+    } || cat; }
     rm -f $email_rcpt_log
     touch $email_rcpt_log
     # set -x

@@ -435,13 +435,14 @@ TEXT_SHOW2
 SLEEP
 Emails:
 --- 22 badge, expect access granted
-wait_line "/build/shed-test-local-out" "GPIO_FAKE value:0" MISS
 ==  Shed output:
 TRACE: io_event:serial start	(./access_hash.c __access_hash)
 TRACE: io_event:serial finish	(./access_hash.c __access_hash)
 TRACE: io_event:serial lookup hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial lookup returning MAP_idx:3e78a	(./access_data.c __user_map_lookup)
 TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
 ==  Config on disk:
 CloseAtSec: FILTERED
 ConfigDownloadStartupDelayMS: 0
@@ -458,8 +459,8 @@ UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
 ==  Serial output:
-TEXT_SHOW1 Sorry closed
-TEXT_SHOW2 Wait FILTERED
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2 days_left:30
 TEXT_SHOW1
 TEXT_SHOW2
 SLEEP

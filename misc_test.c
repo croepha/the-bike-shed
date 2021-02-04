@@ -1,4 +1,5 @@
 #include <time.h>
+#include <errno.h>
 #include <inttypes.h>
 #include "logging.h"
 
@@ -14,7 +15,8 @@ static void test_is_open(u32 day_sec_open, u32 day_sec_close) {
         day_sec_close/60%60,
         day_sec_close%60);
 
-    setenv("TZ", "PST8PDT", 1);
+    int r = putenv("TZ=:America/Los_Angeles");
+    error_check(r);
     tzset();
 
     enum { state_start, state_open, state_closed } last_state = state_start;
@@ -22,7 +24,8 @@ static void test_is_open(u32 day_sec_open, u32 day_sec_close) {
     for (u64 sim_ms = start_time_ms; sim_ms < end_time_ms; sim_ms += 1000) {
         char ftime[30];
 
-        setenv("TZ", "PST8PDT", 1);
+        r = putenv("TZ=:America/Los_Angeles");
+        error_check(r);
         tzset();
         time_t utc_sec = sim_ms / 1000;
         struct tm * tm = localtime(&utc_sec);
