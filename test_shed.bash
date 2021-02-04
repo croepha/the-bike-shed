@@ -8,7 +8,8 @@ set -u
 #bash test_shed.bash > /build/shed-test-local-out
 #diff -u10 --text /build/test-shed-local-test-out.expected /build/test-shed-local-test-out
 
-# set -x
+
+#set -x
 
 nginx_config=/build/shed-test-nginx-config
 nginx_pidfile=/build/shed-test-nginx-pidfile
@@ -89,7 +90,7 @@ function dump_state() (
     } || cat; }
     rm -f $email_rcpt_log
     touch $email_rcpt_log
-    # set -x
+    set -x
 )
 
 function wait_line() {
@@ -272,7 +273,7 @@ SCAN_FINISHED
 EOF
 wait_line $shed_out_file 'Download finished'
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
-sleep 0.1
+sleep 0.01
 dump_state
 
 
@@ -308,7 +309,7 @@ RFID 220102030405060708090a0b0c0d0e0f1011121314151617
 SCAN_FINISHED
 EOF
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
-sleep 0.5
+sleep 0.01
 dump_state
 
 echo "--- force kill, restart"

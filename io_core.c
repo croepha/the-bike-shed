@@ -49,7 +49,7 @@ void io_process_events() { start:;
 
   u64 now_epoch_ms = now_ms();
   if (io_idle_has_work) {
-    IO_TIMER_MS(idle) = now_epoch_ms + 100;
+    IO_TIMER_MS(idle) = now_epoch_ms + 10;
   }
 
   enum _io_timers running_timer;
