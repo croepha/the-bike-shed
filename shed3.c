@@ -277,7 +277,7 @@ static void save_config() {
 
 static void unlock_door() {
     gpio_pwm_set(1);
-    DEBUG("shed_door_unlock_ms:%u", shed_door_unlock_ms);
+    //DEBUG("shed_door_unlock_ms:%u", shed_door_unlock_ms);
     IO_TIMER_MS(shed_pwm) = now_ms() + shed_door_unlock_ms;
 }
 

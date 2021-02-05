@@ -41,7 +41,7 @@ function mk_day_sec() {
     python3 /build/mk_day_sec.py $1
 }
 
-open_at_sec="$( mk_day_sec -1 )"
+open_at_sec="$( mk_day_sec 0 )"
 close_at_sec="$( mk_day_sec 1 )"
 
 [ -v RAW_OUTPUT ] || RAW_OUTPUT=0
