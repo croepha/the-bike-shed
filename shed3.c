@@ -605,7 +605,8 @@ int main (int argc, char ** argv) {
     }
 #endif
 
-    int r = putenv("TZ=:America/Los_Angeles");
+
+    int r = putenv("TZ=PST8PDT");
     error_check(r);
     tzset();
 
