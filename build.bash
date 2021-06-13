@@ -1,5 +1,6 @@
-set -eEuo pipefail
 source /etc/profile
+set -eEuo pipefail
+
 # function _default() {_varname=$1; _default_value=$2;
 #     eval '
 #     if [ ! -v '$_varname' ]; then {
@@ -31,7 +32,7 @@ if [ ! -v SHOULD_CLEAN ]; then {
 nginx_config=/build/shed-test-nginx-config
 nginx_pidfile=/build/shed-test-nginx-pidfile
 
-nginx -s stop -c "$nginx_config" &>/dev/null || true 
+nginx -s stop -c "$nginx_config" &>/dev/null || true
 cat << EOF > $nginx_config
 pid $nginx_pidfile;
 events { worker_connections 768; }
@@ -71,7 +72,7 @@ rule cc_br
  command = ${pi0w_host_prefix}-gcc -Werror -Wshadow-Wall ./$in -c -o $out -MF $out.d -MMD $extra
  depfile = ${out}.d
  deps = gcc
- description = CCBR $out 
+ description = CCBR $out
 
 rule link_br_exec
  command = ${pi0w_host_prefix}-gcc $in -o $out $extra
@@ -86,7 +87,7 @@ EOF
 
 pi0w_target_flags="-target arm-linux-gnueabihf -mfloat-abi=hard -mcpu=arm1176jzf-s -mfpu=vfpv2"
 # PI0W Debug version
-pi0w_host_dir="/build/rootpi0w-dev/host/"
+pi0w_host_dir="/build/root-pi0w-dev-sdk/host/"
 pi0w_host_lib="$pi0w_host_dir/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/"
 pi0w_sysroot="$pi0w_host_dir/arm-buildroot-linux-uclibcgnueabihf/sysroot"
 pi0w_common="--sysroot=$pi0w_sysroot $pi0w_target_flags"
@@ -103,10 +104,10 @@ eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 }
 
 function compile() { SOURCE="$1"; ARGS=("${@:2}")
-  _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=1 -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
-  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=1 -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
-  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=0 -D BUILD_IS_RELEASE=0 $pi0w_common
-  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=0 -D BUILD_IS_RELEASE=1 $pi0w_common
+  _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=1 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
+  _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=1 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
+  _build pi0wdbg  -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=0 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=0 $pi0w_common
+  _build pi0wfast -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=0 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=1 $pi0w_common
 }
 
 function depends_on() {
@@ -145,7 +146,7 @@ function reset() {
 
 cat << 'EOF' >> /build/build.ninja
 rule test
- command = TEST_INSTANCE=$TEST_INSTANCE $in $out 
+ command = TEST_INSTANCE=$TEST_INSTANCE $in $out
  description = TEST $out
 EOF
 

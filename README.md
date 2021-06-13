@@ -9,48 +9,88 @@ An RFID based access control system for [Noisebridge].  Some specific goals:
   - Limit complexity
   - Unit and Functional testing
 - More accessable management, the plan is that the master config will just be pulled from a URL, like a github hosted file for example...
-- support multiple semi-autonomous units
-- possibly be adaptable to other applications like appliance lockouts, or lockers
+- support multiple semi-autonomous units (currently unmet)
+- possibly be adaptable to other applications like appliance lockouts, or lockers (currently unmet)
 
 [Noisebridge]: https://www.noisebridge.net/
 
+
+Install
+--------------------------------------------------
+- Build the Interior and Exterior modules found in the schematics directory (We will work on an easy PCB you can have made)
+- Download a release zip
+- Extract it to an SD Card formatted as FAT (most come this way)
+- Install the SD Card in the PI0, in the interior module
+- Use Arduino studio to build the exterior code, flash that to the ESP32 in the exterior module
+
 Development
 --------------------------------------------------
+### Dev Quickstart:
 
 For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1CowKULMx8
 
-NOTE: These proceedures are broken, they assume you have the build root SDK built
-TODO: Write instructions on building the build root SDK
+For general coding:
+0. Download and install Virtualbox (or similar)
+1. Setup a Ubuntu 20.04 VM
+  - 40 GB should be plenty
+  - Don't forget to give it a few CPUs if you want compiles to be faster
+  - intall openssh with SSH, setup login for root
+2. Log in as root (you will be doing everything as root) [VSCode] is reccomended (but not required) for [remote work over SSH]
+3. `mkdir /workspaces && git clone https://github.com/croepha/the-bike-shed.git && cd the-bike-shed` (Or open a vscode workspace there)
+4. `bash setup_dev_environment.bash` (or run the "setup dev environment" vscode task)
+5. To build the code and run the tests: `bash build.bash`
+Hopefully that just worked, if it didn't, please let us know
 
-### [VSCode](https://code.visualstudio.com/)
+For Schematics, you should also grab [KiCad]
+Currently, the exterior code has a hard requirement on Arduino Studio, and it doesn't matter where you run that
 
-0. Install and setup docker:
-    - Windows & MAC install docker desktop
-    - Ubuntu:
-        1. `sudo apt install docker.io; sudo usermod -aG docker $USER`
-        2. re-login
-    - Linux follow directions for your distro...
-1. Install the "Remote - Containers"
-   (`ms-vscode-remote.remote-containers`) exension
-2. Clone this code locally.
-3. Open the project folder in VSCode
-4. It should prompt to "Reopen in Container", do that. else do
-   `Command Pallette -> "Reopen in Container"`
-    - Note: You can ignore the message about git missing, it will get
-      installed in the next step
-5. Once it's loaded in the new container run the "setup dev
-   environment" task. Command Pallette -> "Run Task"
-6. Re-open window (so that vscode will realize git is now installed)
-7. Run the default build task to build...
-    - To clean and rebuild: Run the "clean and build" task
-8. Don't forget to setup git inside of your container:
-  `git config --local user.email "you@example.com"`
-  `git config --local user.name "Your Name"`
-  if you use an SSH Agent then your key forwarding should work, else you need to do `ssh-keygen` and then `ssh-add -L` and then add your SSH key to your github...
-
-For Schematics, you should grab [KiCad]
-
+[VSCode]: https://code.visualstudio.com/
+[remote work over SSH]: https://code.visualstudio.com/docs/remote/ssh
 [KiCad]: https://www.kicad-pcb.org/
+
+## Dev setup FAQ:
+
+- Q: Do I really need to run inside of Virtualbox?
+
+A: No, not really, you can setup on bare metal or run inside docker with success depending on your
+exact setup.  It is encouraged to not run setup_dev_environment.bash on your
+daily driver system, as it does some things that may be considered rude, such as
+installing system packages, and writing things to random directories within the system.
+
+- Q: Why does everything run as root?
+
+A: Well its already in a VM, and its just easier that way... In actuality, there are only a few things
+that really need root, mostly the tests, like some call iptables to simulate various network situations,
+sometimes chroot or mount is called.  We could fix this if we wanted, but as far as I can tell it would
+be more work, that doesn't actually solve a problem, but if you care, then please feel free empowered to
+fix it yourself
+
+- Q: Why fixed paths, or: Do I really have to put my code in `/workspaces/the-bike-shed`?
+
+A: It's mostly out of lazyness at this point, we might fix this if there is interest.  It's a similar
+situation to "Why does everything run as root".  Everything is already inside a container, why does it matter
+where it is inside of that?  There some actual advantages, albeit minor:
+  - Fixed paths make debugging easier, if something is always in the same place, you don't have to go hunt for it
+  - Collaberation is easier, homogenous environments make it easier to catch people up on eachother's envrironments, and you can copy/paste commands...
+
+- Q: This doesn't build everything does it?
+
+A: You probably didn't ask that question, but I asked it for you.  No, the quickstart assumes that you aren't interested in
+building the kernel or the root OS.  Most people won't need to, they can just copy from the latest release, but if you _are_
+interested, then see `build_root.bash`.  If you actually did wante to build _everything_ from scratch then do this:
+ - `bash build_root.bash clean_all`
+ - `bash build_root.bash build_all`
+ - `bash build_root.bash package_sdk`
+ - `SHOULD_CLEAN=1 bash build.bash`
+ - `bash build_root.bash build_linux`
+ - `bash build_release.bash` (WIP)
+ - The release binaries should now be in `/build/release`
+
+
+
+Everything below this line is probably out of date TODO
+--------------------------------------------------
+
 
 Hardware List
 --------------------------------------------------

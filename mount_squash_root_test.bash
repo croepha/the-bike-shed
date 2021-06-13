@@ -19,6 +19,8 @@ umount -R   $D/initramfs/* || true
 }
 
 cleanup
+#exit -1
+mount --make-unbindable /  # needed on some systems where / is "shared", prevents EINVAL on mount --move
 
 mount   | grep "$D" && exit -1
 losetup | grep "$D" && exit -1
@@ -52,7 +54,7 @@ EOF
 clang $D/fake_init.c --static -o $D/squash1/sbin/init
 
 
-/build/rootpi0w-dev/host/bin/mksquashfs $D/squash1/ $D/boot/squash1 -quiet -no-progress
+/build/root-pi0w-dev-sdk/host/bin/mksquashfs $D/squash1/ $D/boot/squash1 -quiet -no-progress
 
 for f in $( ldd $EXEC | sed -nE 's/[^\/]*(\/[^ ]*).*/\1/p'); do {
   mkdir -p $D/initramfs/$(dirname $f)
@@ -63,8 +65,8 @@ cp $EXEC $D/initramfs/init
 
 mount -o bind /proc $D/initramfs/proc
 
+
 chroot $D/initramfs/ /init $BOOT_DEV squash1
 cleanup
 
 
-    

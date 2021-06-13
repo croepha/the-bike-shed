@@ -1,178 +1,205 @@
 
-# VARIANT="pi0w-dev" bash build_root.bash full_build clean
-# VARIANT="pi0w-dev" bash build_root.bash make menuconfig
-# VARIANT="pi0w-dev" bash build_root.bash save_configs
-# VARIANT="pi0w-dev" bash build_root.bash full_build
+# Our operating system is a distribution of GNU/Linux facilitated by buildroot
 
-# VARIANT="pi0w-dev" bash build_root.bash make linux-menuconfig
-# VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
-# VARIANT="pi0w-dev" bash build_root.bash make linux-update-defconfig
+# The reason why we are using buildroot instead of just simply using
+#  <insert your favorite distro here> is because for reliability we really want to limit
+# the amount of software running on the device, as each additional peice of software
+# competes for system resources, and often, they also increase the attack surface.
+# But most importaintly, more pieces means more things to break.  Buildroot provides
+# a very easy way to build custom OS images with only the things we want in them.
+# Also it allows for some customizations, like for example, we put the whole OS in
+# a squashfs image that sits on the root of the SD card, when we want to update,
+# we just copy over a new squashfs image, no fiddling around with partitions and
+# package managers.  Also all of the importaint configuration options are surfaced
+# to the root of the SD Card, that way the user doesn't have to dig into deep directory
+# trees to configure basic things like network settings.  See mount_squash_root.c for
+# more detains
+
+# Before you get started here, you should know that it may take a decent machine hours
+# to do a full build, unless you are needing to reconfigure the base system, like for
+# example, installing a text editor or network utility, or maybe installing a new
+# system library, then you should probably just use the builds from the latest release
+# there are also a number of files that from the buildroot build that are needed to
+# build binaries, those can be found in the sdk.tar.xz file, the setup_dev_environment.sh
+# script will download and extract that sdk
+
+# A full explanation of how to use buildroot, is a bit out-of-scope, but please study
+# the official buildroot manual: https://buildroot.org/downloads/manual/manual.html
+# With all that said, here are some well defined recipes:
+#  get_buildroot # Download and extract buildroot
+#
+
 
 export FORCE_UNSAFE_CONFIGURE=1
-export GIT_WORK_TREE=/workspaces/the-bike-shed/
-export GIT_DIR=$GIT_WORK_TREE/.git
 export XZ_OPT="-9e --threads=0 -v"
 export _F="set -eEuo pipefail"
 export BR_VERSION=2020.02.2
+export HW_NAME=pi0w-dev
+export SRC=/workspaces/the-bike-shed/
+export BR=/build/root-$BR_VERSION
+export OUT=root
 
-function make() ($_F
-    /usr/bin/make -C /build/root O=/build/root$VARIANT "$@"
+
+function _make() ($_F
+    /usr/bin/make -C $BR O=/build/$OUT-$HW_NAME "$@"
 )
 
-function full_build() ($_F
-    # apt install -y cpio rsync sudo ccache build-essential unzip bc locales
-    # locale-gen en_US.UTF-8
-    # update-locale
+function _load_config() ($_F
+    _make defconfig BR2_DEFCONFIG=$SRC/$HW_NAME-root.config
+)
 
+function get_buildroot() ($_F
+    mkdir -p $BR
+    cd $BR
+    wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
+    tar xvf buildroot.tar.gz --strip-components=1
+)
 
-    if [ ! -d /build/root ]; then
-        mkdir -p /build/root
-        cd /build/root
-        wget -O buildroot.tar.gz https://buildroot.org/downloads/buildroot-$BR_VERSION.tar.gz
-        tar xvf buildroot.tar.gz --strip-components=1
-    fi
-    cd /build/root
+function menuconfig_root() ($_F
+    _load_config
+    _make menuconfig
+    _make savedefconfig
+)
 
-    _b=/build/root$VARIANT/
-    _w=/workspaces/the-bike-shed/
-    _i=$_b/images/
-    _o=$_w/build/
+function menuconfig_linux() ($_F
+    _load_config
+    _make linux-menuconfig
+    _make linux-update-defconfig
+)
 
-    # || ! -f "/build/root/$VARIANT/.config" ???
-    if [[ "( "$@" )" =~ " clean " ]]; then
-        make clean
-    fi
-    make defconfig BR2_DEFCONFIG=$_w/$VARIANT-root.config
+function menuconfig_busybox() ($_F
+    _load_config
+    _make busybox-menuconfig
+    _make busybox-update-config
+)
 
+function menuconfig_uclibc() ($_F
+    _load_config
+    _make uclibc-menuconfig
+    _make uclibc-update-config
+)
+
+function clean_all() ($_F
+    _load_config
+    _make clean
+)
+
+function build_all() ($_F
+    mkdir -p /build/pi0initramfs
+    _load_config
+    _make
+)
+
+function build_linux() ($_F
     rm -rvf  /build/pi0initramfs
     mkdir -p /build/pi0initramfs/{dev,physical,newroot}
     cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
+    _load_config
+    _make linux-rebuild
+    # Copy /build/rootpi0w-dev/images/zImage to sdcard
+)
 
-    make all
+function package_sdk() ($_F
+    o1=/build/$OUT-$HW_NAME
+    o2=$o1-sdk
+    sr_src=$o1/host/arm-buildroot-linux-uclibcgnueabihf/sysroot/
+    sr_dst=$o2/host/arm-buildroot-linux-uclibcgnueabihf/sysroot/
 
-    rm -vf                    $_o/$VARIANT-*
-    mkdir -p                  $_o
-    cp -v $_i/rootfs.squashfs $_o/$VARIANT-rootfs.squashfs
-    [[ ! "$VARIANT" =~ "host" ]] && {
-        cp -v $_i/sdcard.img      $_o/$VARIANT-sdcard.img
-        xz --keep                 $_o/$VARIANT-sdcard.img
+    function copy() {
+        mkdir -p $o2/$1
+        echo rsync -rvha $o1/$1/ $o2/$1/
+        rsync -rvha $o1/$1/ $o2/$1/
     }
-    xz --keep                 $_o/$VARIANT-rootfs.squashfs
-    tar cJv -C $_b/host    . -f  $_o/$VARIANT-host.tar.xz
-    tar cJv -C $_b/staging . -f  $_o/$VARIANT-staging.tar.xz
-    rm -f /build/$VARIANT-full_build.working
-)
 
-function save_configs() ($_F
-    make savedefconfig
-    make linux-update-defconfig
-    make busybox-update-config
-    make uclibc-update-config
-)
+    rm -rvf $o2
 
-function archive() ( $_F
-    _w=/workspaces/the-bike-shed/
-    tar zc $_w/build_root.bash $_w/$VARIANT-*.config
-)
+    mkdir -p $sr_dst/usr/lib/ $sr_dst/lib/
 
+    copy host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
+    copy host/libexec/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/
+    copy host/arm-buildroot-linux-uclibcgnueabihf/bin/
+    copy host/arm-buildroot-linux-uclibcgnueabihf/sysroot/usr/include/
+    copy host/bin/
 
-function build_remote2() ( $_F
-    SSH_HOST=build
-    _w=/workspaces/the-bike-shed/
-    archive | ssh $SSH_HOST tar zx -C /
-    ssh "$SSH_HOST" 'touch /build/'$VARIANT'-full_build.working'
-    ssh "$SSH_HOST" tmux new-session -Ad
-    ssh "$SSH_HOST" build tmux set-option -g remain-on-exit on
-    ssh "$SSH_HOST" tmux new-window -d \
-        'bash '$_w'/build_root.bash VARIANT='$VARIANT' full_build'
+    rsync -vha \
+        $sr_src/usr/lib/crt*.o \
+        $sr_src/usr/lib/libpthread*.a \
+        $sr_src/usr/lib/libutil.* \
+        $sr_src/usr/lib/libc.* \
+        $sr_src/usr/lib/libgcc_s.so* \
+        $sr_src/usr/lib/libcurl.so* \
+        $sr_src/usr/lib/uclibc_nonshared.a \
+        $sr_src/usr/lib/libssl.so* \
+        $sr_src/usr/lib/libcrypto.so* \
+        $sr_src/usr/lib/libz.so* \
+        $sr_src/usr/lib/libatomic.so* \
+        $sr_dst/usr/lib/
 
-)
+    rsync -vha \
+        $sr_src/lib/libc.so.1 \
+        $sr_src/lib/libuClibc-1.0.32.so \
+        $sr_src/lib/ld-uClibc-1.0.32.so \
+        $sr_src/lib/ld-uClibc.so.1 \
+        $sr_dst/lib/
 
-function remote_pull() ( $_F
-    SSH_HOST=build
-    _w=/workspaces/the-bike-shed/
-    _o=$_w/build/
+    rm -rvf $o2/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/install-tools/
+    rm -rvf $o2/host/lib/gcc/arm-buildroot-linux-uclibcgnueabihf/8.4.0/plugin
 
-    git diff --exit-code
-    git diff --cached --exit-code
-    ssh "$SSH_HOST" bash "$_w"'/build_root.bash VARIANT='$VARIANT'pi0w-dev archive' | tar zx -C /
-    scp "$SSH_HOST":$_o/$VARIANT-rootfs.squashfs.xz $_o
-    [[ ! "$VARIANT" =~ "host" ]] &&
-    scp "$SSH_HOST":$_o/$VARIANT-sdcard.img.xz      $_o
-    scp "$SSH_HOST":$_o/$VARIANT-host.tar.xz        $_o
-    scp "$SSH_HOST":$_o/$VARIANT-staging.tar.xz     $_o
-
-    unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
-    [[ ! "$VARIANT" =~ "host" ]] &&
-    unxz -fv $_o/$VARIANT-sdcard.img.xz
-
-    _h=/build/root$VARIANT/host/
-    rm -rvf    $_h
-    mkdir -p   $_h
-    tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
-
-    _h=/build/root$VARIANT/staging/
-    rm -rvf    $_h
-    mkdir -p   $_h
-    tar xJv -C $_h -f $_o/$VARIANT-staging.tar.xz
-
-    if [[ "$VARIANT" =~ "host" ]]; then
-        _target=x86_64-buildroot-linux-uclibc
-    else
-        _target=arm-buildroot-linux-uclibcgnueabihf
-    fi
-    cp -v $_h/lib/gcc/$_target/8.4.0/{crtbeginT.o,crtend.o} \
-        $_h/$_target/sysroot/usr/lib/
+    tar cJvf $o2.tar.xz -C $o2 .
+    echo "Made release: $o2.tar.xz"
 
 )
 
+eval "$@"
 
-function build_remote() ($_F
-    SSH_HOST=build
-    _w=/workspaces/the-bike-shed/
-    _o=$_w/build/
 
-    ssh "$SSH_HOST" 'touch /build/'$VARIANT'-full_build.working'
-    ssh "$SSH_HOST" tmux new-session -Ad
-    ssh "$SSH_HOST" build tmux set-option -g remain-on-exit on
 
-    scp $_w/build_root.bash "$SSH_HOST":/build/
-    ssh "$SSH_HOST" tmux new-window -d \
-        'bash /build/build_root.bash VARIANT='$VARIANT' full_build'
+exit
 
-    while ssh "$SSH_HOST" '[ -e /build/'$VARIANT'-full_build.working ]'; do {
-        echo "waiting"
-        sleep 20
-    }; done
-    scp "$SSH_HOST":$_o/$VARIANT-rootfs.squashfs.xz $_o
-    [[ ! "$VARIANT" =~ "host" ]] &&
-    scp "$SSH_HOST":$_o/$VARIANT-sdcard.img.xz      $_o
-    scp "$SSH_HOST":$_o/$VARIANT-host.tar.xz        $_o
-    scp "$SSH_HOST":$_o/$VARIANT-staging.tar.xz     $_o
+# Everything below here is junk notes that need to be removed or moved elsewhere:
+#--------------------------------------------
 
-    unxz -fv $_o/$VARIANT-rootfs.squashfs.xz
-    [[ ! "$VARIANT" =~ "host" ]] &&
-    unxz -fv $_o/$VARIANT-sdcard.img.xz
 
-    _h=/build/$VARIANT-host/
-    rm -rvf    $_h
-    mkdir -p   $_h
-    tar xJv -C $_h -f $_o/$VARIANT-host.tar.xz
+# recipe full build:
+# bash build_root2.bash _load_config
+# bash build_root2.bash _make clean
+# bash build_root2.bash _make
 
-    _h=/build/$VARIANT-staging/
-    rm -rvf    $_h
-    mkdir -p   $_h
-    tar xJv -C $_h -f $_o/$VARIANT-staging.tar.xz
+# recipe root menuconfig:
+# bash build_root2.bash _load_config
+# bash build_root2.bash _make menuconfig
+# bash build_root2.bash _make savedefconfig
 
-    if [[ "$VARIANT" =~ "host" ]]; then
-        _target=x86_64-buildroot-linux-uclibc
-    else
-        _target=arm-buildroot-linux-uclibcgnueabihf
-    fi
-    cp -v $_h/lib/gcc/$_target/8.4.0/{crtbeginT.o,crtend.o} \
-        $_h/$_target/sysroot/usr/lib/
+# recipe uclibc menuconfig:
 
-)
+# make busybox-menuconfig
+# make busybox-update-config
+
+# To make SD Card image:
+# copy /build/root-pi0w-dev/images/rpi-firmware/*
+# override config files
+
+
+
+
+
+wpa_supplicant -B  -i wlan0 -c /mnt/physical/wpa_supplicant.conf
+wpa_cli -Ba /mnt/physical/wifi_action.sh
+
+
+# cat /mnt/physical/wifi_action.sh
+#!/bin/sh
+#echo WIFI ACTION RUNNING $1 $2 >> /tmp/wifi_action.log
+
+if [ "$2" = "CONNECTED" ]; then
+#    ip link set dev wlan0 up
+    ip addr add 192.168.4.31/24 dev wlan0
+    ip route add default via 192.168.4.1
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+fi
+
+
+
 
 eval "$@"
 

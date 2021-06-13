@@ -8,7 +8,7 @@
 
 set -u
 
-# RAW_OUTPUT=1 bash -x test_shed.bash 2>&1 |  ts -i '%.s' | ts -s '%.s' > build/t 
+# RAW_OUTPUT=1 bash -x test_shed.bash 2>&1 |  ts -i '%.s' | ts -s '%.s' > build/t
 
 D=/build/"$TEST_INSTANCE"
 
@@ -59,7 +59,7 @@ function set_dl_config() {
     echo "$1" > $config_dl_location
     echo "-- Setting dl config:"
     cat $config_dl_location | { [ $RAW_OUTPUT = 0 ] && {
-        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' | 
+        sed -E 's/OpenAtSec: '"$open_at_sec"'/OpenAtSec: FILTERED/' |
         sed -E 's/CloseAtSec: '"$close_at_sec"'/CloseAtSec: FILTERED/'
     } || cat; }
 
@@ -70,6 +70,8 @@ function dump_state() (
 
     echo "-- Shed output:"
     cat $shed_out_file | tr -d '\000' | { [ $RAW_OUTPUT = 0 ] && {
+        sed -E 's/(.....:) timeout:io_curl /\1 FILTERED:io_curl /' |
+        sed -E 's/(.....:) io_event:io_curl /\1 FILTERED:io_curl /' |
         sed -E 's/Day:[0-9]+/Day:FILTERED/' |
         sed -E 's/Child:[0-9]+/Child:XXXX/' |
         sed -E 's/expires: [0-9]+ [0-9]+/expires: FILTERED FILTERED/' |
@@ -92,7 +94,7 @@ function dump_state() (
         sed -E 's/Wait [0-9][0-9]:[0-9][0-9]/Wait FILTERED/' |
         sed -E 's/TEXT_SHOW2[ ]+[0-9][0-9]:[0-9][0-9]/TEXT_SHOW2 FILTERED/' |
         awk '{$1=$1};1'
-    } || cat; }       
+    } || cat; }
     truncate --size=0 $exterior_serial_file
 
     echo "-- Emails:"

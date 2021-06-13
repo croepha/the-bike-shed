@@ -10,13 +10,8 @@ inplace system upgrades by just copying a new squashfs image over
 This binary gets embedded into the linux kernel via the initramfs overlay feature
 
 For quick iterations, this is a shortcut to rebuild a new kernel:
-{
-rm -rvf  /build/pi0initramfs
-mkdir -p /build/pi0initramfs/{dev,physical,newroot}
-cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
-VARIANT="pi0w-dev" bash build_root.bash make linux-rebuild
-# Copy /build/rootpi0w-dev/images/zImage to sdcard
-}
+
+bash build_root.bash build_linux
 
 */
 
@@ -57,13 +52,14 @@ int main(int argc, char**argv) { int r;
   r = mount("none", "/dev", "devtmpfs", 0, 0);
   error_check(r);
 
+  // If we are doing a production build
+#ifdef BUILD_FLAVOR_STATIC
   // Setup standard output, since we're the first process we
   //  can't rely on fd0 to be console
-  if (access("/dev/console", W_OK) == 0) {
-    // if /dev/console doesn't exist, then we are probably running in a test,
-    //  so we probably just want to print to fd0
-    stdout = stderr = fopen("/dev/console", "we");
-  }
+  stdout = stderr = fopen("/dev/console", "we");
+#endif
+  // if we aren't doing a production build we are a test build
+  //  so we probably just want to print to exiting stdout/stderr
 
   // If were printing something, then its probably an exceptional
   //   situation, lets turn off all the buffering so that the output

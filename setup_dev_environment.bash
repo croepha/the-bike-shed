@@ -1,4 +1,4 @@
-set -eEuo pipefail
+set -xeEuo pipefail
 
 # /*
 
@@ -9,8 +9,9 @@ set -eEuo pipefail
 # ./configure --disable-golang && make -j $(nproc) && make install
 # */
 
-
+set +u
 source /etc/profile
+set -u
 if [ ! -v ENV_VER ]; then {
         ENV_VER=0
 }; fi
@@ -21,7 +22,9 @@ export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export ENV_VER=3
 EOF
+  set +u
   source /etc/profile
+  set -u
 }; fi
 
 # rm -f /etc/apt/sources.list.d/shed.list  # for debugging
@@ -88,11 +91,20 @@ apt upgrade -y
 apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10 clang-tools-10 \
         libncurses5-dev bzr cvs mercurial subversion unzip bc \
-        dosfstools nginx libcurl4-openssl-dev libssl-dev re2c python3-tz
+        dosfstools nginx libcurl4-openssl-dev libssl-dev re2c python3-tz \
+        socat
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
 }; done
+
+SDK_DIR=/build/root-pi0w-dev-sdk
+SDK_URL="https://github.com/croepha/the-bike-shed/releases/download/dev-sdk-1/root-pi0w-dev-sdk.tar.xz"
+[ ! -d $SDK_DIR ] && {
+  mkdir -p $SDK_DIR
+  curl -L  $SDK_URL | tar Jxv -C $SDK_DIR
+
+}
 
 
 # This is to try to prevent the annoying "host verifcation failed" message on fresh dockers...
