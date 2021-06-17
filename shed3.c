@@ -206,6 +206,10 @@ static void exterior_display(char * fmt, ...) {
 }
 
 
+static u8 mem_has_nonzero(void* buf, usz len) {
+    return len && (*(u8*)buf || memcmp(buf, buf + 1, len - 1));
+}
+
 static void save_config() {
     int r;
 
@@ -235,6 +239,52 @@ static void save_config() {
     r = dprintf(fd, "OpenAtSec: %u\n", day_sec_open); error_check(r);
     r = dprintf(fd, "CloseAtSec: %u\n", day_sec_close); error_check(r);
 
+    if (mem_has_nonzero(access_salt, SALT_BUF_LEN)) {
+        char* h = access_salt;
+        r = dprintf(fd,
+            "Salt: "
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
+            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
+            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
+            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
+            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
+            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
+            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
+            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
+            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]);
+        error_check(r);
+    }
+
+    if (mem_has_nonzero(access_salt_old, SALT_BUF_LEN)) {
+        char* h = access_salt_old;
+        r = dprintf(fd,
+            "SaltOld: "
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x"
+            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
+            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
+            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
+            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
+            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
+            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
+            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
+            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
+            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]);
+        error_check(r);
+    }
+
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
 
@@ -261,8 +311,7 @@ static void save_config() {
             h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
             h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
             h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]
-            );
+            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]);
     #undef h
         error_check(r);
         if (r < 0) had_error = 1;
@@ -533,6 +582,15 @@ char * email_rcpt;
 char * serial_path = serial_path_DEFAULT;
 
 
+
+void config_salt(char* hex) {
+    buf_from_hex(access_salt, SALT_BUF_LEN, hex);
+}
+
+void config_salt_old(char* hex) {
+    buf_from_hex(access_salt_old, SALT_BUF_LEN, hex);
+}
+
 void config_user_adder(char* hex) {
     admin_added = 1;
     access_HashResult hash = {};
@@ -664,6 +722,13 @@ int main (int argc, char ** argv) {
     assert(base16_to_int('f') == 15);
     assert(base16_to_int('A') == 10);
     assert(base16_to_int('F') == 15);
+
+    {
+        assert(mem_has_nonzero(0, 0) == 0);
+        assert(mem_has_nonzero("\0\0\0\0\0\0\0\0\0\0", 8) == 0);
+        assert(mem_has_nonzero("\0\0\1\0\0\0\0\0\0\0", 8) == 1);
+        assert(mem_has_nonzero("\1\0\0\0\0\0\0\0\0\0", 8) == 1);
+    }
 
     for(;;) {
         log_allowed_fails = 100000000;

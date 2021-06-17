@@ -99,7 +99,8 @@ char* config_push_string(char * str) {
 #endif
 
 
-
+#define _config_salt()  ({ *end = 0; if(config_user_adder) { config_salt(start); } return; })
+#define _config_salt_old()  ({ *end = 0; if(config_user_adder) { config_salt_old(start); } return; })
 #define _config_user_adder()  ({ *end = 0; if(config_user_adder) { config_user_adder(start); } return; })
 #define _config_user_extender() ({ *end = 0; if(config_user_extender) { config_user_extender(start); } return; })
 #define _config_user_normal(n1) ({ *end = 0; if(config_user_normal) { config_user_normal(start, n1); } return; })
@@ -224,6 +225,26 @@ char *   valid_config_day_sec_close[] = {
 0};
 char * invalid_config_day_sec_close[] = {
     "CloseAtSec: ",
+0};
+char * valid_config_salt[] = {
+    "Salt: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "Salt: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+0};
+char * invalid_config_salt[] = {
+    "Salt: ",
+    "Salt: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "Salt: 0",
+    "Salt: asdfasdf",
+0};
+char * valid_config_salt_old[] = {
+    "SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "SaltOld: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+0};
+char * invalid_config_salt_old[] = {
+    "SaltOld: ",
+    "SaltOld: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "SaltOld: 0",
+    "SaltOld: asdfasdf",
 0};
 
 #define do_diagnostic(long_string, short_var) *end=0; \

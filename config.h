@@ -19,6 +19,8 @@ char * config_push_string(char * str);
 void config_load_file(char * file_path);
 
 
+void config_salt(char*) __attribute__((weak_import));
+void config_salt_old(char*) __attribute__((weak_import));
 void config_user_adder(char*) __attribute__((weak_import));
 void config_user_extender(char*) __attribute__((weak_import));
 void config_user_normal(char*, u16 expire_day) __attribute__((weak_import));

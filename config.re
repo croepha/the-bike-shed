@@ -28,6 +28,8 @@ void config_parse_line(char *input_str, int line_number) {
   "UserNormal:"              [ \t]* @part1 [0-9]+ @part1_end [ \t]+ @start [0-9a-fA-F]{64} @end { _config_user_normal(BASE10(part1)); }
   "OpenAtSec:"               [ \t]* @part1 [0-9]+ @part1_end          { set_config2(day_sec_open, BASE10(part1)); }
   "CloseAtSec:"              [ \t]* @part1 [0-9]+ @part1_end          { set_config2(day_sec_close, BASE10(part1)); }
+  "Salt:"                    [ \t]* @start [0-9a-fA-F]{128} @end { _config_salt(); }
+  "SaltOld:"                 [ \t]* @start [0-9a-fA-F]{128} @end { _config_salt_old(); }
   "EmailAddress:"            [ \t]* @start [^ \x00]* @end { do_diagnostic("EmailAddress"             , email_from ); }
   "DestinationEmailAddress:" [ \t]* @start [^ \x00]* @end { do_diagnostic("DestinationEmailAddress"  , email_rcpt ); }
   "EmailServer:"             [ \t]* @start [^ \x00]* @end { do_diagnostic("EmailServer"              , email_host ); }
@@ -37,6 +39,8 @@ void config_parse_line(char *input_str, int line_number) {
   "UserNormal:"              [ \t]* @start [^ \x00]* @end { do_diagnostic("UserNormal"               , user_normal ); }
   "OpenAtSec:"               [ \t]* @start [^ \x00]* @end { do_diagnostic("OpenAtSec"                , day_sec_open ); }
   "CloseAtSec:"              [ \t]* @start [^ \x00]* @end { do_diagnostic("CloseAtSec"               , day_sec_close ); }
+  "Salt:"                    [ \t]* @start [^ \x00]* @end { do_diagnostic("Salt"                     , salt ); }
+  "SaltOld:"                 [ \t]* @start [^ \x00]* @end { do_diagnostic("SaltOld"                  , salt_old ); }
 
   */
 
