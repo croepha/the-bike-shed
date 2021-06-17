@@ -15,6 +15,12 @@
 #include "supervisor.h"
 #include "config.h"
 
+// TODO: Its super wierd that we need access stuff here, this
+//  is because of how we use the same config code for both
+//  processes, we should separate them out a bit, so we can
+//  decouple the two
+#include "access.h"
+
 u64 now_ms() { return real_now_ms(); }
 
 
@@ -33,6 +39,11 @@ char ** supr_child_args;
 struct StringList tmp_arg;
 u32 day_sec_open;
 u32 day_sec_close;
+
+
+char access_salt_old[SALT_BUF_LEN];
+char access_salt[SALT_BUF_LEN];
+
 
 // char * email_from = "tmp-from@testtest.test";
 // char * email_host = "smtp://127.0.0.1:8025";

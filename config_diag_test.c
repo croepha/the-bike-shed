@@ -5,6 +5,7 @@
 #include <errno.h>
 #include "logging.h"
 #include "config.h"
+#include "access.h"
 
 char * email_from;
 char * email_host;
@@ -14,6 +15,8 @@ char ** supr_child_args;
 struct StringList tmp_arg;
 u32 day_sec_open;
 u32 day_sec_close;
+char access_salt_old[SALT_BUF_LEN];
+char access_salt[SALT_BUF_LEN];
 
 
 

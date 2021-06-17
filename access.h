@@ -52,4 +52,5 @@ u16 access_now_day(void);
 s32 access_user_days_left(access_user_IDX USER_idx);
 void access_prune_not_new(void);
 
+extern char access_salt_old[];
 extern char access_salt[];

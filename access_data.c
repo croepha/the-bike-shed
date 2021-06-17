@@ -4,7 +4,8 @@
 #include "logging.h"
 #include "access.h"
 
-char access_salt[SALT_BUF_LEN] = "saltysalt";
+char access_salt_old[SALT_BUF_LEN];
+char access_salt[SALT_BUF_LEN];
 static usz const HASH_MAP_LEN  = 1 << 18; // 256Ki
 static access_user_IDX const USER_TABLE_LEN = 1 << 13; // 8192
 

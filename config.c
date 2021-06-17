@@ -5,6 +5,7 @@
 #include "common.h"
 #include "logging.h"
 #include "config.h"
+#include "access.h"
 
 void string_list_initialize(struct StringList * sl) {
     sl->first = 0; sl->nextp = &sl->first; sl->count = 0;
@@ -250,6 +251,13 @@ static void __do_diagnostic(char * long_string, char * start, int line_number) {
 
 
 void config_load_file(char * file_path) {
+
+
+    {
+        memset(access_salt, 0, SALT_BUF_LEN);
+        strcpy(access_salt, "saltysalt");
+    }
+
     string_list_initialize(&tmp_arg);
     int r;
     int line_number = 1;
