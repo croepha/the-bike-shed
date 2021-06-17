@@ -38,7 +38,7 @@ For general coding:
 2. Log in as root (you will be doing everything as root) [VSCode] is reccomended (but not required) for [remote work over SSH]
 3. `mkdir /workspaces && git clone https://github.com/croepha/the-bike-shed.git && cd the-bike-shed` (Or open a vscode workspace there)
 4. `bash setup_dev_environment.bash` (or run the "setup dev environment" vscode task)
-5. To build the code and run the tests: `bash build.bash`
+5. To build the code and run the tests: `bash build.bash` (or the build task in vscode)
 Hopefully that just worked, if it didn't, please let us know
 
 For Schematics, you should also grab [KiCad]
@@ -53,9 +53,10 @@ Currently, the exterior code has a hard requirement on Arduino Studio, and it do
 - Q: Do I really need to run inside of Virtualbox?
 
 A: No, not really, you can setup on bare metal or run inside docker with success depending on your
-exact setup.  It is encouraged to not run setup_dev_environment.bash on your
-daily driver system, as it does some things that may be considered rude, such as
-installing system packages, and writing things to random directories within the system.
+exact setup.  It is encouraged to not run setup_dev_environment.bash on your daily driver system,
+as it does some things that may be considered rude, such as installing system packages, and writing
+things to random directories within the system.  Mixed results have been seen with Docker Desktop,
+on some setups there are issues setting the core_pattern or other low level systemy things.
 
 - Q: Why does everything run as root?
 
@@ -69,7 +70,7 @@ fix it yourself
 
 A: It's mostly out of lazyness at this point, we might fix this if there is interest.  It's a similar
 situation to "Why does everything run as root".  Everything is already inside a container, why does it matter
-where it is inside of that?  There some actual advantages, albeit minor:
+where it is inside of that?  There are some actual advantages, albeit minor:
   - Fixed paths make debugging easier, if something is always in the same place, you don't have to go hunt for it
   - Collaberation is easier, homogenous environments make it easier to catch people up on eachother's envrironments, and you can copy/paste commands...
 
@@ -77,7 +78,7 @@ where it is inside of that?  There some actual advantages, albeit minor:
 
 A: You probably didn't ask that question, but I asked it for you.  No, the quickstart assumes that you aren't interested in
 building the kernel or the root OS.  Most people won't need to, they can just copy from the latest release, but if you _are_
-interested, then see `build_root.bash`.  If you actually did wante to build _everything_ from scratch then do this:
+interested, then see `build_root.bash`.  If you actually did want to build _everything_ from scratch then do this:
  - `bash build_root.bash clean_all`
  - `bash build_root.bash build_all`
  - `bash build_root.bash package_sdk`
