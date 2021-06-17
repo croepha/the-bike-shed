@@ -273,12 +273,6 @@ static void __do_diagnostic(char * long_string, char * start, int line_number) {
 
 void config_load_file(char * file_path) {
 
-
-    {
-        memset(access_salt, 0, SALT_BUF_LEN);
-        strcpy(access_salt, "saltysalt");
-    }
-
     string_list_initialize(&tmp_arg);
     int r;
     int line_number = 1;

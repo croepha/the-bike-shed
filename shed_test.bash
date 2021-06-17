@@ -153,6 +153,7 @@ EmailServer:  smtp://127.0.0.1:8025
 EmailUserPass:  user:pass
 DestinationEmailAddress: shed-test-local@tmp-test.test
 ConfigDownloadStartupDelayMS: 0
+Salt: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 EOF
 
 set_dl_config ''
