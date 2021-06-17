@@ -62,3 +62,4 @@ TODO:
 autoexec.sh
 supervisor.config
 wpa_supplicant.conf
+wifi_action.sh
