@@ -1,7 +1,7 @@
 
 // This is the main process that runs on the PI0
 
-#define LOG_DEBUG
+// #define LOG_DEBUG
 #include <string.h>
 #include <stdarg.h>
 
@@ -489,11 +489,7 @@ static void exterior_scan_finished() { int r;
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("DENIED:\nUnknown User");
         } else {
-            u16 expire_day = access_users_space[USER_idx].expire_day;
-            if (expire_day == access_expire_day_magics_NewAdder ||
-                expire_day == access_expire_day_magics_Adder   ||
-                expire_day == access_expire_day_magics_NewExtender ||
-                expire_day == access_expire_day_magics_Extender) {
+            if (access_user_is_admin(USER_idx)) {
                 exterior_display("Forcing config\nrefresh");
                 INFO("Forcing config refresh");
                 config_download_timeout();
