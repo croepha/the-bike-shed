@@ -210,6 +210,22 @@ static u8 mem_has_nonzero(void* buf, usz len) {
     return len && (*(u8*)buf || memcmp(buf, buf + 1, len - 1));
 }
 
+static int write_hex_buf2(char * dst, usz dst_len, void * src, usz src_len) {
+    //TRACE_HEXBUFFER(dst, dst_len, "dst len:%zu:", dst_len);
+    //TRACE_HEXBUFFER(src, src_len, "src len:%zu:", src_len);
+    if (dst_len < ((src_len * 2) + 1)) {
+        ERROR("dst_len <= src_len * 2 + 1 dst_len:%zu src_len:%zu", src_len, dst_len);
+        return -1;
+    }
+    for (usz i = 0; i < src_len; i++) {
+        int r = sprintf(dst + (i * 2), "%02x", ((u8*)src)[i]);
+        error_check(r);
+        if (r < 0) return r;
+    }
+    return 0;
+}
+
+
 static void save_config() {
     int r;
 
@@ -240,80 +256,36 @@ static void save_config() {
     r = dprintf(fd, "CloseAtSec: %u\n", day_sec_close); error_check(r);
 
     if (mem_has_nonzero(access_salt, SALT_BUF_LEN)) {
-        char* h = access_salt;
-        r = dprintf(fd,
-            "Salt: "
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
-            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
-            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
-            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
-            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
-            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]);
-        error_check(r);
+        char buf[SALT_BUF_LEN * 2 + 1];
+        write_hex_buf2(buf, sizeof buf, access_salt, SALT_BUF_LEN);
+        r = dprintf(fd, "Salt: %s\n", buf);                 error_check(r);
     }
 
     if (mem_has_nonzero(access_salt_old, SALT_BUF_LEN)) {
-        char* h = access_salt_old;
-        r = dprintf(fd,
-            "SaltOld: "
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
-            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31],
-            h[32], h[33], h[34], h[35], h[36], h[37], h[38], h[39],
-            h[40], h[41], h[42], h[43], h[44], h[45], h[46], h[47],
-            h[48], h[49], h[50], h[51], h[52], h[53], h[54], h[55],
-            h[56], h[57], h[58], h[59], h[60], h[61], h[62], h[63]);
-        error_check(r);
+        char buf[SALT_BUF_LEN * 2 + 1];
+        write_hex_buf2(buf, sizeof buf, access_salt, SALT_BUF_LEN);
+        r = dprintf(fd, "SaltOld: %s\n", buf);              error_check(r);
     }
 
     #define USER (access_users_space[USER_idx])
     for (access_user_IDX USER_idx = access_users_first_idx; USER_idx != access_user_NOT_FOUND; USER_idx = USER.next_idx) {
 
+        char buf[sizeof USER.hash * 2 + 1];
+        r = write_hex_buf2(buf, sizeof buf, USER.hash, sizeof USER.hash);
+        if (r < 0) had_error = 1;
+
         if (USER.expire_day == access_expire_day_magics_Adder   ||
             USER.expire_day == access_expire_day_magics_NewAdder) {
-            r = dprintf(fd, "UserAdder: ");
+            r = dprintf(fd, "UserAdder: %s\n", buf);
             error_check(r);
         } else if (USER.expire_day == access_expire_day_magics_Extender   ||
                     USER.expire_day == access_expire_day_magics_NewExtender) {
-            r = dprintf(fd, "UserExtender: ");
+            r = dprintf(fd, "UserExtender: %s\n", buf);
             error_check(r);
         } else {
-            r = dprintf(fd, "UserNormal: %d ", USER.expire_day);
+            r = dprintf(fd, "UserNormal: %d %s\n", USER.expire_day, buf);
             error_check(r);
         }
-        if (r < 0) had_error = 1;
-
-    #define h (USER.hash)
-        r = dprintf(fd,
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x"
-            "%02x%02x%02x%02x%02x%02x%02x%02x\n",
-            h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-            h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-            h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-            h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]);
-    #undef h
-        error_check(r);
         if (r < 0) had_error = 1;
     }
     #undef USER
@@ -423,20 +395,12 @@ static void exterior_scan_finished() { int r;
 
                 INFO_HEXBUFFER(hash, sizeof hash, "Requested send   Day:%hu Idx:%hu :", day, idx);
                 {
-                    u8* h = hash;
+                    char buf[sizeof hash * 2 + 1];
+                    write_hex_buf2(buf, sizeof buf, hash, sizeof hash);
                     r = snprintf(emailed_hash_buf, sizeof emailed_hash_buf,
                         "Day: %hu Idx: %hu\n"
-                        "Hash: "
-                        "%02x%02x%02x%02x%02x%02x%02x%02x"
-                        "%02x%02x%02x%02x%02x%02x%02x%02x"
-                        "%02x%02x%02x%02x%02x%02x%02x%02x"
-                        "%02x%02x%02x%02x%02x%02x%02x%02x",
-                        day, idx,
-                        h[ 0], h[ 1], h[ 2], h[ 3], h[ 4], h[ 5], h[ 6], h[ 7],
-                        h[ 8], h[ 9], h[10], h[11], h[12], h[13], h[14], h[15],
-                        h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23],
-                        h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]
-                        );
+                        "Hash: %s",
+                        day, idx, buf);
                 }
                 if (r == -1 || r >= sizeof emailed_hash_buf - 1) {
                     ERROR("emailed_hash_buf snprintf r:%d", r);
@@ -740,6 +704,14 @@ int main (int argc, char ** argv) {
         assert(mem_has_nonzero("\0\0\0\0\0\0\0\0\0\0", 8) == 0);
         assert(mem_has_nonzero("\0\0\1\0\0\0\0\0\0\0", 8) == 1);
         assert(mem_has_nonzero("\1\0\0\0\0\0\0\0\0\0", 8) == 1);
+    }
+
+    {
+        char src[2] = {'a', 'b'};
+        char dst[5] = {};
+        write_hex_buf2(dst, sizeof dst, src, sizeof src);
+        assert(strcmp(dst, "6162") == 0);
+
     }
 
     for(;;) {
