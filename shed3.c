@@ -1,7 +1,7 @@
 
 // This is the main process that runs on the PI0
 
-// #define LOG_DEBUG
+//#define LOG_DEBUG
 #include <string.h>
 #include <stdarg.h>
 
@@ -263,7 +263,7 @@ static void save_config() {
 
     if (mem_has_nonzero(access_salt_old, SALT_BUF_LEN)) {
         char buf[SALT_BUF_LEN * 2 + 1];
-        write_hex_buf2(buf, sizeof buf, access_salt, SALT_BUF_LEN);
+        write_hex_buf2(buf, sizeof buf, access_salt_old, SALT_BUF_LEN);
         r = dprintf(fd, "SaltOld: %s\n", buf);              error_check(r);
     }
 
@@ -322,7 +322,7 @@ static void exterior_scan_finished() { int r;
         USER_idx = access_user_lookup(old_hash);
 
         if (USER_idx != access_user_NOT_FOUND) {
-            // User was found with an old salt, we should migrate their hash to the new salt
+            TRACE("User was found with an old salt, we should migrate their hash to the new salt");
             access_user_add(hash, access_users_space[USER_idx].expire_day, 0, 0);
             USER_idx = access_user_lookup(hash);
             if (access_user_is_admin(USER_idx)) {

@@ -347,7 +347,7 @@ dump_state
 
 echo
 echo "====================================================="
-echo "=== 22 badge, opt 200, expect add next"
+echo "=== 22 badge, opt 200, expect user added"
 echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
@@ -403,6 +403,95 @@ EOF
 wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
+echo
+echo "====================================================="
+echo "=== Salt migration: stop, change salt, restart"
+echo
+
+pkill -P $shed_pid
+wait $shed_pid
+shed_pid=-1
+
+# Disable block
+iptables -D OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT --reject-with tcp-reset &>/dev/null || true
+
+sed '/^Salt:.*$/d' -Ei $config_location
+cat << EOF >> $config_location
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+EOF
+
+start_shed
+wait_line $shed_out_file 'Download finished'
+wait_line $shed_out_file 'Maintenance Finished'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+echo
+echo "====================================================="
+echo "=== Salt migration: 11 badge, expect hash change (with INFO lines) and access granted"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+PIN 123456
+RFID 110102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $shed_out_file 'GPIO_FAKE value:0'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+
+echo
+echo "====================================================="
+echo "=== Salt migration: 22 badge, expect hash changes and access granted"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+PIN 123456
+RFID 220102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $shed_out_file 'GPIO_FAKE value:0'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+
+echo
+echo "====================================================="
+echo "=== Salt migration: 11 badge, expect NO hash NO change and access granted"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+PIN 123456
+RFID 110102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $shed_out_file 'GPIO_FAKE value:0'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+
+echo
+echo "====================================================="
+echo "=== Salt migration: 22 badge, expect NO hash changes and access granted"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+PIN 123456
+RFID 220102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $shed_out_file 'GPIO_FAKE value:0'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
+
+
+echo
+echo "====================================================="
+echo "=== shutdown and final state"
+echo
 
 pkill -P $shed_pid
 wait $shed_pid
@@ -411,10 +500,6 @@ kill $serial_copy_pid
 wait $serial_copy_pid
 serial_copy_pid=-1
 
-echo
-echo "====================================================="
-echo "=== final state"
-echo
 dump_state
 
 pkill -f "$exterior_serial_dev"

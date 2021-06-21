@@ -439,7 +439,7 @@ SLEEP
 -- Emails:
 
 =====================================================
-=== 22 badge, opt 200, expect add next
+=== 22 badge, opt 200, expect user added
 
 -- Shed output:
 TRACE: io_event:serial start	(./access_hash.c __access_hash)
@@ -599,7 +599,232 @@ SLEEP
 -- Emails:
 
 =====================================================
-=== final state
+=== Salt migration: stop, change salt, restart
+
+Starting: /build/shed3.dbg.exec /build/shed_test/config
+-- Shed output:
+ INFO: Tracing enabled	(./shed3.c main)
+ WARN: parse Config value for 'serial_path' is already set, overwriting	(./config.c __set_config)
+TRACE: parse add hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:3e78a Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:255882 [8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431]	(./access_data.c access_user_add)
+TRACE: parse add hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:36182 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:221570 [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./access_data.c access_user_add)
+TRACE: parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: parse add MAP_idx:2dbd2 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+ INFO: GPIO_FAKE	(./pwm.c gpio_pwm_initialize)
+ INFO: Maintenance Starting	(./shed3.c idle_timeout)
+ WARN: FILTERED:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: FILTERED:io_curl parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+TRACE: FILTERED:io_curl parse add MAP_idx:2dbd2 USER_idx:1ffd Update existing	(./access_data.c access_user_add)
+TRACE: FILTERED:io_curl parse add hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add returning MAP_idx:36182	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:221570 [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./access_data.c access_user_add)
+TRACE: FILTERED:io_curl parse add MAP_idx:36182 USER_idx:1ffe Update existing	(./access_data.c access_user_add)
+ WARN: FILTERED:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: timeout:idle USER_idx:1ffd  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1ffd  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+TRACE: timeout:idle USER_idx:1ffe  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1ffe  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+TRACE: timeout:idle USER_idx:1fff  expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+TRACE: timeout:idle USER_idx:1fff  Not expired, doing nothing	(./access_data.c access_idle_maintenance)
+ INFO: timeout:idle Maintenance Finished	(./shed3.c idle_timeout)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+-- Serial output:
+TEXT_SHOW1 System restart
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== Salt migration: 11 badge, expect hash change (with INFO lines) and access granted
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:3632a Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: start	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:36182	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: User was found with an old salt, we should migrate their hash to the new salt	(./shed3.c exterior_scan_finished)
+TRACE: io_event:serial Salt Migration: add hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add MAP_idx:3632a Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add expire_day:FILTERED require_existing:0 overwrite_admin:0 map_idx:221994 [2a6337cb6611ffdacd52e43fc233a1333aabb58605ab1128ffacf686adde2093]	(./access_data.c access_user_add)
+TRACE: io_event:serial Salt Migration: lookup hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:3632a	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial Salt Migration: Old hash: [82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0]	(./shed3.c exterior_scan_finished)
+ INFO: io_event:serial Salt Migration: New hash: [2a6337cb6611ffdacd52e43fc233a1333aabb58605ab1128ffacf686adde2093]	(./shed3.c exterior_scan_finished)
+ WARN: io_event:serial Salt Migration: An admin's hash needs to be manually updated, details preceed	(./shed3.c exterior_scan_finished)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+-- Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== Salt migration: 22 badge, expect hash changes and access granted
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [a3f21be28e9c1b62]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:3f2a3 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: start	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: lookup hash: [8ae74f6df0f03067]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:3e78a	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: User was found with an old salt, we should migrate their hash to the new salt	(./shed3.c exterior_scan_finished)
+TRACE: io_event:serial Salt Migration: add hash: [a3f21be28e9c1b62]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add MAP_idx:3f2a3 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add expire_day:FILTERED require_existing:0 overwrite_admin:0 map_idx:258723 [a3f21be28e9c1b6263894d0e45b9d77a2c9610a178eaaa3b3a40a15fd305a86f]	(./access_data.c access_user_add)
+TRACE: io_event:serial Salt Migration: lookup hash: [a3f21be28e9c1b62]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:3f2a3	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+-- Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2 days_left:30
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== Salt migration: 11 badge, expect NO hash NO change and access granted
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:3632a	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+-- Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== Salt migration: 22 badge, expect NO hash changes and access granted
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [a3f21be28e9c1b62]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup returning MAP_idx:3f2a3	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial expires: FILTERED FILTERED 	(./access_data.c access_user_days_left)
+ INFO: io_event:serial GPIO_FAKE value:1	(./pwm.c gpio_pwm_set)
+ INFO: timeout:shed_pwm GPIO_FAKE value:0	(./pwm.c gpio_pwm_set)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+-- Serial output:
+TEXT_SHOW1 ACCESS GRANTED
+TEXT_SHOW2 days_left:30
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== shutdown and final state
 
 -- Shed output:
 -- Config on disk:
@@ -614,7 +839,8 @@ EmailAddress: tmp-from@testtest.test
 EmailServer: smtp://127.0.0.1:8025
 EmailUserPass: user:pass
 OpenAtSec: FILTERED
-Salt: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
@@ -624,3 +850,4 @@ UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863
  INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
  INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
 ERROR: io_curl:config_download test_sort:id:00 CURL_ERROR:Couldn't connect to server	(./config_download.c is_download_successful)
+ INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
