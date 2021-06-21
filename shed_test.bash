@@ -8,6 +8,8 @@
 
 set -u
 
+# To make a salt: python3 -c $'import secrets \nprint("Salt:", secrets.token_hex(64))'
+
 # RAW_OUTPUT=1 bash -x test_shed.bash 2>&1 |  ts -i '%.s' | ts -s '%.s' > build/t
 
 D=/build/"$TEST_INSTANCE"

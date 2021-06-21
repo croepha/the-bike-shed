@@ -25,6 +25,14 @@ access_user_IDX * access_idle_maintenance_prev;
 #define USER (access_users_space[USER_idx])
 #define MAP  (        access_map[MAP_idx ])
 
+u8 access_user_is_admin(access_user_IDX USER_idx) {
+  return (
+    USER.expire_day == access_expire_day_magics_Adder       ||
+    USER.expire_day == access_expire_day_magics_NewAdder    ||
+    USER.expire_day == access_expire_day_magics_Extender    ||
+    USER.expire_day == access_expire_day_magics_NewExtender
+  );
+}
 
 u16 access_now_day() {
   // Lets put the cutoff at 1pm Pacific Time, that ensures that fresh
@@ -43,13 +51,7 @@ s32 access_user_days_left(access_user_IDX USER_idx) {
   u16  pt_day = access_now_day();
   TRACE("expires: %u %u ", pt_day, USER.expire_day);
 
-  u8 is_admin = (
-    USER.expire_day == access_expire_day_magics_Adder       ||
-    USER.expire_day == access_expire_day_magics_NewAdder    ||
-    USER.expire_day == access_expire_day_magics_Extender    ||
-    USER.expire_day == access_expire_day_magics_NewExtender
-  );
-  if (is_admin) {
+  if (access_user_is_admin(USER_idx)) {
     return (u16)-1;
   } else {
     return USER.expire_day - pt_day;
@@ -57,33 +59,17 @@ s32 access_user_days_left(access_user_IDX USER_idx) {
 }
 
 
-void access_hash(access_HashResult hash, char * rfid, char * pin) {
+void access_hash(access_HashResult hash, char * rfid, char * pin, enum accessFlags flags) {
   struct access_HashPayload payload = {};
-  memcpy(payload.salt, access_salt, sizeof payload.salt);
+  if (flags & access_OLD_SALT) {
+    memcpy(payload.salt, access_salt_old, sizeof payload.salt);
+  } else {
+    memcpy(payload.salt, access_salt, sizeof payload.salt);
+  }
   memcpy(payload.rfid, rfid, sizeof payload.rfid);
   memcpy(payload.pin , pin , sizeof payload.pin );
   __access_hash(hash, &payload);
 }
-
-u8 access_requested(char * rfid, char * pin, u16 * days_left) {
-  *days_left = (u16)-1;
-  access_HashResult hash;
-  access_hash(hash, rfid, pin);
-  access_user_IDX USER_idx = access_user_lookup(hash);
-  LOGCTX(" USER_idx:%x ", USER_idx );
-  if (USER_idx != access_user_NOT_FOUND) {
-    s32 _dl = access_user_days_left(USER_idx);
-    if (_dl < 0) {
-      if (days_left) *days_left = 0;
-      return 0;
-    } else {
-      if (days_left) *days_left = _dl;
-      return 1;
-    }
-  }
-  return 0;
-}
-
 
 void access_user_list_init(void) {
 
@@ -233,11 +219,12 @@ void access_idle_maintenance(void) {
 // Returns error message if any
 
 static char const * const _msg_no_space_left = "No space left";
-static char const * const _msg_extend_only = "User can only extend";
+static char const *const _msg_require_existing = "User must exist";
 static char const * const _msg_overwrite_admin = "Already admin";
 static char const * const _msg_unknown_error = "Unknown error";
 
-char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_only, u8 overwrite_admin) {
+char const *access_user_add(access_HashResult hash, u16 expire_day,
+                            u8 require_existing, u8 overwrite_admin) {
   LOGCTX(" add");
 
 
@@ -254,16 +241,17 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
 
   u32 MAP_idx = __user_map_lookup(hash);
 
-  TRACE_HEXBUFFER(hash, sizeof(access_HashResult), "expire_day:%d extend_only:%d overwrite_admin:%d map_idx:%d",
-     expire_day, extend_only, overwrite_admin, MAP_idx);
+  TRACE_HEXBUFFER(hash, sizeof(access_HashResult),
+                  "expire_day:%d require_existing:%d overwrite_admin:%d map_idx:%d",
+                  expire_day, require_existing, overwrite_admin, MAP_idx);
 
   if (MAP_idx == (u32)-1) {
     return _msg_unknown_error;
   }
   if (MAP == map_EMPTY || MAP == map_TOMB) {
-    if (extend_only) {
-        ERROR("extend_only");
-        return _msg_extend_only;
+    if (require_existing) {
+      ERROR("require_existing");
+      return _msg_require_existing;
     } else {
       u16 USER_idx = access_users_first_free_idx;
       access_users_first_free_idx = USER.next_idx;
@@ -283,14 +271,7 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
     u16 USER_idx = MAP - 1;
     assert(!USER.debug_is_free);
 
-    u8 is_admin = (
-      USER.expire_day == access_expire_day_magics_Adder       ||
-      USER.expire_day == access_expire_day_magics_NewAdder    ||
-      USER.expire_day == access_expire_day_magics_Extender    ||
-      USER.expire_day == access_expire_day_magics_NewExtender
-    );
-
-    if (is_admin && !overwrite_admin ) {
+    if (access_user_is_admin(USER_idx) && !overwrite_admin) {
       ERROR("overwrite_admin");
       return _msg_overwrite_admin;
     } else {
@@ -298,9 +279,7 @@ char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_o
       USER.expire_day = expire_day;
       return 0;
     }
-
   }
-
 }
 
 access_user_IDX access_user_lookup(access_HashResult hash) {

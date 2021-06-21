@@ -37,19 +37,22 @@ struct accessUser {
   access_user_IDX next_idx;
 } extern access_users_space[];
 
+enum accessFlags {
+  access_OLD_SALT = 1
+};
 
 void __access_hash(access_HashResult result, struct access_HashPayload * payload);
-void access_hash(access_HashResult hash, char * rfid, char * pin);
+void access_hash(access_HashResult hash, char * rfid, char * pin, enum accessFlags flags);
 
-char const * access_user_add(access_HashResult hash, u16 expire_day, u8 extend_only, u8 overwrite_admin);
+char const * access_user_add(access_HashResult hash, u16 expire_day, u8 require_existing, u8 overwrite_admin);
 void access_user_list_init(void);
 void access_idle_maintenance(void);
-u8   access_requested(char * rfid, char * pin, u16 * days_left);
 access_user_IDX   access_user_lookup(access_HashResult hash);
 extern access_user_IDX * access_idle_maintenance_prev;
 extern access_user_IDX access_users_first_idx;
 u16 access_now_day(void);
 s32 access_user_days_left(access_user_IDX USER_idx);
+u8 access_user_is_admin(access_user_IDX USER_idx);
 void access_prune_not_new(void);
 
 extern char access_salt_old[];

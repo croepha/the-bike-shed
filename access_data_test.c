@@ -34,14 +34,35 @@ static void set_mock_salt(u32 hash_i, u32 extra) {
 //   }
 // }
 
-
 static void test_add(u32 hash_i, u32 extra, u16 expire_day) {
   access_HashResult hash;
   INFO("Add: %x %x", hash_i, extra);
   set_mock_salt(hash_i, extra);
-  access_hash(hash, "rfidrfidrfidrfidrfidrf2d", "pin1231231");
+  access_hash(hash, "rfidrfidrfidrfidrfidrf2d", "pin1231231", 0);
   access_user_add(hash, expire_day, 0, 1);
 }
+
+static u8 access_requested(char * rfid, char * pin, u16 * days_left) {
+  *days_left = (u16)-1;
+
+  access_HashResult hash;
+  access_hash(hash, rfid, pin, 0);
+  access_user_IDX USER_idx = access_user_lookup(hash);
+
+  LOGCTX(" USER_idx:%x ", USER_idx );
+  if (USER_idx != access_user_NOT_FOUND) {
+    s32 _dl = access_user_days_left(USER_idx);
+    if (_dl < 0) {
+      if (days_left) *days_left = 0;
+      return 0;
+    } else {
+      if (days_left) *days_left = _dl;
+      return 1;
+    }
+  }
+  return 0;
+}
+
 
 static void test_req(u32 hash_i, u32 extra) {
   u8 result;

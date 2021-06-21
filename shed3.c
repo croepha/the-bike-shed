@@ -339,8 +339,28 @@ static void exterior_scan_finished() { int r;
     buf_from_hex(exterior_rfid, sizeof exterior_rfid, exterior_rfid_text);
 
     access_HashResult hash = {};
-    access_hash(hash, (char*)exterior_rfid, exterior_pin);
+    access_hash(hash, (char*)exterior_rfid, exterior_pin, 0);
     access_user_IDX USER_idx = access_user_lookup(hash);
+
+    if (USER_idx == access_user_NOT_FOUND) { LOGCTX(" Salt Migration:");
+        // If user isn't found, also try a lookup with the old salt
+        access_HashResult old_hash = {};
+        access_hash(old_hash, (char*)exterior_rfid, exterior_pin, access_OLD_SALT);
+
+        USER_idx = access_user_lookup(old_hash);
+
+        if (USER_idx != access_user_NOT_FOUND) {
+            // User was found with an old salt, we should migrate their hash to the new salt
+            access_user_add(hash, access_users_space[USER_idx].expire_day, 0, 0);
+            USER_idx = access_user_lookup(hash);
+            if (access_user_is_admin(USER_idx)) {
+                // TRACKING!
+                INFO_HEXBUFFER(old_hash, sizeof old_hash, "Old hash:");
+                INFO_HEXBUFFER(hash, sizeof hash, "New hash:");
+                WARN("An admin's hash needs to be manually updated, details preceed");
+            }
+        }
+    }
 
     if (add_next_user != add_user_state_NOT_ADDING) {
         // TODO enforce pin complexity?
@@ -361,11 +381,7 @@ static void exterior_scan_finished() { int r;
         if (USER_idx == access_user_NOT_FOUND) {
             exterior_display("ACCESS DENIED\nUnknown User");
         } else {
-            u16 expire_day = access_users_space[USER_idx].expire_day;
-            if (expire_day == access_expire_day_magics_NewAdder ||
-                expire_day == access_expire_day_magics_Adder ||
-                expire_day == access_expire_day_magics_NewExtender ||
-                expire_day == access_expire_day_magics_Extender) {
+            if (access_user_is_admin(USER_idx)) {
                     exterior_display("ACCESS GRANTED\n");
                     unlock_door();
             } else {
