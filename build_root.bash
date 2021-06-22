@@ -94,6 +94,7 @@ function build_linux() ($_F
     rm -rvf  /build/pi0initramfs
     mkdir -p /build/pi0initramfs/{dev,physical,newroot}
     cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
+    /build/$OUT-$HW_NAME/host/arm-buildroot-linux-uclibcgnueabihf/bin/strip /build/pi0initramfs/init
     _load_config
     _make linux-rebuild
     # Copy /build/rootpi0w-dev/images/zImage to sdcard
