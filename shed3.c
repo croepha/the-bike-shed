@@ -330,6 +330,8 @@ static void exterior_scan_finished() { int r;
                 INFO_HEXBUFFER(old_hash, sizeof old_hash, "Old hash:");
                 INFO_HEXBUFFER(hash, sizeof hash, "New hash:");
                 WARN("An admin's hash needs to be manually updated, details preceed");
+            } else {
+                save_config(); // if its not an admin, we save the config, for admins, we will just get the new hashes when the dl_config is updated
             }
         }
     }
