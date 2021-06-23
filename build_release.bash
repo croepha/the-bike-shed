@@ -126,7 +126,7 @@ echo
 find /build/release -type f -exec sha384sum {} +
 ) > /build/release/debugging/info
 
-tar cf /build/release-$(date +%s).tar -C /build/release .
+( cd /build/release; zip -r /build/release-$(date +%s).zip .; )
 
 exit -1
 

@@ -92,7 +92,7 @@ apt install -y build-essential wget unar libtinfo5 \
         ninja-build git clangd-10 clang-10 lld-10 lldb-10 clang-tools-10 \
         libncurses5-dev bzr cvs mercurial subversion unzip bc \
         dosfstools nginx libcurl4-openssl-dev libssl-dev re2c python3-tz \
-        socat
+        socat zip
 
 for i in clangd clang lld lldb; do {
   ln -sfv $i-10 /usr/bin/$i
