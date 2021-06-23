@@ -1,7 +1,46 @@
 
 # TODO....
 
+
+
+
+set -eEuo pipefail
+
+
+bash build_root.bash clean_all
+bash build_root.bash build_all
+bash build_root.bash package_sdk
+SHOULD_CLEAN=1 bash build.bash
+bash build_root.bash build_linux
+
+rm -rvf /build/release
+mkdir -p /build/release/debugging
+
+cp /build/supervisor.pi0wfast.exec /build/release/debugging/
+cp /build/supervisor.pi0wfast.exec /build/release/supervisor.exec
+/build/root-pi0w-dev-sdk/host/arm-buildroot-linux-uclibcgnueabihf/bin/strip /build/release/supervisor.exec
+
+cp /build/shed3.pi0wfast.exec /build/release/debugging/
+cp /build/shed3.pi0wfast.exec /build/release/shed.exec
+/build/root-pi0w-dev-sdk/host/arm-buildroot-linux-uclibcgnueabihf/bin/strip /build/release/shed.exec
+
+cp -r \
+/build/root-pi0w-dev/images/rpi-firmware/overlays \
+/build/root-pi0w-dev/images/rpi-firmware/bootcode.bin \
+/build/root-pi0w-dev/images/rpi-firmware/fixup.dat \
+/build/root-pi0w-dev/images/rpi-firmware/start.elf \
+/build/root-pi0w-dev/images/bcm2708-rpi-zero-w.dtb \
+/build/root-pi0w-dev/images/rootfs.squashfs \
+/build/root-pi0w-dev/images/zImage \
+/build/release/
+
 exit -1
+
+# QA Check list:
+# - can ping it
+# - basic badge in test
+
+
 
 
 # Gather these files:

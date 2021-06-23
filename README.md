@@ -50,7 +50,7 @@ Currently, the exterior code has a hard requirement on Arduino Studio, and it do
 
 ## Dev setup FAQ:
 
-- Q: Do I really need to run inside of Virtualbox?
+### Q: Do I really need to run inside of Virtualbox?
 
 A: No, not really, you can setup on bare metal or run inside docker with success depending on your
 exact setup.  It is encouraged to not run setup_dev_environment.bash on your daily driver system,
@@ -58,7 +58,7 @@ as it does some things that may be considered rude, such as installing system pa
 things to random directories within the system.  Mixed results have been seen with Docker Desktop,
 on some setups there are issues setting the core_pattern or other low level systemy things.
 
-- Q: Why does everything run as root?
+### Q: Why does everything run as root?
 
 A: Well its already in a VM, and its just easier that way... In actuality, there are only a few things
 that really need root, mostly the tests, like some call iptables to simulate various network situations,
@@ -66,7 +66,7 @@ sometimes chroot or mount is called.  We could fix this if we wanted, but as far
 be more work, that doesn't actually solve a problem, but if you care, then please feel free empowered to
 fix it yourself
 
-- Q: Why fixed paths, or: Do I really have to put my code in `/workspaces/the-bike-shed`?
+### Q: Why fixed paths, or: Do I really have to put my code in `/workspaces/the-bike-shed`?
 
 A: It's mostly out of lazyness at this point, we might fix this if there is interest.  It's a similar
 situation to "Why does everything run as root".  Everything is already inside a container, why does it matter
@@ -74,7 +74,8 @@ where it is inside of that?  There are some actual advantages, albeit minor:
   - Fixed paths make debugging easier, if something is always in the same place, you don't have to go hunt for it
   - Collaberation is easier, homogenous environments make it easier to catch people up on eachother's envrironments, and you can copy/paste commands...
 
-- Q: This doesn't build everything does it?
+
+### Q: This doesn't build everything does it?
 
 A: You probably didn't ask that question, but I asked it for you.  No, the quickstart assumes that you aren't interested in
 building the kernel or the root OS.  Most people won't need to, they can just copy from the latest release, but if you _are_

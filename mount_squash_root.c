@@ -11,7 +11,7 @@ This binary gets embedded into the linux kernel via the initramfs overlay featur
 
 For quick iterations, this is a shortcut to rebuild a new kernel:
 
-bash build_root.bash build_linux
+bash build_root.bash build_linux_with_init /build/mount_squash_root.staticpi0wdbg.exec
 
 */
 

@@ -15,7 +15,7 @@
 # trees to configure basic things like network settings.  See mount_squash_root.c for
 # more detains
 
-# Before you get started here, you should know that it may take a decent machine hours
+# Before you get started here, you should know that it may take a decent machine almost an hour
 # to do a full build, unless you are needing to reconfigure the base system, like for
 # example, installing a text editor or network utility, or maybe installing a new
 # system library, then you should probably just use the builds from the latest release
@@ -25,10 +25,8 @@
 
 # A full explanation of how to use buildroot, is a bit out-of-scope, but please study
 # the official buildroot manual: https://buildroot.org/downloads/manual/manual.html
-# With all that said, here are some well defined recipes:
-#  get_buildroot # Download and extract buildroot
-#
-
+# With all that said, check out some of the functions defined here for some well defined recipes,
+# also see build_release.bash for some example invocations
 
 export FORCE_UNSAFE_CONFIGURE=1
 export XZ_OPT="-9e --threads=0 -v"
@@ -90,14 +88,19 @@ function build_all() ($_F
     _make
 )
 
-function build_linux() ($_F
+function build_linux_with_init() ($_F
     rm -rvf  /build/pi0initramfs
     mkdir -p /build/pi0initramfs/{dev,physical,newroot}
-    cp /build/mount_squash_root.staticpi0wdbg.exec /build/pi0initramfs/init
+    cp $1 /build/pi0initramfs/init
     /build/$OUT-$HW_NAME/host/arm-buildroot-linux-uclibcgnueabihf/bin/strip /build/pi0initramfs/init
     _load_config
     _make linux-rebuild
     # Copy /build/rootpi0w-dev/images/zImage to sdcard
+)
+
+
+function build_linux() ($_F
+    build_linux_with_init /build/mount_squash_root.staticpi0wfast.exec
 )
 
 function package_sdk() ($_F
