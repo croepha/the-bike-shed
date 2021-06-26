@@ -9,9 +9,9 @@ set -xeEuo pipefail
 # ./configure --disable-golang && make -j $(nproc) && make install
 # */
 
-set +u
+set +eu
 source /etc/profile
-set -u
+set -eu
 if [ ! -v ENV_VER ]; then {
         ENV_VER=0
 }; fi
@@ -22,9 +22,9 @@ export DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C
 export ENV_VER=3
 EOF
-  set +u
+  set +eu
   source /etc/profile
-  set -u
+  set -eu
 }; fi
 
 # rm -f /etc/apt/sources.list.d/shed.list  # for debugging

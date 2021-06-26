@@ -32,20 +32,56 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 
 For general coding:
 0. Download and install Virtualbox (or similar)
-1. Setup a Ubuntu 20.04 VM (Use ubuntu-server if you want a lighter install, since we dont need the GUI)
-  - 40 GB should be plenty
-  - Don't forget to give it a few CPUs if you want compiles to be faster
-  - intall openssh with SSH, setup login for root
+1. Setup a Ubuntu 20.04 VM
+    - Hint: Deselect "Set up this disk as an LVM group" so that it just gives you the whole disk
+    - ubuntu-server is reccomended, it will be a lighter install, and we dont need the GUI
+    - 40 GB should be plenty
+    - 4GB+ of RAM
+    - Don't forget to give it a few CPUs if you want compiles to be faster
+    - intall openssh with SSH, setup login for root
+        - Set networking options to use bridged networking
+        - `sudo apt install openssh-server` Or select (Install OpenSSH server during ubuntu install)
+        - `ip addr # print ip address`
+        - You should now at-least be able to ssh in as your non-root user
+        - `sudo passwd root # set a root password`
+        - `echo "PermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config # Appends option to end of file`
+        - `sudo systemctl restart sshd`
+        - Pro tip, add a section like this to your local `~/.ssh/config`
+
+              Host shed-dev-vbox
+                Hostname 1.2.3.4 # Relplace with your virtualbox ip address
+                User root
+                ForwardAgent yes  # Enables ssh agent forwarding, which makes
+                                  # accessing github over ssh easier
+
+          Then you should be able to do `ssh shed-dev-vbox`
+
+    - Setup SAMBA for remote file access, usefull for using KiCad or Arduino Studio on your local workstation, also makes it easier to copy files out
+        - `sudo apt install samba`
+        - edit `/etc/samba/smb.conf` Add an entry at the end like this:
+
+              [root_samba]
+                  browseable = yes
+                  read only = no
+                  writable = yes
+                  create mask = 0755
+                  directory mask = 0755
+                  path = /
+
+        - `sudo smbpasswd root -a # Set a root password for SMB access`
+        - Now you should be able to easilly access the VM's files directly over SMB, login as root with the password you just set
+
 2. Log in as root (you will be doing everything as root) [VSCode] is reccomended (but not required) for [remote work over SSH]
 3. `mkdir /workspaces && git clone https://github.com/croepha/the-bike-shed.git /workspaces/the-bike-shed && cd /workspaces/the-bike-shed` (optionally open a vscode workspace there)
 4. `bash setup_dev_environment.bash` (or run the "setup dev environment" vscode task)
 5. To build the code and run the tests: `bash build.bash` (or the build task in vscode) Note the first
    time you run the build, you might get an error like this:  `fatal error: '/build/parse_headers.re.c' file not found`
    Just run the build again, currently we aren't telling ninja about some files were generating, this only effects first time builds.
+
+
 Hopefully that just worked, if it didn't, please let us know
 
-For Schematics, you should also grab [KiCad]
-Currently, the exterior code has a hard requirement on Arduino Studio, and it doesn't matter where you run that
+For Schematics, you should also grab [KiCad].  Currently, the exterior code has a hard requirement on Arduino Studio, and it doesn't matter where you run that
 
 [VSCode]: https://code.visualstudio.com/
 [remote work over SSH]: https://code.visualstudio.com/docs/remote/ssh
