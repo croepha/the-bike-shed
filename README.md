@@ -83,8 +83,8 @@ where it is inside of that?  There are some actual advantages, albeit minor:
 A: You probably didn't ask that question, but I asked it for you.  No, the quickstart assumes that you aren't interested in
 building the kernel or the root OS.  Most people won't need to, they can just copy from the latest release, but if you _are_
 interested, then see `build_root.bash`.  If you actually did want to build _everything_ from scratch then do this:
- - `bash build_root get_buildroot`
- - `bash build_release.bash` (WIP)
+ - `bash build_root.bash get_buildroot`
+ - `bash build_release.bash`
  - The release binaries should now be in `/build/release`
 
 
