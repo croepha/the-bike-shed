@@ -32,7 +32,7 @@ For best results, listen to this on repeat: https://www.youtube.com/watch?v=T1Co
 
 For general coding:
 0. Download and install Virtualbox (or similar)
-1. Setup a Ubuntu 20.04 VM
+1. Setup a Ubuntu 20.04 VM (Use ubuntu-server if you want a lighter install, since we dont need the GUI)
   - 40 GB should be plenty
   - Don't forget to give it a few CPUs if you want compiles to be faster
   - intall openssh with SSH, setup login for root
