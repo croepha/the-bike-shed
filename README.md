@@ -41,7 +41,7 @@ For general coding:
 4. `bash setup_dev_environment.bash` (or run the "setup dev environment" vscode task)
 5. To build the code and run the tests: `bash build.bash` (or the build task in vscode) Note the first
    time you run the build, you might get an error like this:  `fatal error: '/build/parse_headers.re.c' file not found`
-   Just run the build again, currently we aren't telling ninja about some files were generating
+   Just run the build again, currently we aren't telling ninja about some files were generating, this only effects first time builds.
 Hopefully that just worked, if it didn't, please let us know
 
 For Schematics, you should also grab [KiCad]
