@@ -1,4 +1,4 @@
-the-bike-shed
+SHED: Secure-ish Hacker Entry Device
 ================================================================================
 
 An RFID based access control system for [Noisebridge].  Some specific goals:
@@ -18,8 +18,9 @@ An RFID based access control system for [Noisebridge].  Some specific goals:
 Install
 --------------------------------------------------
 - Build the Interior and Exterior modules found in the schematics directory (We will work on an easy PCB you can have made)
-- Download a release zip
+- Download a release zip, (from Github releases, should be a file named like `release-12341234.zip`)
 - Extract it to an SD Card formatted as FAT (most come this way)
+- Read the `README-release.txt` file that you just extracted
 - Install the SD Card in the PI0, in the interior module
 - Use Arduino studio to build the exterior code, flash that to the ESP32 in the exterior module
 

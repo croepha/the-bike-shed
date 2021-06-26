@@ -41,6 +41,7 @@ EOF
 echo "root=/dev/mmcblk0p2 rootwait console=tty1 -- /dev/mmcblk0p1 rootfs.squashfs" > /build/release/cmdline.txt
 
 cat << 'EOF' > /build/release/shed.config
+# This is the config file used by the main SHED process
 # This is the email address that notifications are sent from:
 EmailAddress: example@example.com
 # SMTP Server for outgoing mail:
@@ -54,6 +55,7 @@ ConfigURL: https://example.com/config
 EOF
 
 cat << 'EOF' > /build/release/supervisor.config
+# This is the config file used by the supervisor process
 # This is the email address that notifications are sent from:
 EmailAddress: example@example.com
 # SMTP Server for outgoing mail:
@@ -69,6 +71,7 @@ EOF
 
 cat << 'EOF' > /build/release/wifi_action.sh
 #!/bin/sh
+# This script is run everytime we associate to a WIFI network, edit network ip settings here:
 if [ "$2" = "CONNECTED" ]; then
     ip addr add 1.2.3.4/24 dev wlan0 # Set static IP address
     ip route add default via 1.2.3.1 # Set static default route
@@ -77,6 +80,8 @@ fi
 EOF
 
 cat << 'EOF' > /build/release/wpa_supplicant.conf
+# This is the config file used by the WIFI stack, configure WIFI settings here.  Some
+# documentation on this file can be found here: https://linux.die.net/man/5/wpa_supplicant.conf
 update_config=1
 ctrl_interface=/var/run/wpa_supplicant
 ap_scan=1
@@ -117,6 +122,25 @@ while true; do {
     sleep 5
 }; done
 EOF
+
+cp /workspaces/the-bike-shed/LICENSE /build/release/
+
+cat << 'EOF' > /build/release/README-release.txt
+License and disclaimers can be found in LICENSE.
+
+The contents of this release zip should be extracted to an SD card for
+running on the PI0w as part of the interrior module.
+
+The debugging/ directory can be omitted, and is only there in-case we
+need to troublshoot a specific release.
+
+SHED Releases come unconfigured, so you should probably edit these files:
+- shed.config
+- supervisor.config
+- wifi_action.sh
+- wpa_supplicant.conf
+EOF
+
 
 (
 echo "Git HEAD: $(git rev-parse HEAD)"
