@@ -56,7 +56,7 @@ For general coding:
 
           Then you should be able to do `ssh shed-dev-vbox`
 
-    - Setup SAMBA for remote file access, usefull for using KiCad or Arduino Studio on your local workstation, also makes it easier to copy files out
+    - Setup SAMBA for remote file access, useful for using KiCad or Arduino Studio on your local workstation, also makes it easier to copy files out
         - `sudo apt install samba`
         - edit `/etc/samba/smb.conf` Add an entry at the end like this at the bottom:
 
