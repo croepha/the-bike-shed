@@ -37,9 +37,11 @@ For general coding:
   - Don't forget to give it a few CPUs if you want compiles to be faster
   - intall openssh with SSH, setup login for root
 2. Log in as root (you will be doing everything as root) [VSCode] is reccomended (but not required) for [remote work over SSH]
-3. `mkdir /workspaces && git clone https://github.com/croepha/the-bike-shed.git && cd the-bike-shed` (Or open a vscode workspace there)
+3. `mkdir /workspaces && git clone https://github.com/croepha/the-bike-shed.git /workspaces/the-bike-shed && cd /workspaces/the-bike-shed` (optionally open a vscode workspace there)
 4. `bash setup_dev_environment.bash` (or run the "setup dev environment" vscode task)
-5. To build the code and run the tests: `bash build.bash` (or the build task in vscode)
+5. To build the code and run the tests: `bash build.bash` (or the build task in vscode) Note the first
+   time you run the build, you might get an error like this:  `fatal error: '/build/parse_headers.re.c' file not found`
+   Just run the build again, currently we aren't telling ninja about some files were generating
 Hopefully that just worked, if it didn't, please let us know
 
 For Schematics, you should also grab [KiCad]
