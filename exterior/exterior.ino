@@ -5,6 +5,76 @@
 #include <LiquidCrystal.h>
 
 
+//#define LCD_DB4_GPIO   15
+//#define KP_R0_GPIO     15
+//
+//#define LCD_DB5_GPIO    2
+//#define KP_R1_GPIO      2
+//
+//#define LCD_DB6_GPIO    0
+//#define KP_R2_GPIO      0
+//
+//#define LCD_DB7_GPIO    4
+//#define KP_R3_GPIO      4
+//
+//#define KP_C0_GPIO     27
+//#define KP_C1_GPIO     26
+//#define KP_C2_GPIO     25
+//#define KP_C3_GPIO     33
+//
+//#define LCD_E_GPIO     13
+//#define LCD_RS_GPIO    14
+//#define LCD_LED_GPIO    5
+//
+//#define RFID_RSI_GPIO  22
+//#define RFID_MISO_GPIO 19
+//#define RFID_MOSI_GPIO 23
+//#define RFID_SCK_GPIO  18
+//#define RFID_SDA_GPIO  21
+//
+//#define SERIAL_RX_GPIO 16 // RO
+//#define SERIAL_TX_GPIO 17 // DI
+//
+
+
+
+#define LCD_DB4_GPIO   15
+#define KP_R0_GPIO     15
+
+#define LCD_DB5_GPIO    2
+#define KP_R1_GPIO      2
+
+#define LCD_DB6_GPIO    0
+#define KP_R2_GPIO      0
+
+#define LCD_DB7_GPIO    4
+#define KP_R3_GPIO      4
+
+#define KP_C0_GPIO     34
+#define KP_C1_GPIO     35
+#define KP_C2_GPIO     36
+#define KP_C3_GPIO     39
+
+#define LCD_E_GPIO     13
+#define LCD_RS_GPIO    14
+#define LCD_LED_GPIO    5
+
+#define RFID_RSI_GPIO  22
+#define RFID_MISO_GPIO 19
+#define RFID_MOSI_GPIO 23
+#define RFID_SCK_GPIO  18
+#define RFID_SDA_GPIO  21
+
+#define SERIAL_RX_GPIO 16
+#define SERIAL_TX_GPIO 17
+#define SERIAL_EN_GPIO 12
+
+#define SPK_GPIO       25
+
+#define LCD_LED_CHAN    0
+#define SPK_CHAN        1
+
+
 typedef  uint8_t   u8;
 typedef  uint16_t u16;
 typedef  uint32_t u32;
@@ -17,15 +87,9 @@ typedef  ssize_t  ssz;
 typedef   size_t  usz;
 
 
-#define col_pins _(27) _(26) _(25) _(33)
-#define row_pins _(15) _(2) _(0) _(4)
+#define col_pins _(KP_C0_GPIO) _(KP_C1_GPIO) _(KP_C2_GPIO) _(KP_C3_GPIO)
+#define row_pins _(KP_R0_GPIO) _(KP_R1_GPIO) _(KP_R2_GPIO) _(KP_R3_GPIO)
 
-#define RST_PIN  22 // Reset pin
-#define SS_PIN   21 // Slave select pin
-
-const int RS = 14, EN = 13, d4 = 15 /*18*/, d5 = 2/*5*/, d6 = 0, d7 = 4;
-const int LCD_BL_pin = 5;
-const int LCD_BL_chan = 0;
 
 volatile int pressed_col = -1;
 
@@ -34,14 +98,33 @@ int row_i(int pin) { int ret = 0; row_pins }
 int col_i(int pin) { int ret = 0; col_pins }
 #undef _
 
-LiquidCrystal lcd(RS, EN, d4, d5, d6, d7);
+
+int notes[] = {
+  220, // A3
+  247, // B3
+  262, // C4
+  294, // D4
+  329, // E4
+  349, // F4
+  392, // G4  
+  440, // A4
+  494, // B4
+  523, // C5
+  587, // D5
+  659, // E5
+  698, // F5
+  783, // G5
+  880, // A5
+};
+
+LiquidCrystal lcd(LCD_RS_GPIO, LCD_E_GPIO, LCD_DB4_GPIO, LCD_DB5_GPIO, LCD_DB6_GPIO, LCD_DB7_GPIO);
 
 #define _(n) void IRAM_ATTR col ## n ## _isr() { pressed_col = n; }
 col_pins
 #undef _
 
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+MFRC522 mfrc522(RFID_SDA_GPIO, RFID_RSI_GPIO);  // Create MFRC522 instance
 HardwareSerial InteriorSerial(1);
 
 
@@ -99,9 +182,12 @@ void setup() {
   SPI.begin();
   mfrc522.PCD_Init();
 
+  pinMode(SERIAL_EN_GPIO, OUTPUT); digitalWrite(SERIAL_EN_GPIO, HIGH);
+  
+
   Serial.begin(115200);
   Serial.println("INFO Started UP");
-  InteriorSerial.begin(115200, SERIAL_8N1, 16 /*RX*/, 17 /*TX*/);
+  InteriorSerial.begin(115200, SERIAL_8N1, SERIAL_RX_GPIO, SERIAL_TX_GPIO);
   InteriorSerial.println("INFO Started UP");
 
 
@@ -111,8 +197,13 @@ void setup() {
 	delay(4);				// Optional delay. Some board do need more time after init to be ready, see Readme
 	mfrc522.PCD_DumpVersionToSerial();
 
-  ledcSetup(LCD_BL_chan, 5000, 16);
-  ledcAttachPin(LCD_BL_pin, LCD_BL_chan);
+  ledcSetup(LCD_LED_CHAN, 5000, 16);
+  ledcAttachPin(LCD_LED_GPIO, LCD_LED_CHAN);
+
+  
+  ledcSetup(SPK_CHAN, 5000, 16);
+  ledcAttachPin(SPK_GPIO, SPK_CHAN);
+  ledcWrite(SPK_GPIO, 0);
 
   InteriorSerial.printf("EXTERIOR_RESTART\n");
 
@@ -209,6 +300,7 @@ void draw_input_lines() {
   setup_keypad();
   delay(10);
   pressed_col = -1;
+  
 }
 
 
@@ -262,7 +354,7 @@ void loop() {
     }
   }
 
-  ledcWrite(LCD_BL_chan, backlight_level);
+  ledcWrite(LCD_LED_CHAN, backlight_level);
   if (till_autosleep_ms <= 0 && backlight_level > 0) {
     unsigned long delta_level = (backlight_level_MAX / 1000) * uptime_delta_ms;
     if (delta_level > backlight_level) {
@@ -271,6 +363,8 @@ void loop() {
       backlight_level -= delta_level;
     }
   }
+
+  int tone_key = -1;
 
   delay(1);
   if (pressed_col != -1) {
@@ -295,6 +389,7 @@ void loop() {
         }
         hits++;
       }
+      tone_key = row_i(pressed_row)*4+col_i(hit_col);
       char c = "123A456B789C*0#D"[row_i(pressed_row)*4+col_i(hit_col)];
       if (hits == 20) {
 
@@ -320,6 +415,15 @@ void loop() {
 //      pressed_col = -1;
 //  }
   setup_keypad();
+
+  if (0) {
+    if (tone_key == -1) {
+        //ledcWrite(SPK_CHAN, 0);
+    } else {
+        ledcWrite(SPK_CHAN, 32 * 4 * 256);
+        ledcWriteTone(SPK_CHAN, notes[tone_key]);    
+    }
+  }
 
   while (InteriorSerial.available() > 0) {
     char in_byte = InteriorSerial.read();
