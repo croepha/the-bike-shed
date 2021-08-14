@@ -365,7 +365,7 @@ echo "====================================================="
 echo "=== force kill, restart"
 echo
 
-iptables -A OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT  --reject-with tcp-reset
+iptables -I OUTPUT -p tcp --dport 9161 -m owner --gid-owner="$TEST_INSTANCE" -j REJECT  --reject-with tcp-reset
 pkill -9 -P $shed_pid
 wait $shed_pid 2> /dev/null
 start_shed
