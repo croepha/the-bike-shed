@@ -103,6 +103,8 @@ if [ $_OBJ_ONLY = 0 ]; then {
 eval "${VARIANT}"'_OBJ_FILES="$'"${VARIANT}"'_OBJ_FILES $_O"'
 }
 
+ # -fsanitize=undefined
+
 function compile() { SOURCE="$1"; ARGS=("${@:2}")
   _build dbg      -gfull -O0    -D ABORT_ON_ERROR=1 -D GPIO_FAKE=1 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=0 -fPIC -fsanitize=address
   _build fast     -gfull -Ofast -D ABORT_ON_ERROR=0 -D GPIO_FAKE=1 -D "BUILD_FLAVOR_$FLAVOR=1" -D BUILD_IS_RELEASE=0 -fPIC -flto=thin -march=native
