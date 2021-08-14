@@ -1,5 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:exterior2-cache
+LIBS:exterior-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -26,17 +26,6 @@ F 3 "https://datasheets.maximintegrated.com/en/ds/MAX1487E-MAX491E.pdf" H 1900 1
 	1    0    0    -1  
 $EndComp
 $Comp
-L Interface_UART:MAX489E U?
-U 1 1 5EB773B0
-P 8900 1800
-F 0 "U?" H 8900 2481 50  0000 C CNN
-F 1 "MAX489E" H 8900 2390 50  0000 C CNN
-F 2 "" H 8900 1100 50  0001 C CNN
-F 3 "https://datasheets.maximintegrated.com/en/ds/MAX1487E-MAX491E.pdf" H 8950 1825 50  0001 C CNN
-	1    8900 1800
-	-1   0    0    -1  
-$EndComp
-$Comp
 L Connector:RJ45 J?
 U 1 1 5EB9EE51
 P 4700 1800
@@ -47,47 +36,6 @@ F 3 "~" V 4700 1825 50  0001 C CNN
 	1    4700 1800
 	-1   0    0    1   
 $EndComp
-Text Label 6300 1500 0    50   ~ 0
-INTERIOR+DATA
-Text Label 6300 1600 0    50   ~ 0
-INTERIOR-DATA
-Text Label 6300 1700 0    50   ~ 0
-EXTERIOR+DATA
-Text Label 6300 1800 0    50   ~ 0
-INTERIOR+12v
-Text Label 6300 1900 0    50   ~ 0
-INTERIOR+12v
-Text Label 6300 2000 0    50   ~ 0
-EXTERIOR-DATA
-Text Label 6300 2100 0    50   ~ 0
-INTERIOR-GND
-Text Label 6300 2200 0    50   ~ 0
-INTERIOR-GND
-$Comp
-L Connector:RJ45 J?
-U 1 1 5EB9C575
-P 5900 1800
-F 0 "J?" H 5900 1800 50  0000 R CNN
-F 1 "RJ45" H 5950 1900 50  0000 R CNN
-F 2 "" V 5900 1825 50  0001 C CNN
-F 3 "~" V 5900 1825 50  0001 C CNN
-	1    5900 1800
-	1    0    0    1   
-$EndComp
-Wire Wire Line
-	6300 1800 7050 1800
-Wire Wire Line
-	6300 1900 7050 1900
-Wire Wire Line
-	7050 1800 7050 1900
-Connection ~ 7050 1900
-Wire Wire Line
-	7150 2100 7150 2200
-Wire Wire Line
-	7150 2100 6300 2100
-Connection ~ 7150 2200
-Wire Wire Line
-	7150 2200 6300 2200
 Text Label 4300 1500 2    50   ~ 0
 INTERIOR+DATA
 Text Label 4300 1600 2    50   ~ 0
@@ -108,10 +56,6 @@ Wire Wire Line
 	4300 2100 3550 2100
 Wire Wire Line
 	4300 2200 3550 2200
-Wire Wire Line
-	6300 1700 7350 1700
-Wire Wire Line
-	7450 1800 7650 1800
 Wire Wire Line
 	2250 2000 3200 2000
 Wire Wire Line
@@ -134,41 +78,8 @@ Wire Wire Line
 	1450 1900 1150 1900
 Wire Wire Line
 	1450 2000 1150 2000
-Text Notes 6100 850  0    50   ~ 0
-INTERIOR
 Text Notes 4250 850  0    50   ~ 0
 EXTERIOR
-Text Notes 6950 4350 0    50   ~ 0
-MAINS PSU\nRS-25-12
-Wire Notes Line
-	6750 4450 7600 4450
-Wire Notes Line
-	7600 4450 7600 4150
-Wire Notes Line
-	7600 4150 6750 4150
-Wire Notes Line
-	6750 4150 6750 4450
-Text Label 7050 4050 1    50   ~ 0
-12V
-Text Label 7150 4050 1    50   ~ 0
-GND
-Wire Wire Line
-	7050 4500 7050 4800
-Wire Wire Line
-	7150 4500 7150 4800
-Text Notes 7250 5000 2    50   ~ 0
-TO MAINS
-$Comp
-L Device:L DOOR_LOCK_STRIKE
-U 1 1 5EC430A6
-P 5950 2650
-F 0 "DOOR_LOCK_STRIKE" V 6050 3000 50  0000 R CNN
-F 1 "L" H 5906 2695 50  0001 R CNN
-F 2 "" H 5950 2650 50  0001 C CNN
-F 3 "~" H 5950 2650 50  0001 C CNN
-	1    5950 2650
-	0    -1   -1   0   
-$EndComp
 $Comp
 L Connector:Conn_01x08_Male J?
 U 1 1 5F9E5D72
@@ -829,24 +740,8 @@ Text Label 1150 2000 0    50   ~ 0
 GPIO_17
 Text Label 600  1550 0    50   ~ 0
 GPIO_16
-Wire Wire Line
-	9300 1800 9600 1800
-Wire Wire Line
-	9300 1900 9600 1900
-Wire Wire Line
-	9300 2000 9600 2000
-Text Label 9600 1900 2    50   ~ 0
-5V
-Text Label 9600 1800 2    50   ~ 0
-GND
-Text Label 9600 2000 2    50   ~ 0
-BCM_14
-Text Label 10150 1550 2    50   ~ 0
-BCM_15
 Text Notes 550  750  0    50   ~ 0
 ALL GPIO IN EXTERIOR GO TO \nNODEMCU / ESP32.  Will probably\nchange GPIO assignments in PCB
-Text Notes 11000 700  2    50   ~ 0
-ALL BCM IN INTERIOR\nGO TO RPI0W\n
 $Comp
 L Regulator_Linear:L7805 U?
 U 1 1 5FEAB61F
@@ -870,25 +765,6 @@ Wire Wire Line
 	2700 2900 2150 2900
 Text Label 2150 2900 0    50   ~ 0
 5V
-$Comp
-L Regulator_Linear:L7805 U?
-U 1 1 5FECE1F9
-P 8550 3250
-F 0 "U?" H 8550 3492 50  0000 C CNN
-F 1 "VX7805" H 8550 3401 50  0000 C CNN
-F 2 "" H 8575 3100 50  0001 L CIN
-F 3 "" H 8550 3200 50  0001 C CNN
-	1    8550 3250
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	8850 3250 9400 3250
-Text Label 9400 3250 2    50   ~ 0
-5V
-Wire Wire Line
-	7050 3250 8250 3250
-Wire Wire Line
-	7150 3550 8550 3550
 Text Notes 1700 4350 1    50   ~ 0
 Prevents crash on firmware upload
 Wire Notes Line
@@ -916,19 +792,6 @@ Wire Wire Line
 	1050 5050 1050 3950
 $Comp
 L Device:R R?
-U 1 1 5FFD36DE
-P 8250 2550
-F 0 "R?" H 8320 2596 50  0001 L CNN
-F 1 "1K" V 8250 2500 50  0000 L CNN
-F 2 "" V 8180 2550 50  0001 C CNN
-F 3 "~" H 8250 2550 50  0001 C CNN
-	1    8250 2550
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	7950 2550 8100 2550
-$Comp
-L Device:R R?
 U 1 1 5FA69E74
 P 3200 1500
 F 0 "R?" H 3270 1546 50  0001 L CNN
@@ -937,60 +800,6 @@ F 2 "" V 3130 1500 50  0001 C CNN
 F 3 "~" H 3200 1500 50  0001 C CNN
 	1    3200 1500
 	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5FA97000
-P 7500 1550
-F 0 "R?" H 7570 1596 50  0001 L CNN
-F 1 "330" V 7500 1500 50  0000 L CNN
-F 2 "" V 7430 1550 50  0001 C CNN
-F 3 "~" H 7500 1550 50  0001 C CNN
-	1    7500 1550
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	7650 1700 8500 1700
-Wire Wire Line
-	7650 2350 7150 2350
-Wire Wire Line
-	7150 2200 7150 2350
-Wire Wire Line
-	5700 2750 5700 2650
-Wire Wire Line
-	5700 2650 5800 2650
-Wire Wire Line
-	6100 2650 7050 2650
-Connection ~ 7150 2350
-Wire Wire Line
-	7150 2350 7150 3550
-Connection ~ 7050 2650
-Wire Wire Line
-	7050 2650 7050 3250
-Wire Wire Line
-	7050 1900 7050 2650
-Wire Wire Line
-	5700 2750 7650 2750
-Text Label 9650 2550 0    50   ~ 0
-BCM_18
-Wire Wire Line
-	8400 2550 10050 2550
-Connection ~ 7050 3250
-Wire Wire Line
-	7050 3250 7050 4050
-Connection ~ 7150 3550
-Wire Wire Line
-	7150 3550 7150 4050
-$Comp
-L Transistor_BJT:TIP120 Q?
-U 1 1 5FE5696D
-P 7750 2550
-F 0 "Q?" H 7957 2596 50  0001 L CNN
-F 1 "TIP120" H 7550 2750 50  0000 L CNN
-F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 7950 2475 50  0001 L CIN
-F 3 "http://www.fairchildsemi.com/ds/TI/TIP120.pdf" H 7750 2550 50  0001 L CNN
-	1    7750 2550
-	-1   0    0    1   
 $EndComp
 Connection ~ 1150 6500
 Connection ~ 1150 7200
@@ -1190,20 +999,6 @@ Wire Wire Line
 	3400 1600 4300 1600
 Wire Wire Line
 	3200 1700 3400 1500
-Wire Wire Line
-	8500 1900 7450 1900
-Wire Wire Line
-	7450 1900 7150 1600
-Wire Wire Line
-	6300 1600 7150 1600
-Wire Wire Line
-	6950 1500 7450 2000
-Wire Wire Line
-	6300 1500 6950 1500
-Wire Wire Line
-	7450 2000 8500 2000
-Wire Wire Line
-	7350 1550 7350 1700
 Text Notes 5100 1250 0    50   ~ 0
 TIA 568B
 $Comp
@@ -1246,10 +1041,10 @@ GPIO_25
 Wire Wire Line
 	1300 2850 1400 2850
 $Comp
-L Device:Speaker LS?
+L Device:Speaker PIEZO
 U 1 1 60E6A3D7
 P 850 3150
-F 0 "LS?" H 1020 3146 50  0000 L CNN
+F 0 "PIEZO" H 1020 3146 50  0000 L CNN
 F 1 "Speaker" H 1020 3055 50  0000 L CNN
 F 2 "" H 850 2950 50  0001 C CNN
 F 3 "~" H 840 3100 50  0001 C CNN
@@ -1513,7 +1308,7 @@ Wire Wire Line
 Wire Wire Line
 	5550 6400 5650 6400
 Text Notes 5350 6600 0    50   ~ 0
-…. 12 total
+…. 16 total
 Wire Wire Line
 	5950 6100 5950 6250
 Connection ~ 5950 6100
@@ -1535,13 +1330,7 @@ Connection ~ 5950 6400
 Text Notes 6050 5500 0    50   ~ 0
 TODO: Could merge with \nLCD LED Transistor\n
 Wire Notes Line
-	5050 4700 5550 4700
-Wire Notes Line
 	5050 1150 5050 4700
-Wire Notes Line
-	5550 1150 5550 5150
-Wire Notes Line
-	5550 5150 10800 5150
 Text Label 650  3400 3    50   ~ 0
 5V
 Wire Wire Line
@@ -1549,65 +1338,6 @@ Wire Wire Line
 Connection ~ 1000 1550
 Wire Wire Line
 	1000 1550 600  1550
-$Comp
-L Device:R R?
-U 1 1 610EAA3F
-P 9500 1650
-F 0 "R?" H 9570 1696 50  0001 L CNN
-F 1 "1K" V 9500 1600 50  0000 L CNN
-F 2 "" V 9430 1650 50  0001 C CNN
-F 3 "~" H 9500 1650 50  0001 C CNN
-	1    9500 1650
-	0    1    -1   0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 610EAA45
-P 9750 1700
-F 0 "R?" H 9820 1746 50  0001 L CNN
-F 1 "1K" V 9750 1650 50  0000 L CNN
-F 2 "" V 9680 1700 50  0001 C CNN
-F 3 "~" H 9750 1700 50  0001 C CNN
-	1    9750 1700
-	1    0    0    1   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 610EAA4B
-P 9750 2000
-F 0 "R?" H 9820 2046 50  0001 L CNN
-F 1 "1K" V 9750 1950 50  0000 L CNN
-F 2 "" V 9680 2000 50  0001 C CNN
-F 3 "~" H 9750 2000 50  0001 C CNN
-	1    9750 2000
-	1    0    0    1   
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 610EAA51
-P 9750 2150
-F 0 "#PWR?" H 9750 1900 50  0001 C CNN
-F 1 "GND" H 9755 1977 50  0000 C CNN
-F 2 "" H 9750 2150 50  0001 C CNN
-F 3 "" H 9750 2150 50  0001 C CNN
-	1    9750 2150
-	-1   0    0    -1  
-$EndComp
-Wire Wire Line
-	9650 1650 9650 1550
-Wire Wire Line
-	9650 1550 9750 1550
-Connection ~ 9750 1550
-Wire Wire Line
-	9750 1550 10150 1550
-Wire Wire Line
-	9300 1700 9350 1650
-Text Label 7850 2000 0    50   ~ 0
-INTERIOR+DATA
-Text Label 7850 1900 0    50   ~ 0
-INTERIOR-DATA
-Text Label 7850 1800 0    50   ~ 0
-EXTERIOR-DATA
 Text Label 2300 1800 0    50   ~ 0
 INTERIOR-DATA
 Text Label 2300 2000 0    50   ~ 0
@@ -1616,20 +1346,6 @@ Text Label 2300 1900 0    50   ~ 0
 EXTERIOR-DATA
 Text Label 2300 1700 0    50   ~ 0
 INTERIOR+DATA
-Text Label 7850 1700 0    50   ~ 0
-EXTERIOR+DATA
-Wire Wire Line
-	7450 1800 7250 2000
-Wire Wire Line
-	6300 2000 7250 2000
-Wire Wire Line
-	7350 1700 7650 1700
-Connection ~ 7350 1700
-Connection ~ 7650 1800
-Wire Wire Line
-	7650 1800 8500 1800
-Wire Wire Line
-	7650 1550 7650 1800
 Wire Wire Line
 	2250 1700 3200 1700
 Wire Wire Line

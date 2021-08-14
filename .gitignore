@@ -3,3 +3,5 @@ build/
 clangd.log
 compile_commands.json
 .DS_Store
+**/._exterior.pro
+**/*.sch-bak

@@ -1,0 +1,316 @@
+EESchema Schematic File Version 4
+LIBS:interior-cache
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Interface_UART:MAX489E U?
+U 1 1 5EB773B0
+P 5700 2700
+F 0 "U?" H 5700 3381 50  0000 C CNN
+F 1 "MAX489E" H 5700 3290 50  0000 C CNN
+F 2 "" H 5700 2000 50  0001 C CNN
+F 3 "https://datasheets.maximintegrated.com/en/ds/MAX1487E-MAX491E.pdf" H 5750 2725 50  0001 C CNN
+	1    5700 2700
+	-1   0    0    -1  
+$EndComp
+Text Label 3100 2400 0    50   ~ 0
+INTERIOR+DATA
+Text Label 3100 2500 0    50   ~ 0
+INTERIOR-DATA
+Text Label 3100 2600 0    50   ~ 0
+EXTERIOR+DATA
+Text Label 3100 2700 0    50   ~ 0
+INTERIOR+12v
+Text Label 3100 2800 0    50   ~ 0
+INTERIOR+12v
+Text Label 3100 2900 0    50   ~ 0
+EXTERIOR-DATA
+Text Label 3100 3000 0    50   ~ 0
+INTERIOR-GND
+Text Label 3100 3100 0    50   ~ 0
+INTERIOR-GND
+$Comp
+L Connector:RJ45 J?
+U 1 1 5EB9C575
+P 2700 2700
+F 0 "J?" H 2700 2700 50  0000 R CNN
+F 1 "RJ45" H 2750 2800 50  0000 R CNN
+F 2 "" V 2700 2725 50  0001 C CNN
+F 3 "~" V 2700 2725 50  0001 C CNN
+	1    2700 2700
+	1    0    0    1   
+$EndComp
+Wire Wire Line
+	3100 2700 3850 2700
+Wire Wire Line
+	3100 2800 3850 2800
+Wire Wire Line
+	3850 2700 3850 2800
+Connection ~ 3850 2800
+Wire Wire Line
+	3950 3000 3950 3100
+Wire Wire Line
+	3950 3000 3100 3000
+Connection ~ 3950 3100
+Wire Wire Line
+	3950 3100 3100 3100
+Wire Wire Line
+	3100 2600 4150 2600
+Wire Wire Line
+	4250 2700 4450 2700
+Text Notes 2900 1750 0    50   ~ 0
+INTERIOR
+Text Notes 3750 5250 0    50   ~ 0
+MAINS PSU\nRS-25-12
+Wire Notes Line
+	3550 5350 4400 5350
+Wire Notes Line
+	4400 5350 4400 5050
+Wire Notes Line
+	4400 5050 3550 5050
+Wire Notes Line
+	3550 5050 3550 5350
+Text Label 3850 4950 1    50   ~ 0
+12V
+Text Label 3950 4950 1    50   ~ 0
+GND
+Wire Wire Line
+	3850 5400 3850 5700
+Wire Wire Line
+	3950 5400 3950 5700
+Text Notes 4050 5900 2    50   ~ 0
+TO MAINS
+$Comp
+L Device:L DOOR_LOCK_STRIKE
+U 1 1 5EC430A6
+P 2750 3550
+F 0 "DOOR_LOCK_STRIKE" V 2850 3900 50  0000 R CNN
+F 1 "L" H 2706 3595 50  0001 R CNN
+F 2 "" H 2750 3550 50  0001 C CNN
+F 3 "~" H 2750 3550 50  0001 C CNN
+	1    2750 3550
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	6100 2700 6400 2700
+Wire Wire Line
+	6100 2800 6400 2800
+Wire Wire Line
+	6100 2900 6400 2900
+Text Label 6400 2800 2    50   ~ 0
+5V
+Text Label 6400 2700 2    50   ~ 0
+GND
+Text Label 6400 2900 2    50   ~ 0
+BCM_14
+Text Label 6950 2450 2    50   ~ 0
+BCM_15
+Text Notes 7800 1600 2    50   ~ 0
+ALL BCM IN INTERIOR\nGO TO RPI0W\n
+$Comp
+L Regulator_Linear:L7805 U?
+U 1 1 5FECE1F9
+P 5350 4150
+F 0 "U?" H 5350 4392 50  0000 C CNN
+F 1 "VX7805" H 5350 4301 50  0000 C CNN
+F 2 "" H 5375 4000 50  0001 L CIN
+F 3 "" H 5350 4100 50  0001 C CNN
+	1    5350 4150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5650 4150 6200 4150
+Text Label 6200 4150 2    50   ~ 0
+5V
+Wire Wire Line
+	3850 4150 5050 4150
+Wire Wire Line
+	3950 4450 5350 4450
+$Comp
+L Device:R R?
+U 1 1 5FFD36DE
+P 5050 3450
+F 0 "R?" H 5120 3496 50  0001 L CNN
+F 1 "1K" V 5050 3400 50  0000 L CNN
+F 2 "" V 4980 3450 50  0001 C CNN
+F 3 "~" H 5050 3450 50  0001 C CNN
+	1    5050 3450
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4750 3450 4900 3450
+$Comp
+L Device:R R?
+U 1 1 5FA97000
+P 4300 2450
+F 0 "R?" H 4370 2496 50  0001 L CNN
+F 1 "330" V 4300 2400 50  0000 L CNN
+F 2 "" V 4230 2450 50  0001 C CNN
+F 3 "~" H 4300 2450 50  0001 C CNN
+	1    4300 2450
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4450 2600 5300 2600
+Wire Wire Line
+	4450 3250 3950 3250
+Wire Wire Line
+	3950 3100 3950 3250
+Wire Wire Line
+	2500 3650 2500 3550
+Wire Wire Line
+	2500 3550 2600 3550
+Wire Wire Line
+	2900 3550 3850 3550
+Connection ~ 3950 3250
+Wire Wire Line
+	3950 3250 3950 4450
+Connection ~ 3850 3550
+Wire Wire Line
+	3850 3550 3850 4150
+Wire Wire Line
+	3850 2800 3850 3550
+Wire Wire Line
+	2500 3650 4450 3650
+Text Label 6450 3450 0    50   ~ 0
+BCM_18
+Wire Wire Line
+	5200 3450 6850 3450
+Connection ~ 3850 4150
+Wire Wire Line
+	3850 4150 3850 4950
+Connection ~ 3950 4450
+Wire Wire Line
+	3950 4450 3950 4950
+$Comp
+L Transistor_BJT:TIP120 Q?
+U 1 1 5FE5696D
+P 4550 3450
+F 0 "Q?" H 4757 3496 50  0001 L CNN
+F 1 "TIP120" H 4350 3650 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-220-3_Vertical" H 4750 3375 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/TI/TIP120.pdf" H 4550 3450 50  0001 L CNN
+	1    4550 3450
+	-1   0    0    1   
+$EndComp
+Text Label 2300 2400 2    50   ~ 0
+WT_ORANGE
+Text Label 2300 2500 2    50   ~ 0
+ORANGE
+Text Label 2300 2600 2    50   ~ 0
+WT_GREEN
+Text Label 2300 2700 2    50   ~ 0
+BLUE
+Text Label 2300 2800 2    50   ~ 0
+WT_BLUE
+Text Label 2300 2900 2    50   ~ 0
+GREEN
+Text Label 2300 3000 2    50   ~ 0
+WT_BROWN
+Text Label 2300 3100 2    50   ~ 0
+BROWN
+Wire Wire Line
+	5300 2800 4250 2800
+Wire Wire Line
+	4250 2800 3950 2500
+Wire Wire Line
+	3100 2500 3950 2500
+Wire Wire Line
+	3750 2400 4250 2900
+Wire Wire Line
+	3100 2400 3750 2400
+Wire Wire Line
+	4250 2900 5300 2900
+Wire Wire Line
+	4150 2450 4150 2600
+Text Notes 1900 2150 0    50   ~ 0
+TIA 568B
+$Comp
+L Device:R R?
+U 1 1 610EAA3F
+P 6300 2550
+F 0 "R?" H 6370 2596 50  0001 L CNN
+F 1 "1K" V 6300 2500 50  0000 L CNN
+F 2 "" V 6230 2550 50  0001 C CNN
+F 3 "~" H 6300 2550 50  0001 C CNN
+	1    6300 2550
+	0    1    -1   0   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 610EAA45
+P 6550 2600
+F 0 "R?" H 6620 2646 50  0001 L CNN
+F 1 "1K" V 6550 2550 50  0000 L CNN
+F 2 "" V 6480 2600 50  0001 C CNN
+F 3 "~" H 6550 2600 50  0001 C CNN
+	1    6550 2600
+	1    0    0    1   
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 610EAA4B
+P 6550 2900
+F 0 "R?" H 6620 2946 50  0001 L CNN
+F 1 "1K" V 6550 2850 50  0000 L CNN
+F 2 "" V 6480 2900 50  0001 C CNN
+F 3 "~" H 6550 2900 50  0001 C CNN
+	1    6550 2900
+	1    0    0    1   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 610EAA51
+P 6550 3050
+F 0 "#PWR?" H 6550 2800 50  0001 C CNN
+F 1 "GND" H 6555 2877 50  0000 C CNN
+F 2 "" H 6550 3050 50  0001 C CNN
+F 3 "" H 6550 3050 50  0001 C CNN
+	1    6550 3050
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	6450 2550 6450 2450
+Wire Wire Line
+	6450 2450 6550 2450
+Connection ~ 6550 2450
+Wire Wire Line
+	6550 2450 6950 2450
+Wire Wire Line
+	6100 2600 6150 2550
+Text Label 4650 2900 0    50   ~ 0
+INTERIOR+DATA
+Text Label 4650 2800 0    50   ~ 0
+INTERIOR-DATA
+Text Label 4650 2700 0    50   ~ 0
+EXTERIOR-DATA
+Text Label 4650 2600 0    50   ~ 0
+EXTERIOR+DATA
+Wire Wire Line
+	4250 2700 4050 2900
+Wire Wire Line
+	3100 2900 4050 2900
+Wire Wire Line
+	4150 2600 4450 2600
+Connection ~ 4150 2600
+Connection ~ 4450 2700
+Wire Wire Line
+	4450 2700 5300 2700
+Wire Wire Line
+	4450 2450 4450 2600
+Connection ~ 4450 2600
+Wire Wire Line
+	4450 2600 4450 2700
+$EndSCHEMATC
