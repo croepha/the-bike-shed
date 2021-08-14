@@ -36,6 +36,11 @@ function fail() {
     exit -1
 }
 
-echo "to overwrite check: cp $OUT_FILE.cleaned $CHECK_FILE" >> "$OUT_FILE"
-diff "$OUT_FILE.cleaned" "$CHECK_FILE" >> "$OUT_FILE"
+diff "$OUT_FILE.cleaned" "$CHECK_FILE" >> "$OUT_FILE" || {
+  echo diff "$OUT_FILE.cleaned" "$CHECK_FILE"
+  cat $OUT_FILE
+  echo "to overwrite check: cp $OUT_FILE.cleaned $CHECK_FILE"
+  exit -1
+}
+
 echo "PASSED" >> "$OUT_FILE"
