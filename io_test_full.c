@@ -67,25 +67,12 @@ void test_main() {
 
   for (int i=0; i<COUNT(dl_ctx); i++) {
     char buf[1024];
-    snprintf(buf, sizeof buf, "/build/httpbin-get-id-%02d", i);
+    snprintf(buf, sizeof buf, "/build/testfile-%02d", i);
     unlink(buf);
     int fd = open(buf, O_CREAT | O_WRONLY, 0644);
     error_check(fd);
 
-    char buf2[2048];
-    snprintf(buf2, sizeof buf2,
-     "{\n"
-     "  \"args\": {\n"
-     "    \"id\": \"%02d\"\n"
-     "  }, \n"
-     "  \"headers\": {\n"
-     "    \"Accept\": \"*/*\", \n"
-     "    \"Host\": \"httpbin.org\", \n"
-     "  }, \n"
-     "  \"url\": \"https://httpbin.org/get?id=%02d\"\n"
-     "}\n", i, i);
-
-    int r = write(fd, buf2, strlen(buf2));
+    int r = dprintf(fd, "%s", buf);
     error_check(r);
 
     r = close(fd);
@@ -106,7 +93,7 @@ void test_main() {
     dl_ctx[i].f = fopen(buf, "w"); error_check(dl_ctx[i].f?0:-1);
     dl_ctx[i].id = i;
     CURLESET(WRITEDATA, dl_ctx[i].f);
-    snprintf(buf, sizeof buf, "http://127.0.0.1:9161/build/httpbin-get-id-%02d", i);
+    snprintf(buf, sizeof buf, "http://127.0.0.1:9161/build/testfile-%02d", i);
     CURLESET(URL, buf);
     //CURLESET(VERBOSE, 1);
     events_pending++;

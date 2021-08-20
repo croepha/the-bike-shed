@@ -1,115 +1,25 @@
  INFO: Running all events:	(./io_test_full.c test_main)
  INFO:	 timeout:logging_send 	(./io_test_full.c logging_send_timeout)
  INFO: cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "00"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=00"
-}
+/build/testfile-00
  INFO: cat /build/io_test_full_01 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "01"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=01"
-}
+/build/testfile-01
  INFO: cat /build/io_test_full_02 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "02"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=02"
-}
+/build/testfile-02
  INFO: cat /build/io_test_full_03 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "03"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=03"
-}
+/build/testfile-03
  INFO: cat /build/io_test_full_04 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "04"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=04"
-}
+/build/testfile-04
  INFO: cat /build/io_test_full_05 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "05"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=05"
-}
+/build/testfile-05
  INFO: cat /build/io_test_full_06 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "06"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=06"
-}
+/build/testfile-06
  INFO: cat /build/io_test_full_07 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "07"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=07"
-}
+/build/testfile-07
  INFO: cat /build/io_test_full_08 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "08"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=08"
-}
+/build/testfile-08
  INFO: cat /build/io_test_full_09 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
-{
-  "args": {
-    "id": "09"
-  }, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin.org", 
-  }, 
-  "url": "https://httpbin.org/get?id=09"
-}
+/build/testfile-09
  INFO: cat  /build/email_mock_io_test_full00@asdfasdf.no	(./io_test_full.c test_main)
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
 ===> RCPT TO:<io_test_full00@asdfasdf.no>
