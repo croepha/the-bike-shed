@@ -1,6 +1,7 @@
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <stdio.h>
 #include <curl/curl.h>
+#include <fcntl.h>
 #include "email.h"
 #include "io.h"
 #include "io_curl.h"
@@ -64,20 +65,48 @@ void test_main() {
   io_initialize();
   io_curl_initialize();
 
+  for (int i=0; i<COUNT(dl_ctx); i++) {
+    char buf[1024];
+    snprintf(buf, sizeof buf, "/build/httpbin-get-id-%02d", i);
+    unlink(buf);
+    int fd = open(buf, O_CREAT | O_WRONLY, 0644);
+    error_check(fd);
+
+    char buf2[2048];
+    snprintf(buf2, sizeof buf2,
+     "{\n"
+     "  \"args\": {\n"
+     "    \"id\": \"%02d\"\n"
+     "  }, \n"
+     "  \"headers\": {\n"
+     "    \"Accept\": \"*/*\", \n"
+     "    \"Host\": \"httpbin.org\", \n"
+     "  }, \n"
+     "  \"url\": \"https://httpbin.org/get?id=%02d\"\n"
+     "}\n", i, i);
+
+    int r = write(fd, buf2, strlen(buf2));
+    error_check(r);
+
+    r = close(fd);
+    error_check(r);
+
+  }
+
   system("rm -f /build/io_test_full_* /build/email_mock_io_test_full*");
 
   start_time = now_ms() + 50;
-  char buf[1024];
 
   starting_email = 1;
 
   for (int i=0; i<COUNT(dl_ctx); i++) {
+    char buf[1024];
     CURL*easy = test_io_curl_create_handle(&dl_ctx[i]);
     snprintf(buf, sizeof buf, "/build/io_test_full_%02d", i);
     dl_ctx[i].f = fopen(buf, "w"); error_check(dl_ctx[i].f?0:-1);
     dl_ctx[i].id = i;
     CURLESET(WRITEDATA, dl_ctx[i].f);
-    snprintf(buf, sizeof buf, "https://httpbin.org/get?id=%02d", i);
+    snprintf(buf, sizeof buf, "http://127.0.0.1:9161/build/httpbin-get-id-%02d", i);
     CURLESET(URL, buf);
     //CURLESET(VERBOSE, 1);
     events_pending++;
@@ -107,11 +136,13 @@ void test_main() {
   }
 
   for (int i=0; i<COUNT(dl_ctx); i++) {
+    char buf[1024];
     snprintf(buf, sizeof buf, "cat /build/io_test_full_%02d | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '\"origin\"' ", i);
     INFO("%s", buf);
     int r = system(buf); error_check(r);
   }
   for (int i=0; i<COUNT(email_ctx); i++) {
+    char buf[1024];
     snprintf(buf, sizeof buf, "cat  /build/email_mock_io_test_full%02d@asdfasdf.no", i);
     INFO("%s", buf);
     int r = system(buf); error_check(r);
