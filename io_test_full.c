@@ -124,7 +124,8 @@ void test_main() {
 
   for (int i=0; i<COUNT(dl_ctx); i++) {
     char buf[1024];
-    snprintf(buf, sizeof buf, "cat /build/io_test_full_%02d | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '\"origin\"' ", i);
+    // im not sure why we need a grep here, but without it cat isn't dumping the file? maybe buffering?
+    snprintf(buf, sizeof buf, "cat /build/io_test_full_%02d | grep -v 'asdfasdf' ", i);
     INFO("%s", buf);
     int r = system(buf); error_check(r);
   }

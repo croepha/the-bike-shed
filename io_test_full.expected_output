@@ -1,24 +1,24 @@
  INFO: Running all events:	(./io_test_full.c test_main)
  INFO:	 timeout:logging_send 	(./io_test_full.c logging_send_timeout)
- INFO: cat /build/io_test_full_00 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_00 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-00
- INFO: cat /build/io_test_full_01 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_01 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-01
- INFO: cat /build/io_test_full_02 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_02 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-02
- INFO: cat /build/io_test_full_03 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_03 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-03
- INFO: cat /build/io_test_full_04 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_04 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-04
- INFO: cat /build/io_test_full_05 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_05 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-05
- INFO: cat /build/io_test_full_06 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_06 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-06
- INFO: cat /build/io_test_full_07 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_07 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-07
- INFO: cat /build/io_test_full_08 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_08 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-08
- INFO: cat /build/io_test_full_09 | grep -v 'date:' | grep -v 'X-Amzn-Trace-Id' | grep -v '"origin"' 	(./io_test_full.c test_main)
+ INFO: cat /build/io_test_full_09 | grep -v 'asdfasdf' 	(./io_test_full.c test_main)
 /build/testfile-09
  INFO: cat  /build/email_mock_io_test_full00@asdfasdf.no	(./io_test_full.c test_main)
 ===> MAIL FROM:<from@longlonglonglonglonglonglonglonghost.com>
