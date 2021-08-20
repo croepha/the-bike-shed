@@ -106,7 +106,7 @@ int notes[] = {
   294, // D4
   329, // E4
   349, // F4
-  392, // G4  
+  392, // G4
   440, // A4
   494, // B4
   523, // C5
@@ -183,7 +183,7 @@ void setup() {
   mfrc522.PCD_Init();
 
   pinMode(SERIAL_EN_GPIO, OUTPUT); digitalWrite(SERIAL_EN_GPIO, HIGH);
-  
+
 
   Serial.begin(115200);
   Serial.println("INFO Started UP");
@@ -200,7 +200,7 @@ void setup() {
   ledcSetup(LCD_LED_CHAN, 5000, 16);
   ledcAttachPin(LCD_LED_GPIO, LCD_LED_CHAN);
 
-  
+
   ledcSetup(SPK_CHAN, 5000, 16);
   ledcAttachPin(SPK_GPIO, SPK_CHAN);
   ledcWrite(SPK_GPIO, 0);
@@ -300,7 +300,7 @@ void draw_input_lines() {
   setup_keypad();
   delay(10);
   pressed_col = -1;
-  
+
 }
 
 
@@ -421,7 +421,7 @@ void loop() {
         //ledcWrite(SPK_CHAN, 0);
     } else {
         ledcWrite(SPK_CHAN, 32 * 4 * 256);
-        ledcWriteTone(SPK_CHAN, notes[tone_key]);    
+        ledcWriteTone(SPK_CHAN, notes[tone_key]);
     }
   }
 
