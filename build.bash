@@ -349,6 +349,12 @@ do_test serial_test /build/serial_test.dbg.exec
 
 reset
 depends_on logging
+compile exterior_sim_lcd
+link_exec exterior_sim_lcd
+
+
+reset
+depends_on logging
 depends_on io_core
 depends_on serial_open
 depends_on misc
