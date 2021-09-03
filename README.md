@@ -78,6 +78,7 @@ For general coding:
    time you run the build, you might get an error like this:  `fatal error: '/build/parse_headers.re.c' file not found`
    Just run the build again, currently we aren't telling ninja about some files were generating, this only effects first time builds.
 
+The "clangd" extension for VSCode is highly reccomended
 
 Hopefully that just worked, if it didn't, please let us know
 
