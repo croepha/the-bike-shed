@@ -57,7 +57,7 @@ WARN    Just like ERROR, but slightly less severe.  Also things that might be ER
 
 FATAL   Something really unexpected has happened, execution cannot continue... Process will abort and restart
 
-DEBUG   Hints to the developer these are turned of in production builds
+DEBUG   Hints to the developer these are turned of in production builds, ignored for tests
 
 TRACE   An internal dump of an algorithms state or event tracing, useful for tests, these are turned of in production builds
 
