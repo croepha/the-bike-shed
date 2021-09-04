@@ -42,30 +42,26 @@ void io_curl_io_event(struct epoll_event epe) {
 }
 
 static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, void* s) {
+  u32 events = 0;
+  switch (action) { SWITCH_DEFAULT_IS_UNEXPECTED;
+    case CURL_POLL_REMOVE: { events = 0                  ; } break;
+    case CURL_POLL_IN    : { events = EPOLLIN            ; } break;
+    case CURL_POLL_OUT   : { events = EPOLLOUT           ; } break;
+    case CURL_POLL_INOUT : { events = EPOLLIN & EPOLLOUT ; } break;
+  };
 
-    io_EPData data = {.my_data = {.id = fd, .event_type = _io_socket_type_io_curl_fd}};
-    struct epoll_event epe = {.data = data.data};
-
-    switch (action) { SWITCH_DEFAULT_IS_UNEXPECTED;
-      case CURL_POLL_REMOVE: break;
-      case CURL_POLL_IN   : { epe.events=EPOLLIN           ; } break;
-      case CURL_POLL_OUT  : { epe.events=EPOLLOUT          ; } break;
-      case CURL_POLL_INOUT: { epe.events=EPOLLIN & EPOLLOUT; } break;
-    };
-
-    if (action == CURL_POLL_REMOVE) {
-        int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_DEL, fd, &epe);
-        error_check(r1);
-    } else if(!s) {
-      CURLMcode mr = curl_multi_assign(multi, fd, (void*)1);
-      error_check_curlm(mr);
-      int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, fd, &epe);
-      error_check(r1);
-    } else {
-      int r1 = epoll_ctl(io_epoll_fd, EPOLL_CTL_MOD, fd, &epe);
-      error_check(r1);
-    }
-    return 0;
+  int op;
+  if (action == CURL_POLL_REMOVE) {
+    op = EPOLL_CTL_DEL;
+  } else if(!s) {
+    CURLMcode mr = curl_multi_assign(multi, fd, (void*)1);
+    error_check_curlm(mr);
+    op = EPOLL_CTL_ADD;
+  } else {
+    op = EPOLL_CTL_MOD;
+  }
+  io_fd_ctl(events, op, _io_socket_type_io_curl_fd, fd, fd);
+  return 0;
 }
 
 void io_curl_abort(CURL* easy) {

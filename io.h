@@ -3,8 +3,6 @@
 #include <sys/epoll.h>
 #include "common.h"
 
-extern int io_epoll_fd;
-
 //#define _io_timers_FIRST _io_timer_logging_send
 #define _IO_TIMERS \
  _(logging_send) \
@@ -52,9 +50,8 @@ typedef union {
 #include "logging.h"
 
 
-#define io_ADD_R(fd) __io_set(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, fd)
-void __io_set(int flags, int op, enum _io_socket_types type, int fd);
-
+#define io_ADD_R(fd) io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, 0, fd)
+void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
 
 
 

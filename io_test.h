@@ -62,12 +62,7 @@ __attribute__((unused)) static void echo_test_socket(int i, int type, char const
 
     r = close(sv[1]); error_check(r);
 
-    io_EPData data;
-    data.my_data.id = i;
-    data.my_data.event_type = type;
-    struct epoll_event epe = { .events = EPOLLIN, .data = data.data};
-    r = epoll_ctl(io_epoll_fd, EPOLL_CTL_ADD, sockets[i], &epe); error_check(r);
-
+    io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, type, i, sockets[i]);
     INFO("socket id:%02d type:%s:%d", i, name, type);
     events_pending++;
 }

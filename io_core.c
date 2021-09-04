@@ -13,19 +13,20 @@
 u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 #undef  _
 
-int io_epoll_fd = -1;
+static int _epfd = -1;
 
 u8   io_idle_has_work; // TODO make unit test for this
 
 void io_initialize() {
   io_idle_has_work = 0;
-  io_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+  _epfd = epoll_create1(EPOLL_CLOEXEC);
 }
 
-void __io_set(int flags, int op, enum _io_socket_types type, int fd) { int r;
-    io_EPData data = {.my_data = { .event_type = type }};
+void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd) { int r;
+    io_EPData data = {.my_data = {.id = id, .event_type = type }};
     struct epoll_event epe = {.data = data.data, .events = flags};
-    r = epoll_ctl(io_epoll_fd, op, fd, &epe); error_check(r);
+    r = epoll_ctl(_epfd, op, fd, &epe);
+    error_check(r);
 }
 
 #ifdef LOG_DEBUG
@@ -84,7 +85,7 @@ void io_process_events() { start:;
 
   struct epoll_event epes[16];
 
-  int epoll_ret = epoll_wait(io_epoll_fd, epes, COUNT(epes), timeout_interval_ms);
+  int epoll_ret = epoll_wait(_epfd, epes, COUNT(epes), timeout_interval_ms);
   if (epoll_ret == -1 && errno == EINTR) {
     INFO("Got interrupted system call, restarting wait");
     goto start;
