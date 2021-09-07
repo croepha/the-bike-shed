@@ -53,6 +53,28 @@ void io_process_events() { start:;
     IO_TIMER_MS(idle) = now_epoch_ms + 10;
   }
 
+  // TODO: Instead of calculating the timers each time here, we should really just
+  //  have setters for timers and use a min-heap which is inserted into each time we
+  //  set a timer, we do that instead of just linear searching the timers for the lowest
+  //  whenever we process events, this would be more optimal for several reasons:
+  //   - We reuse the sorting work, instead of doing it from scratch
+  //   - We move the work from a routine that runs all the time, to a routine that runs rarely
+  //   - The complexity of the heap insert should be much better than a linear scan
+  //  I am however leaving this terrible implementation as it sits for now, because even
+  //   though it is terrible, its super fast for our current needs, as we are operating on
+  //   a small scale...
+
+  // TODO: Also I think the timers are using a non monotonic clock, which means that NTP
+  //  can mess us up, for internal scheduling, we should really just be using boottime,
+  //  or some other monotonic time.  Furthermore, just using a monotonic time is great for
+  //  timeouts, throttles, or retry timers, but are actually bad for real time timers.
+  //  So, I propose that we have two different APIs, one for "stopwatch" like things, and
+  //  annother for "appointments", and we need to get notified on siginificant time changes
+  //  We can use timerfd+cancel detection to detect major wall clock adjustments, when we
+  //  detect that, we should then call a special callback for "appointments" so that they
+  //  can be rescheduled, as there is a new time that they should use as a now reference...
+  //  We should start by making some kind of test to prove that this is actually a bug
+
   enum _io_timers running_timer;
   u64 next_timer_epoch_ms = -1;
   for (int i=1; i < _io_timer_COUNT; i++) {
