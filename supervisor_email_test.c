@@ -34,14 +34,14 @@ extern enum SUPR_LOG_EMAIL_STATE_T supr_email_state;
 static void dump_email_state() {
   INFO(  "now:%" PRIu64 " email_state:%d IO_TIMER_MS(logging_send):%" PRIu64
           " sent_epoch_sec:%" PRIu64 " buf_used:%u sent_bytes:%u",
-          now_ms_value / 1000, supr_email_state, IO_TIMER_MS(logging_send) / 1000,
+          now_ms_value / 1000, supr_email_state, IO_DEBUG_TIMER_MS_GET(logging_send) / 1000,
           supr_email_sent_epoch_sec, supr_email_buf_used,
           supr_email_sent_bytes);
 }
 
 static void reset_email_state() {
     now_ms_value  = 100000000;
-    IO_TIMER_MS(logging_send) = -1;
+    IO_TIMER_SET_MS(logging_send, -1);
     supr_email_sent_epoch_sec = 0;
     supr_email_buf_used = 0;
     supr_email_sent_bytes = 0;
@@ -134,7 +134,7 @@ void dump_email_state();
 void reset_email_state();
 
 static void timer_skip() {
-  now_ms_value = IO_TIMER_MS(logging_send);
+  now_ms_value = IO_DEBUG_TIMER_MS_GET(logging_send);
   assert(now_ms_value < 1000000000000);
   logging_send_timeout();
   now_ms_value += 1000;

@@ -16,7 +16,7 @@ void serial_line_handler(char* line) {
 IO_TIMEOUT_CALLBACK(logging_send) {
     INFO();
     dprintf(serial_fd, "TEST TEST\n");
-    IO_TIMER_MS(logging_send) = now_sec()*1000 + 1000;
+    IO_TIMER_SET_MS(logging_send, IO_NOW_MS() + 1000);
 }
 
 int main (int argc, char ** argv) {
@@ -28,7 +28,7 @@ int main (int argc, char ** argv) {
 
     serial_io_initialize(dev_path);
 
-    IO_TIMER_MS(logging_send) = now_sec() + 1000;
+    IO_TIMER_SET_MS(logging_send, IO_NOW_MS() + 1000);
 
 
     for(;;) {

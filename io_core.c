@@ -53,9 +53,9 @@ EP_TYPES
 
 void io_process_events() { start:;
 
-  u64 now_epoch_ms = now_ms();
+  u64 now_epoch_ms = IO_NOW_MS();
   if (io_idle_has_work) {
-    IO_TIMER_MS(idle) = now_epoch_ms + 10;
+    IO_TIMER_SET_MS(idle, now_epoch_ms + 10);
   }
 
   // TODO: Instead of calculating the timers each time here, we should really just

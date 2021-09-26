@@ -38,7 +38,7 @@ IO_CURL_SETUP(supervisor_email, struct SupervisorCurlCtx, curl_type);
 
 
 static void poke_state_machine() {
-  u64 now_epoch_sec = now_sec();
+  u64 now_epoch_sec = IO_NOW_MS() / 1000;
   assert(now_epoch_sec > supr_email_rapid_threshold_secs);
   assert(now_epoch_sec > supr_email_low_threshold_secs);
   assert(now_epoch_sec > supr_email_timeout_secs);
@@ -69,25 +69,23 @@ static void poke_state_machine() {
                    email_size, "Logs");
         supr_email_sent_bytes = email_size;
         supr_email_sent_epoch_sec = now_epoch_sec;
-        IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000;
+        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
         supr_email_state = SUPR_LOG_EMAIL_STATE_SENT;
       } else {
         DEBUG("Waiting on threshold timeout or more data");
-        IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + supr_email_low_threshold_secs) * 1000;
+        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_low_threshold_secs) * 1000);
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_SENT: {
-      assert(IO_TIMER_MS(logging_send) ==
-             (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
+//      assert(IO_TIMER_MS(logging_send) == (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
       if (supr_email_sent_epoch_sec + supr_email_timeout_secs <=
           now_epoch_sec) {
+        // TODO: I think we should have error logs here...
         DEBUG("If our email is timing out, lets abort it");
         ERROR("log email took too long, aborting");
         email_free(&supr_email_ctx);
         supr_email_sent_bytes = 0;
-        IO_TIMER_MS(logging_send) = -1;
+        IO_TIMER_SET_MS(logging_send, -1);
         supr_email_state = SUPR_LOG_EMAIL_STATE_COOLDOWN;
         goto start;
       } else {
@@ -98,9 +96,7 @@ static void poke_state_machine() {
       if (now_epoch_sec <
           supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) {
         DEBUG("Were cooling down");
-        IO_TIMER_MS(logging_send) =
-            (supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) *
-            1000;
+        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) * 1000);
       } else {
         if (supr_email_buf_used) {
           supr_email_state = SUPR_LOG_EMAIL_STATE_COLLECTING;

@@ -20,7 +20,7 @@ u64 now_ms() {
 
 IO_TIMEOUT_CALLBACK(logging_send) {
   INFO();
-  IO_TIMER_MS(logging_send) = -1;
+  IO_TIMER_SET_MS(logging_send, -1);
   events_pending--;
 }
 
@@ -83,7 +83,7 @@ void test_main() {
 
   system("rm -f /build/io_test_full_* /build/email_mock_io_test_full*");
 
-  start_time = now_ms() + 50;
+  start_time = IO_NOW_MS() + 50;
 
   starting_email = 1;
 
@@ -113,7 +113,7 @@ void test_main() {
 
   starting_email = 0;
 
-  IO_TIMER_MS(logging_send) = start_time;
+  IO_TIMER_SET_MS(logging_send, start_time);
   events_pending++;
 
   INFO("Running all events:"); { LOGCTX("\t");
