@@ -33,6 +33,10 @@ __attribute__((unused)) static void sock_read_line(int fd, char * buf, size_t bu
 
 u64 start_time;
 
+// TODO: remove
+void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+
+
 __attribute__((unused)) static void echo_test_socket(int i, int type, char const * name) { int r;
     int sv[2] = {-1,-1};
     r = socketpair(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0, sv); error_check(r);

@@ -57,8 +57,11 @@ enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
 #include "logging.h"
 
 
-#define io_ADD_R(fd) io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, 0, fd)
-void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+//#define io_ADD_R(fd) io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, 0, fd)
+#define io_ADD_R(fd) io_ctl(fd, fd, 0, EPOLLIN, EPOLL_CTL_ADD)
+//void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+
+#define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)
 
 
 

@@ -59,7 +59,7 @@ static int socket_callback(CURL* easy, curl_socket_t fd, int action, void* u, vo
   } else {
     op = EPOLL_CTL_MOD;
   }
-  io_fd_ctl(events, op, _io_socket_type_io_curl_fd, fd, fd);
+  io_ctl(io_curl_fd, fd, fd, events, op);
   return 0;
 }
 

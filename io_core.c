@@ -29,6 +29,22 @@ _IO_TIMERS
 #undef  _
 
 
+// TODO: Make static
+void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+
+
+#define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)
+
+#define _(type) \
+void __io_ctl__ ## type ## _fd (s32, s32, s32, s32); \
+void __io_ctl__ ## type ## _fd (s32 fd, s32 id, s32 flags, s32 op) \
+{ io_fd_ctl(flags, op, _io_socket_type_ ## type ## _fd, id, fd); }
+
+_IO_SOCKET_TYPES
+#undef  _
+
+
+
 typedef union {
   epoll_data_t data;
   struct {
