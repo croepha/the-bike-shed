@@ -30,7 +30,7 @@ static void timeout_cb(char* name, enum _io_timers timer) {
 _IO_TIMERS
 #undef  _
 
-void io_event_cb(char* name, u32 events, s32 id, s32 type);
+void io_event_cb(char* name, u32 events, s32 id);
 
 // // TODO remove
 // #define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
@@ -44,7 +44,7 @@ void io_event_cb(char* name, u32 events, s32 id, s32 type);
 
 
 
-#define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id, _io_socket_type_ ## name ## _fd); }
+#define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id); }
 _IO_SOCKET_TYPES
 #undef  _
 
@@ -65,12 +65,12 @@ char const * const socket_type_names[] = { _IO_SOCKET_TYPES };
 enum _io_socket_types const socket_types[] = { _IO_SOCKET_TYPES };
 # undef  _
 
-void io_event_cb(char* name, u32 events, s32 id, s32 type) { int r;
+void io_event_cb(char* name, u32 events, s32 id) { int r;
   int i = id;
   LOGCTX("test_sort:id:%02d", i);
   char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
 
-  INFO("IO Event %s type:%d buf:'%s'", name, type, buf);
+  INFO("IO Event %s buf:'%s'", name, buf);
   { LOGCTX("\t"); log_ep_event(events); }
   r = dprintf(sockets[id], "REPLY%02d\n", id);
   error_check(r);

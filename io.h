@@ -50,13 +50,7 @@ enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
 // _IO_SOCKET_TYPES
 // #undef  _
 
-typedef union {
-  epoll_data_t data;
-  struct {
-    s32 id;
-    enum _io_socket_types event_type;
-  } my_data;
-} io_EPData;
+
 
 #include <errno.h>
 #include <sys/epoll.h>

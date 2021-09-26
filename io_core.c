@@ -29,6 +29,15 @@ _IO_TIMERS
 #undef  _
 
 
+typedef union {
+  epoll_data_t data;
+  struct {
+    s32 id;
+    enum _io_socket_types event_type;
+  } my_data;
+} io_EPData;
+
+
 static int _epfd = -1;
 
 u8   io_idle_has_work; // TODO make unit test for this
