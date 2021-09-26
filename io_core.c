@@ -53,10 +53,10 @@ u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS  _(idle)};
 
 
 #define _(name) \
-void __io_timer_ms_set__ ## name (u64); \
-void __io_timer_ms_set__ ## name (u64 value_ms) { io_timers_epoch_ms[_io_timer_ ## name] = value_ms; } \
-u64 __io_debug_timer_ms_get__ ## name (void); \
-u64 __io_debug_timer_ms_get__ ## name () { return io_timers_epoch_ms[_io_timer_ ## name]; }
+void __io_timer_ms_set__       ## name (u64); \
+void __io_timer_ms_set__       ## name (u64 value_ms) { io_timers_epoch_ms[_io_timer_ ## name] = value_ms; } \
+u64  __io_timer_ms_debug_get__ ## name (void); \
+u64  __io_timer_ms_debug_get__ ## name () { return io_timers_epoch_ms[_io_timer_ ## name]; }
 
 _IO_TIMERS _(idle)
 #undef  _

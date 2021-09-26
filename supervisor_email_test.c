@@ -74,8 +74,8 @@ CURL* __io_curl_create_handle() {
 //u64 io_timers_epoch_ms[_io_timer_logging_send + 1];
 
 u64 __fake_io_timers_ms__logging_send;
-u64 __io_debug_timer_ms_get__logging_send(void);
-u64 __io_debug_timer_ms_get__logging_send(void) { return __fake_io_timers_ms__logging_send; }
+u64 __io_timer_ms_debug_get__logging_send(void);
+u64 __io_timer_ms_debug_get__logging_send(void) { return __fake_io_timers_ms__logging_send; }
 void __io_timer_ms_set__logging_send(u64 value_ms);
 void __io_timer_ms_set__logging_send(u64 value_ms) { __fake_io_timers_ms__logging_send = value_ms; }
 
