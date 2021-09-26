@@ -204,7 +204,7 @@ static void exterior_display(char * fmt, ...) {
     error_check(r);
     r = dprintf(serial_fd, "TEXT_SHOW2 %s\n", line2);
     error_check(r);
-    IO_TIMER_SET_MS(clear_display, IO_NOW_MS() + shed_clear_timeout_ms);
+    IO_TIMER_MS_SET(clear_display, IO_NOW_MS() + shed_clear_timeout_ms);
 }
 
 
@@ -304,7 +304,7 @@ static void save_config() {
 static void unlock_door() {
     gpio_pwm_set(1);
     //DEBUG("shed_door_unlock_ms:%u", shed_door_unlock_ms);
-    IO_TIMER_SET_MS(shed_pwm, IO_NOW_MS() + shed_door_unlock_ms);
+    IO_TIMER_MS_SET(shed_pwm, IO_NOW_MS() + shed_door_unlock_ms);
 }
 
 static void exterior_scan_finished() { int r;
@@ -423,7 +423,7 @@ static void exterior_scan_finished() { int r;
             case STATE_SENDING_NO_CANCEL: {
                 WARN("Got send request while email is pending");
                 exterior_display("\nCant send, email busy, try again to cancel and send again");
-                IO_TIMER_SET_MS(clear_display, IO_NOW_MS() + 2000);
+                IO_TIMER_MS_SET(clear_display, IO_NOW_MS() + 2000);
                 state = STATE_SENDING_CANCELLED;
             } break;
         }
@@ -508,7 +508,7 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
     LOGCTX(" download_finished");
     memset(config_download_previous_etag, 0, sizeof config_download_previous_etag);
     strncpy(config_download_previous_etag, c->etag, sizeof config_download_previous_etag);
-    IO_TIMER_SET_MS(config_download, last_config_download_ms + config_download_interval_sec * 1000);
+    IO_TIMER_MS_SET(config_download, last_config_download_ms + config_download_interval_sec * 1000);
 
     DEBUG("success:%d admin_added:%d", success, admin_added);
 
@@ -545,7 +545,7 @@ IO_TIMEOUT_CALLBACK(config_download) {
     config_download_previous_etag,
     config_download_previous_modified_time_sec);
 
-    IO_TIMER_SET_MS(config_download, last_config_download_ms + config_download_interval_sec * 1000);
+    IO_TIMER_MS_SET(config_download, last_config_download_ms + config_download_interval_sec * 1000);
 }
 
 void __debug_config_download_complete_hook() {};
@@ -622,7 +622,7 @@ IO_TIMEOUT_CALLBACK(idle) {
     } else {
         INFO("Maintenance Finished");
         // Set timer to next day
-        IO_TIMER_SET_MS(idle, next_maint_ms);
+        IO_TIMER_MS_SET(idle, next_maint_ms);
         io_idle_has_work = 0;
     }
 
@@ -688,7 +688,7 @@ int main (int argc, char ** argv) {
 
     // Wait 5 seconds to start downloading config,
     //  internet might not be available right away
-    IO_TIMER_SET_MS(config_download, IO_NOW_MS() + config_download_startup_delay_ms);
+    IO_TIMER_MS_SET(config_download, IO_NOW_MS() + config_download_startup_delay_ms);
 
     idle_timeout();
 

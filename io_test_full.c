@@ -22,7 +22,7 @@ IO_TIMEOUT_CALLBACK(idle) {}
 
 IO_TIMEOUT_CALLBACK(logging_send) {
   INFO();
-  IO_TIMER_SET_MS(logging_send, -1);
+  IO_TIMER_MS_SET(logging_send, -1);
   events_pending--;
 }
 
@@ -115,7 +115,7 @@ void test_main() {
 
   starting_email = 0;
 
-  IO_TIMER_SET_MS(logging_send, start_time);
+  IO_TIMER_MS_SET(logging_send, start_time);
   events_pending++;
 
   INFO("Running all events:"); { LOGCTX("\t");

@@ -69,11 +69,11 @@ static void poke_state_machine() {
                    email_size, "Logs");
         supr_email_sent_bytes = email_size;
         supr_email_sent_epoch_sec = now_epoch_sec;
-        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
+        IO_TIMER_MS_SET(logging_send, (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
         supr_email_state = SUPR_LOG_EMAIL_STATE_SENT;
       } else {
         DEBUG("Waiting on threshold timeout or more data");
-        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_low_threshold_secs) * 1000);
+        IO_TIMER_MS_SET(logging_send, (supr_email_sent_epoch_sec + supr_email_low_threshold_secs) * 1000);
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_SENT: {
@@ -85,7 +85,7 @@ static void poke_state_machine() {
         ERROR("log email took too long, aborting");
         email_free(&supr_email_ctx);
         supr_email_sent_bytes = 0;
-        IO_TIMER_SET_MS(logging_send, -1);
+        IO_TIMER_MS_SET(logging_send, -1);
         supr_email_state = SUPR_LOG_EMAIL_STATE_COOLDOWN;
         goto start;
       } else {
@@ -96,7 +96,7 @@ static void poke_state_machine() {
       if (now_epoch_sec <
           supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) {
         DEBUG("Were cooling down");
-        IO_TIMER_SET_MS(logging_send, (supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) * 1000);
+        IO_TIMER_MS_SET(logging_send, (supr_email_sent_epoch_sec + supr_email_rapid_threshold_secs) * 1000);
       } else {
         if (supr_email_buf_used) {
           supr_email_state = SUPR_LOG_EMAIL_STATE_COLLECTING;

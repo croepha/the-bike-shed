@@ -10,9 +10,9 @@
 
 static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
   if (timeout_ms_ < 0) {
-    IO_TIMER_SET_MS(io_curl, -1);
+    IO_TIMER_MS_SET(io_curl, -1);
   } else {
-    IO_TIMER_SET_MS(io_curl, IO_NOW_MS() + timeout_ms_);
+    IO_TIMER_MS_SET(io_curl, IO_NOW_MS() + timeout_ms_);
   }
 
   DEBUG("timeout: %ld ms, new timer: %"PRId64"\n",
@@ -24,7 +24,7 @@ static CURLM * multi;
 static CURLSH * share;
 
 IO_TIMEOUT_CALLBACK(io_curl) {
-  IO_TIMER_SET_MS(io_curl, -1);
+  IO_TIMER_MS_SET(io_curl, -1);
   int running_handles;
   CURLMcode mr = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
   error_check_curlm(mr);

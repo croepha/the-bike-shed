@@ -18,7 +18,7 @@ IO_TIMEOUT_CALLBACK(idle) {}
 IO_TIMEOUT_CALLBACK(logging_send) {
     INFO();
     dprintf(serial_fd, "TEST TEST\n");
-    IO_TIMER_SET_MS(logging_send, IO_NOW_MS() + 1000);
+    IO_TIMER_MS_SET(logging_send, IO_NOW_MS() + 1000);
 }
 
 int main (int argc, char ** argv) {
@@ -30,7 +30,7 @@ int main (int argc, char ** argv) {
 
     serial_io_initialize(dev_path);
 
-    IO_TIMER_SET_MS(logging_send, IO_NOW_MS() + 1000);
+    IO_TIMER_MS_SET(logging_send, IO_NOW_MS() + 1000);
 
 
     for(;;) {

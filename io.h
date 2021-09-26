@@ -5,7 +5,7 @@
 
 #define IO_TIMEOUT_CALLBACK(m_name) void m_name ## _timeout(void); void m_name ## _timeout()
 #define IO_EVENT_CALLBACK(m_name, m_arg_epoll_events, m_arg_id) void m_name ## _io_event(u32, s32); void m_name ## _io_event(u32 m_arg_epoll_events, s32 m_arg_id)
-#define IO_TIMER_SET_MS(name, value_ms) ({ void __io_timer_ms_set__ ## name (u64); __io_timer_ms_set__ ## name (value_ms); })
+#define IO_TIMER_MS_SET(name, value_ms) ({ void __io_timer_ms_set__ ## name (u64); __io_timer_ms_set__ ## name (value_ms); })
 #define IO_DEBUG_TIMER_MS_GET(name) ({ u64 __io_debug_timer_ms_get__ ## name (void); __io_debug_timer_ms_get__ ## name (); })
 #define IO_NOW_MS() now_ms()
 

@@ -44,7 +44,7 @@ static void dump_email_state() {
 
 static void reset_email_state() {
     now_ms_value  = 100000000;
-    IO_TIMER_SET_MS(logging_send, -1);
+    IO_TIMER_MS_SET(logging_send, -1);
     supr_email_sent_epoch_sec = 0;
     supr_email_buf_used = 0;
     supr_email_sent_bytes = 0;
