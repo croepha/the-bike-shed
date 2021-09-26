@@ -17,7 +17,7 @@ void serial_io_initialize(char* dev_path) {
     io_ADD_R(serial_fd);
 }
 
-IO_EVENT_CALLBACK(serial, event_info) {
+IO_EVENT_CALLBACK(serial, events, not_used) {
     char buf[512];
     ssz size = read(serial_fd, buf, sizeof buf);
     DEBUG("read size:%zd", size);
@@ -25,7 +25,7 @@ IO_EVENT_CALLBACK(serial, event_info) {
     if (size >= 0) {
         line_accumulator(&serial_line_leftovers, buf, size, serial_line_handler);
     }
-    if (event_info.events & EPOLLERR) {
+    if (events & EPOLLERR) {
         ERROR("Serial interface is broken somehow...");
 //        ERROR("Serial interface is broken somehow... reinitializing");
         // close(serial_fd);

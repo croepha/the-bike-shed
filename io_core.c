@@ -10,7 +10,7 @@
 #include "io.h"
 
 
-#define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+#define _(name) void name ## _io_event(u32, s32) __attribute__((weak_import));
 _IO_SOCKET_TYPES
 #undef  _
 
@@ -147,7 +147,7 @@ void io_process_events() { start:;
       io_EPData data = {.data = epe.data};
       log_ep_event(epe);
       switch (data.my_data.event_type) {
-        #define _(name) case _io_socket_type_ ## name ## _fd: { LOGCTX(" io_event:"#name); DEBUG(); assert(name ## _io_event); name ## _io_event(epe); } break;
+        #define _(name) case _io_socket_type_ ## name ## _fd: { LOGCTX(" io_event:"#name); DEBUG(); assert(name ## _io_event); name ## _io_event(epe.events, data.my_data.id); } break;
         _IO_SOCKET_TYPES
         #undef  _
         default: ERROR("Unandled switch case: %d", data.my_data.event_type);

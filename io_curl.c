@@ -30,14 +30,13 @@ IO_TIMEOUT_CALLBACK(io_curl) {
   error_check_curlm(mr);
 }
 
-IO_EVENT_CALLBACK(io_curl, epe) {
+IO_EVENT_CALLBACK(io_curl, events, id) {
   int curl_ev = 0;
-  if (epe.events & EPOLLERR) curl_ev |= CURL_CSELECT_ERR;
-  if (epe.events & EPOLLIN ) curl_ev |= CURL_CSELECT_IN;
-  if (epe.events & EPOLLOUT) curl_ev |= CURL_CSELECT_OUT;
+  if (events & EPOLLERR) curl_ev |= CURL_CSELECT_ERR;
+  if (events & EPOLLIN ) curl_ev |= CURL_CSELECT_IN;
+  if (events & EPOLLOUT) curl_ev |= CURL_CSELECT_OUT;
   int running_handles;
-  io_EPData data = {.data = epe.data};
-  CURLMcode mr = curl_multi_socket_action(multi, data.my_data.id, curl_ev, &running_handles);
+  CURLMcode mr = curl_multi_socket_action(multi, id, curl_ev, &running_handles);
   error_check_curlm(mr);
 }
 
