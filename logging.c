@@ -8,7 +8,6 @@
 #include <inttypes.h>
 #include <sys/time.h>
 #include "common.h"
-#include "io.h"
 #include "io_curl.h"
 #include "logging.h"
 

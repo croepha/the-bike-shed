@@ -156,12 +156,12 @@ enum {
     add_user_state_EXTENDING,
 } add_next_user;
 
-void shed_pwm_timeout(void) {
+IO_TIMEOUT_CALLBACK(shed_pwm) {
     gpio_pwm_set(0);
 }
 
 
-void clear_display_timeout() { int r;
+IO_TIMEOUT_CALLBACK(clear_display) { int r;
     r = dprintf(serial_fd, "TEXT_SHOW1 \n");
     error_check(r);
     r = dprintf(serial_fd, "TEXT_SHOW2 \n");
@@ -532,7 +532,7 @@ void config_download_finished(struct config_download_Ctx *c, u8 success) {
 
 }
 
-void config_download_timeout() {
+IO_TIMEOUT_CALLBACK(config_download) {
   //DEBUG();
   config_download_abort(&config_download_ctx);
   last_config_download_sec = now_sec();
@@ -597,7 +597,7 @@ void config_user_normal(char* hex, u16 expire_day) {
 
 
 u16 last_maintenance_day;
-void idle_timeout() {
+IO_TIMEOUT_CALLBACK(idle) {
     // Lets do maintenance at 4AM PT, should probaby be the slowest time at NB
     u64 const ms_per_hour = 60 * 60 * 1000;
     u64 const ms_per_day  = 24 * ms_per_hour;

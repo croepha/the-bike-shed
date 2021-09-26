@@ -42,7 +42,7 @@ static void supr_start_child() { int r;
 
 static u8 already_got_die_request;
 
-void supr_signal_io_event(struct epoll_event epe) { int r;
+IO_EVENT_CALLBACK(supr_signal, epe) { int r;
     struct signalfd_siginfo siginfo;
     r = read(supr_signal_fd, &siginfo, sizeof siginfo);        error_check(r);
 
@@ -95,7 +95,7 @@ void supr_email_done_hook() {
   }
 }
 
-void supr_read_from_child_io_event(struct epoll_event epe) { int r;
+IO_EVENT_CALLBACK(supr_read_from_child, epe) { int r;
   char* buf; usz buf_len; supr_email_add_data_start(&buf, &buf_len);
   r = read(supr_read_from_child_fd, buf, buf_len);   error_check(r);
   supr_email_add_data_finish(r);

@@ -23,14 +23,14 @@ static int timer_callback(CURLM* multi, long timeout_ms_, void* u) {
 static CURLM * multi;
 static CURLSH * share;
 
-void io_curl_timeout() {
+IO_TIMEOUT_CALLBACK(io_curl) {
   IO_TIMER_MS(io_curl) = -1;
   int running_handles;
   CURLMcode mr = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
   error_check_curlm(mr);
 }
 
-void io_curl_io_event(struct epoll_event epe) {
+IO_EVENT_CALLBACK(io_curl, epe) {
   int curl_ev = 0;
   if (epe.events & EPOLLERR) curl_ev |= CURL_CSELECT_ERR;
   if (epe.events & EPOLLIN ) curl_ev |= CURL_CSELECT_IN;

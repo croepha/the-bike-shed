@@ -135,7 +135,7 @@ void supr_email_push() {
   poke_state_machine();
 }
 
-void logging_send_timeout() {
+IO_TIMEOUT_CALLBACK(logging_send) {
   DEBUG();
   poke_state_machine();
 }

@@ -30,6 +30,11 @@ _IO_TIMERS
 
 void io_event_cb(char* name, struct epoll_event epe);
 
+// TODO remove
+#define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+_IO_SOCKET_TYPES
+#undef  _
+
 #define _(name) void name ## _io_event(struct epoll_event epe) { io_event_cb(#name, epe); }
 _IO_SOCKET_TYPES
 #undef  _

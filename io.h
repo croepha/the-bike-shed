@@ -21,12 +21,18 @@
  _(serial) \
 
 
+
+#define IO_TIMEOUT_CALLBACK(m_name) void m_name ## _timeout(void); void m_name ## _timeout()
+#define IO_EVENT_CALLBACK(m_name, m_arg0) void m_name ## _io_event(struct epoll_event); void m_name ## _io_event(struct epoll_event m_arg0)
+
 #define _(name) _io_timer_ ## name,
 enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) _(NO_TIMER) };
 #undef _
+
 #define _(name) void name ## _timeout(void) __attribute__((weak_import));
 _IO_TIMERS
 #undef _
+
 extern u64 io_timers_epoch_ms[];
 #define IO_TIMER_MS(name) io_timers_epoch_ms[_io_timer_ ## name]
 
@@ -34,9 +40,11 @@ extern u64 io_timers_epoch_ms[];
 #define _(name) _io_socket_type_ ## name ## _fd,
 enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
 #undef _
-#define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
-_IO_SOCKET_TYPES
-#undef  _
+
+// #define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+// _IO_SOCKET_TYPES
+// #undef  _
+
 typedef union {
   epoll_data_t data;
   struct {

@@ -9,6 +9,11 @@
 #include "logging.h"
 #include "io.h"
 
+
+#define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+_IO_SOCKET_TYPES
+#undef  _
+
 #define _(name) [ _io_timer_ ## name ] = -1,
 u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 #undef  _

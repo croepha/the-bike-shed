@@ -17,7 +17,8 @@ u64 now_ms() {
   }
 }
 
-void logging_send_timeout() {
+
+IO_TIMEOUT_CALLBACK(logging_send) {
   INFO();
   IO_TIMER_MS(logging_send) = -1;
   events_pending--;

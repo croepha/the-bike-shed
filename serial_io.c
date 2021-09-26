@@ -17,7 +17,7 @@ void serial_io_initialize(char* dev_path) {
     io_ADD_R(serial_fd);
 }
 
-void serial_io_event(struct epoll_event event_info) {
+IO_EVENT_CALLBACK(serial, event_info) {
     char buf[512];
     ssz size = read(serial_fd, buf, sizeof buf);
     DEBUG("read size:%zd", size);

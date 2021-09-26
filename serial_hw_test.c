@@ -13,8 +13,7 @@ void serial_line_handler(char* line) {
     INFO_BUFFER(line, strlen(line));
 }
 
-
-void logging_send_timeout() {
+IO_TIMEOUT_CALLBACK(logging_send) {
     INFO();
     dprintf(serial_fd, "TEST TEST\n");
     IO_TIMER_MS(logging_send) = now_sec()*1000 + 1000;
