@@ -70,10 +70,6 @@ u64 * const timers[] = { _IO_TIMERS };
 char const * const socket_type_names[] = { TEST_SOCKET_TYPES };
 # undef  _
 
-# define _(name) _io_socket_type_ ## name ## _fd,
-enum _io_socket_types const socket_types[] = { TEST_SOCKET_TYPES };
-# undef  _
-
 void io_event_cb(char* name, u32 events, s32 id) { int r;
   int i = id;
   LOGCTX("test_sort:id:%02d", i);
@@ -87,11 +83,6 @@ void io_event_cb(char* name, u32 events, s32 id) { int r;
   error_check(r);
   events_pending--;
 }
-
-
-// TODO: remove
-void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
-
 
 __attribute__((unused)) static void echo_test_socket(int i, int type, char const * name) { int r;
     int sv[2] = {-1,-1};
@@ -120,10 +111,21 @@ __attribute__((unused)) static void echo_test_socket(int i, int type, char const
       exit(0);
     }
 
+    switch (type) {
+      case 0: { io_ctl(test0_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 1: { io_ctl(test1_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 2: { io_ctl(test2_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 3: { io_ctl(test3_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 4: { io_ctl(test4_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 5: { io_ctl(test5_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 6: { io_ctl(test6_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+      case 7: { io_ctl(test7_fd, sockets[i], i, EPOLLIN, EPOLL_CTL_ADD); } break;
+    }
+
+    INFO("socket id:%02d type:%s", i, name);
+
     r = close(sv[1]); error_check(r);
 
-    io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, type, i, sockets[i]);
-    INFO("socket id:%02d type:%s:%d", i, name, type);
     events_pending++;
 }
 
@@ -159,8 +161,17 @@ void test_main() {
 
   for (int i = 0; i < socket_COUNT; i++) {
     int type_i = i % 8;
-    echo_test_socket(i, socket_types[type_i], socket_type_names[type_i]);
+    echo_test_socket(i, type_i, socket_type_names[type_i]);
   }
+
+  // io_ctl(test0_fd, sockets[0], 0, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test1_fd, sockets[1], 1, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test2_fd, sockets[2], 2, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test3_fd, sockets[3], 3, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test4_fd, sockets[4], 4, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test5_fd, sockets[5], 5, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test6_fd, sockets[6], 6, EPOLLIN, EPOLL_CTL_ADD);
+  // io_ctl(test7_fd, sockets[7], 7, EPOLLIN, EPOLL_CTL_ADD);
 
   INFO("Setting timers in decending order:"); { LOGCTX("\t");
     for (int i=0; i < COUNT(timers); i++) {

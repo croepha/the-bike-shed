@@ -10,6 +10,26 @@
 #include "io.h"
 
 
+//#define _io_socket_type_FIRST _io_socket_type_io_curl
+#define _IO_SOCKET_TYPES \
+ _(io_curl) \
+ _(supr_signal) \
+ _(supr_read_from_child) \
+ _(test1) \
+ _(serial) \
+ _(test0) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
+
+#define _(name) _io_socket_type_ ## name ## _fd,
+enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
+#undef _
+
+
 #define _(name) void name ## _io_event(u32, s32) __attribute__((weak_import));
 _IO_SOCKET_TYPES
 #undef  _
@@ -28,9 +48,7 @@ u64 __io_debug_timer_ms_get__ ## name () { return io_timers_epoch_ms[_io_timer_ 
 _IO_TIMERS
 #undef  _
 
-
-// TODO: Make static
-void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+static void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
 
 
 #define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)

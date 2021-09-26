@@ -12,20 +12,6 @@
  _(clear_display) \
  _(idle) \
 
-//#define _io_socket_type_FIRST _io_socket_type_io_curl
-#define _IO_SOCKET_TYPES \
- _(io_curl) \
- _(supr_signal) \
- _(supr_read_from_child) \
- _(test1) \
- _(serial) \
- _(test0) \
- _(test2) \
- _(test3) \
- _(test4) \
- _(test5) \
- _(test6) \
- _(test7) \
 
 
 
@@ -49,9 +35,6 @@ extern u64 io_timers_epoch_ms[];
 #define IO_DEBUG_TIMER_MS_GET(name) ({ u64 __io_debug_timer_ms_get__ ## name (void); __io_debug_timer_ms_get__ ## name (); })
 #define IO_NOW_MS() now_ms()
 
-#define _(name) _io_socket_type_ ## name ## _fd,
-enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
-#undef _
 
 // #define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
 // _IO_SOCKET_TYPES
