@@ -30,6 +30,8 @@ u64 now_ms() { return real_now_ms(); }
 
 char * const serial_path_DEFAULT = "/dev/ttyAMA0";
 
+void config_download_timeout();
+
 
 /* Some example exterior serial input
 

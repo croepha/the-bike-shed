@@ -10,6 +10,33 @@
 #include "io.h"
 
 
+#define _IO_TIMERS \
+ _(logging_send) \
+ _(shed_pwm) \
+ _(io_curl) \
+ _(config_download) \
+ _(clear_display) \
+ _(idle) \
+ _(test0) \
+ _(test1) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
+
+
+
+#define _(name) _io_timer_ ## name,
+enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) _(NO_TIMER) };
+#undef _
+
+#define _(name) void name ## _timeout(void) __attribute__((weak_import));
+_IO_TIMERS
+#undef _
+
+
 //#define _io_socket_type_FIRST _io_socket_type_io_curl
 #define _IO_SOCKET_TYPES \
  _(io_curl) \
@@ -24,6 +51,7 @@
  _(test5) \
  _(test6) \
  _(test7) \
+
 
 #define _(name) _io_socket_type_ ## name ## _fd,
 enum _io_socket_types { _(INVALID) _IO_SOCKET_TYPES _(COUNT) };
