@@ -42,10 +42,19 @@ void io_event_cb(char* name, u32 events, s32 id);
 // #undef  _
 
 
+#define TEST_SOCKET_TYPES \
+ _(test0) \
+ _(test1) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
 
 
 #define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id); }
-_IO_SOCKET_TYPES
+TEST_SOCKET_TYPES
 #undef  _
 
 
@@ -58,11 +67,11 @@ u64 * const timers[] = { _IO_TIMERS };
 # undef  _
 
 # define _(name) #name,
-char const * const socket_type_names[] = { _IO_SOCKET_TYPES };
+char const * const socket_type_names[] = { TEST_SOCKET_TYPES };
 # undef  _
 
 # define _(name) _io_socket_type_ ## name ## _fd,
-enum _io_socket_types const socket_types[] = { _IO_SOCKET_TYPES };
+enum _io_socket_types const socket_types[] = { TEST_SOCKET_TYPES };
 # undef  _
 
 void io_event_cb(char* name, u32 events, s32 id) { int r;
@@ -110,7 +119,7 @@ void test_main() {
   start_time = now_ms() + 50;
 
   for (int i = 0; i < socket_COUNT; i++) {
-    int type_i = i % COUNT(socket_types);
+    int type_i = i % 8;
     echo_test_socket(i, socket_types[type_i], socket_type_names[type_i]);
   }
 

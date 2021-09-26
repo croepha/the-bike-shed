@@ -19,6 +19,13 @@
  _(supr_read_from_child) \
  _(test1) \
  _(serial) \
+ _(test0) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
 
 
 
