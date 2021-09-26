@@ -1,16 +1,18 @@
 
+#include "io.h"
 #include "io_test.h"
 
 u64 now_ms() { return real_now_ms(); }
 
 
-static void log_ep_event(struct epoll_event event) {
+static void log_ep_event(u32 events) {
 #define EP_TYPES _(EPOLLIN) _(EPOLLOUT) _(EPOLLRDHUP) _(EPOLLPRI) _(EPOLLERR) _(EPOLLHUP) _(EPOLLET) _(EPOLLONESHOT)
 // _(EPOLLWAKEUP)
   char  buf[128];
   char * buf_next = buf;
   char * const buf_END = buf + sizeof buf;
-#define _(type) if (event.events & type && buf_next < buf_END) { buf_next += snprintf(buf_next, buf_END - buf_next, #type); }
+// TODO: Put space here
+#define _(type) if (events & type && buf_next < buf_END) { buf_next += snprintf(buf_next, buf_END - buf_next, #type); }
 EP_TYPES
 #undef _
   if (buf_next >= buf_END) { strcpy(buf_END -3, "..."); }
@@ -28,16 +30,24 @@ static void timeout_cb(char* name, enum _io_timers timer) {
 _IO_TIMERS
 #undef  _
 
-void io_event_cb(char* name, struct epoll_event epe);
+void io_event_cb(char* name, u32 events, s32 id, s32 type);
 
-// TODO remove
-#define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+// // TODO remove
+// #define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
+// _IO_SOCKET_TYPES
+// #undef  _
+
+// #define _(name) void name ## _io_event(struct epoll_event epe) { io_event_cb(#name, epe); }
+// _IO_SOCKET_TYPES
+// #undef  _
+
+
+
+
+#define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id, _io_socket_type_ ## name ## _fd); }
 _IO_SOCKET_TYPES
 #undef  _
 
-#define _(name) void name ## _io_event(struct epoll_event epe) { io_event_cb(#name, epe); }
-_IO_SOCKET_TYPES
-#undef  _
 
 # define _(name) #name,
 char const * const timer_names[] = { _IO_TIMERS };
@@ -55,17 +65,16 @@ char const * const socket_type_names[] = { _IO_SOCKET_TYPES };
 enum _io_socket_types const socket_types[] = { _IO_SOCKET_TYPES };
 # undef  _
 
-void io_event_cb(char* name, struct epoll_event epe) { int r;
-  io_EPData data = { .data = epe.data };
-  int i = data.my_data.id;
+void io_event_cb(char* name, u32 events, s32 id, s32 type) { int r;
+  int i = id;
   LOGCTX("test_sort:id:%02d", i);
   char buf[256]; sock_read_line(sockets[i], buf, sizeof buf);
 
-  INFO("IO Event %s type:%d buf:'%s'", name, data.my_data.event_type, buf);
-  { LOGCTX("\t"); log_ep_event(epe); }
-  r = dprintf(sockets[data.my_data.id], "REPLY%02d\n", data.my_data.id);
+  INFO("IO Event %s type:%d buf:'%s'", name, type, buf);
+  { LOGCTX("\t"); log_ep_event(events); }
+  r = dprintf(sockets[id], "REPLY%02d\n", id);
   error_check(r);
-  r = close(sockets[data.my_data.id]);
+  r = close(sockets[id]);
   error_check(r);
   events_pending--;
 }
