@@ -11,6 +11,14 @@
  _(config_download) \
  _(clear_display) \
  _(idle) \
+ _(test0) \
+ _(test1) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
 
 
 

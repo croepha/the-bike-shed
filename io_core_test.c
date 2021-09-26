@@ -52,13 +52,16 @@ void io_event_cb(char* name, u32 events, s32 id);
 
 
 #define TEST_TIMER_TYPES \
- _(logging_send) \
- _(shed_pwm) \
- _(io_curl) \
- _(config_download) \
- _(clear_display) \
- _(idle) \
+ _(test0) \
+ _(test1) \
+ _(test2) \
+ _(test3) \
+ _(test4) \
+ _(test5) \
+ _(test6) \
+ _(test7) \
 
+static int const test_timer_type_count = 8;
 
 #define TEST_SOCKET_TYPES \
  _(test0) \
@@ -72,23 +75,34 @@ void io_event_cb(char* name, u32 events, s32 id);
 
 
 
-#define _(name)  IO_TIMEOUT_CALLBACK(name) { IO_TIMER_SET_MS(name, -1); events_pending--; INFO("%s Timeout", #name);}
+
+#define _(name) \
+static void timeout_set_ ## name (u64 value) { IO_TIMER_SET_MS(name, value); } \
+static u64 timeout_get_ ## name (void) { return IO_DEBUG_TIMER_MS_GET(name); } \
+IO_TIMEOUT_CALLBACK(name) { IO_TIMER_SET_MS(name, -1); events_pending--; INFO("%s Timeout", #name);} \
+//end define
 TEST_TIMER_TYPES
 #undef  _
+
+#define _(name) test_timer_enum__ ## name,
+enum { TEST_TIMER_TYPES };
+#undef  _
+
+#define _(name) timeout_set_ ## name,
+void(*timeout_setters[])(u64) = { TEST_TIMER_TYPES };
+#undef  _
+#define _(name) timeout_get_ ## name,
+u64(*timeout_getters[])(void) = { TEST_TIMER_TYPES };
+#undef  _
+# define _(name) #name,
+char const * const timer_names[] = { TEST_TIMER_TYPES };
+# undef  _
 
 
 #define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id); }
 TEST_SOCKET_TYPES
 #undef  _
 
-
-# define _(name) #name,
-char const * const timer_names[] = { _IO_TIMERS };
-# undef  _
-
-# define _(name) &io_timers_epoch_ms[_io_timer_ ## name],
-u64 * const timers[] = { _IO_TIMERS };
-# undef  _
 
 # define _(name) #name,
 char const * const socket_type_names[] = { TEST_SOCKET_TYPES };
@@ -158,10 +172,10 @@ void test_main() {
   io_initialize();
 
   INFO("Setting timers in acending order:"); { LOGCTX("\t");
-    for (int i=0; i < COUNT(timers); i++) {
-      *timers[i] = 1000 + i;
+    for (int i=0; i < test_timer_type_count; i++) {
+      timeout_setters[i](1000 + i);
       events_pending ++;
-      INFO("timer:%d, %s = %"PRId64, (s32)(timers[i] - io_timers_epoch_ms), timer_names[i], *timers[i]);
+      INFO("timer:%d, %s = %"PRId64, i, timer_names[i], timeout_getters[i]());
     }
   }
 
@@ -170,10 +184,10 @@ void test_main() {
   }
 
   INFO("Setting timers in decending order:"); { LOGCTX("\t");
-    for (int i=0; i < COUNT(timers); i++) {
-      *timers[i] = 1000 - i;
+    for (int i=0; i < test_timer_type_count; i++) {
+      timeout_setters[i](1000 - i);
       events_pending ++;
-      INFO("timer:%d, %s = %"PRId64, (int)(timers[i] - io_timers_epoch_ms), timer_names[i], *timers[i]);
+      INFO("timer:%d, %s = %"PRId64, i, timer_names[i], timeout_getters[i]());
     }
   }
 
@@ -198,9 +212,10 @@ void test_main() {
   // io_ctl(test7_fd, sockets[7], 7, EPOLLIN, EPOLL_CTL_ADD);
 
   INFO("Setting timers in decending order:"); { LOGCTX("\t");
-    for (int i=0; i < COUNT(timers); i++) {
-      *timers[i] = start_time - i;
+    for (int i=0; i < test_timer_type_count; i++) {
+      timeout_setters[i](1000 - i);
       events_pending ++;
+      // TODO print here?
     }
   }
 
