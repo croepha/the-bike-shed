@@ -18,6 +18,17 @@ _IO_SOCKET_TYPES
 u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
 #undef  _
 
+
+#define _(name) \
+void __io_timer_ms_set__ ## name (u64); \
+void __io_timer_ms_set__ ## name (u64 value_ms) { io_timers_epoch_ms[_io_timer_ ## name] = value_ms; } \
+u64 __io_debug_timer_ms_get__ ## name (void); \
+u64 __io_debug_timer_ms_get__ ## name () { return io_timers_epoch_ms[_io_timer_ ## name]; }
+
+_IO_TIMERS
+#undef  _
+
+
 static int _epfd = -1;
 
 u8   io_idle_has_work; // TODO make unit test for this

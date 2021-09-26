@@ -35,8 +35,10 @@ _IO_TIMERS
 
 extern u64 io_timers_epoch_ms[];
 //#define IO_TIMER_MS(name) io_timers_epoch_ms[_io_timer_ ## name]
-#define IO_TIMER_SET_MS(name, value_ms) ({ io_timers_epoch_ms[_io_timer_ ## name] = value_ms; })
-#define IO_DEBUG_TIMER_MS_GET(name) io_timers_epoch_ms[_io_timer_ ## name]
+// #define IO_TIMER_SET_MS(name, value_ms) ({ io_timers_epoch_ms[_io_timer_ ## name] = value_ms; })
+// #define IO_DEBUG_TIMER_MS_GET(name) io_timers_epoch_ms[_io_timer_ ## name]
+#define IO_TIMER_SET_MS(name, value_ms) ({ void __io_timer_ms_set__ ## name (u64); __io_timer_ms_set__ ## name (value_ms); })
+#define IO_DEBUG_TIMER_MS_GET(name) ({ u64 __io_debug_timer_ms_get__ ## name (void); __io_debug_timer_ms_get__ ## name (); })
 #define IO_NOW_MS() now_ms()
 
 #define _(name) _io_socket_type_ ## name ## _fd,
