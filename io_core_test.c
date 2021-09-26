@@ -47,7 +47,7 @@ IO_TIMEOUT_CALLBACK(idle) {}
 
 #define _(name) \
 static void timeout_set_ ## name (u64 value) { IO_TIMER_MS_SET(name, value); } \
-static u64 timeout_get_ ## name (void) { return IO_DEBUG_TIMER_MS_GET(name); } \
+static u64 timeout_get_ ## name (void) { return IO_TIMER_MS_DEBUG_GET(name); } \
 IO_TIMEOUT_CALLBACK(name) { IO_TIMER_MS_SET(name, -1); events_pending--; INFO("%s Timeout", #name);} \
 //end define
 TEST_TIMER_TYPES
