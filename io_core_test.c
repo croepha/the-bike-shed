@@ -20,15 +20,24 @@ EP_TYPES
 }
 
 
-static void timeout_cb(char* name, enum _io_timers timer) {
-  io_timers_epoch_ms[timer] = -1;
-  events_pending --;
-  INFO("%s Timeout", name);
-}
+// static void timeout_cb(char* name, enum _io_timers timer) {
+//   io_timers_epoch_ms[timer] = -1;
+//   events_pending --;
+//   INFO("%s Timeout", name);
+// }
 
-#define _(name) void name ## _timeout() { timeout_cb(#name, _io_timer_  ## name); }
-_IO_TIMERS
-#undef  _
+// #define _(name) void name ## _timeout() { timeout_cb(#name, _io_timer_  ## name); }
+// _IO_TIMERS
+// #undef  _
+
+
+
+
+
+
+
+
+
 
 void io_event_cb(char* name, u32 events, s32 id);
 
@@ -42,6 +51,15 @@ void io_event_cb(char* name, u32 events, s32 id);
 // #undef  _
 
 
+#define TEST_TIMER_TYPES \
+ _(logging_send) \
+ _(shed_pwm) \
+ _(io_curl) \
+ _(config_download) \
+ _(clear_display) \
+ _(idle) \
+
+
 #define TEST_SOCKET_TYPES \
  _(test0) \
  _(test1) \
@@ -51,6 +69,12 @@ void io_event_cb(char* name, u32 events, s32 id);
  _(test5) \
  _(test6) \
  _(test7) \
+
+
+
+#define _(name)  IO_TIMEOUT_CALLBACK(name) { IO_TIMER_SET_MS(name, -1); events_pending--; INFO("%s Timeout", #name);}
+TEST_TIMER_TYPES
+#undef  _
 
 
 #define _(name) IO_EVENT_CALLBACK(name, events, id) { io_event_cb(#name, events, id); }
