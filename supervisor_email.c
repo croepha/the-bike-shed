@@ -77,7 +77,7 @@ static void poke_state_machine() {
       }
     } break;
     case SUPR_LOG_EMAIL_STATE_SENT: {
-//      assert(IO_TIMER_MS(logging_send) == (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
+      assert(IO_DEBUG_TIMER_MS_GET(logging_send) == (supr_email_sent_epoch_sec + supr_email_timeout_secs) * 1000);
       if (supr_email_sent_epoch_sec + supr_email_timeout_secs <=
           now_epoch_sec) {
         // TODO: I think we should have error logs here...
