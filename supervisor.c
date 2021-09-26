@@ -14,6 +14,7 @@
 #include "io_curl.h"
 #include "supervisor.h"
 #include "config.h"
+#include "io.h"
 
 // TODO: Its super wierd that we need access stuff here, this
 //  is because of how we use the same config code for both
@@ -23,6 +24,8 @@
 
 u64 now_ms() { return real_now_ms(); }
 
+
+IO_TIMEOUT_CALLBACK(idle) {}
 
 u32 supr_email_low_threshold_bytes = 1 << 14; // 16 KB
 u32 supr_email_rapid_threshold_secs = 20; // 20 Seconds  Prevent emails from being sent more often than this

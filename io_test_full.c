@@ -18,6 +18,8 @@ u64 now_ms() {
 }
 
 
+IO_TIMEOUT_CALLBACK(idle) {}
+
 IO_TIMEOUT_CALLBACK(logging_send) {
   INFO();
   IO_TIMER_SET_MS(logging_send, -1);

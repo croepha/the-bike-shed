@@ -24,7 +24,7 @@
 
 
 
-
+IO_TIMEOUT_CALLBACK(idle) {}
 
 void config_parse_line() {}
 u64 now_ms() { return real_now_ms(); }

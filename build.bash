@@ -161,6 +161,28 @@ build /build/$NAME.test_results: test /workspaces/the-bike-shed/test_wrapper.bas
 EOF
 }
 
+function io_compile() {
+  sockets='_IO_SOCKET_TYPES='
+  timers='_IO_TIMERS='
+  mode='sockets'
+  for ((i=2; i<=$#; i++))
+  do
+    if [ "${!i}" = "--" ]
+    then
+      mode='timers'
+    elif [ "$mode" = 'sockets' ]
+    then
+      sockets="$sockets"'_\('"${!i}"'\)'
+    elif [ "$mode" = 'timers' ]
+    then
+      timers="$timers"'_\('"${!i}"'\)'
+    else
+      false; exit -1
+    fi
+  done
+  FLAVOR=$1 compile io_core -D"$sockets" -D"$timers"
+}
+
 
 do_test mount_squash_root_test /workspaces/the-bike-shed/mount_squash_root_test.bash /build/mount_squash_root.dbg.exec
 
@@ -188,7 +210,7 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-compile    io_core -D $'_IO_SOCKET_TYPES=_\(io_curl\)_\(supr_signal\)_\(supr_read_from_child\)_\(test1\)_\(serial\)_\(test0\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)' -D $'_IO_TIMERS=_\(logging_send\)_\(shed_pwm\)_\(io_curl\)_\(config_download\)_\(clear_display\)_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)'
+io_compile io_curl_test io_curl -- io_curl
 compile    io_curl
 compile    io_curl_test
 depends_on config_download
@@ -213,7 +235,7 @@ compile access_hash      -Iargon2
 compile access_hash_test
 depends_on logging
 link_exec access_hash_test    -l pthread
-do_test access_hash_test /build/access_hash_test.fast.exec
+#do_test access_hash_test /build/access_hash_test.fast.exec
 
 do_test shed_test /workspaces/the-bike-shed/shed_test.bash /build/shed3.dbg.exec
 
@@ -232,14 +254,14 @@ reset
 depends_on  logging
 compile     supervisor_io
 compile     supervisor_io_test
-depends_on  io_core
+io_compile  supervisor_io_test supr_signal supr_read_from_child
 depends_on  misc
 link_exec   supervisor_io_test
 do_test supervisor_io_test /build/supervisor_io_test.dbg.exec
 
 reset
 depends_on  logging
-depends_on  io_core
+io_compile  supervisor io_curl supr_signal supr_read_from_child -- io_curl logging_send
 depends_on  io_curl
 depends_on  supervisor_io
 FLAVOR=nodiagnostic depends_on  config
@@ -266,14 +288,14 @@ do_test    config_nodiag_test /build/config_nodiag_test.dbg.exec
 
 reset
 depends_on logging
-FLAVOR=io_core_test compile io_core -D $'_IO_SOCKET_TYPES=_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)' -D $'_IO_TIMERS=_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)'
+io_compile io_core_test test0 test1 test2 test3 test4 test5 test6 test7 -- test0 test1 test2 test3 test4 test5 test6 test7
 depends_on misc
 compile    io_core_test
 link_exec  io_core_test
 
 reset
 depends_on logging
-depends_on io_core
+io_compile io_test_full io_curl -- logging_send io_curl
 depends_on io_curl
 depends_on email
 depends_on misc
@@ -303,7 +325,7 @@ do_test line_accumulator_test /build/line_accumulator_test.dbg.exec
 reset
 depends_on logging
 depends_on line_accumulator
-depends_on io_core
+io_compile config_download_test2 io_curl -- io_curl
 depends_on io_curl
 compile config_download
 compile config_download_test2
@@ -355,7 +377,7 @@ link_exec exterior_sim_lcd
 
 reset
 depends_on logging
-depends_on io_core
+io_compile serial_hw_test serial -- logging_send
 depends_on serial_open
 depends_on misc
 depends_on line_accumulator
@@ -365,7 +387,7 @@ link_exec serial_hw_test
 
 reset
 depends_on logging
-depends_on io_core
+io_compile shed3 io_curl serial -- config_download clear_display shed_pwm io_curl
 depends_on serial_open
 depends_on misc
 depends_on line_accumulator

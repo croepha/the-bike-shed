@@ -7,6 +7,9 @@
 #include "logging.h"
 #include "io_curl.h"
 #include "supervisor.h"
+#include "io.h"
+
+IO_TIMEOUT_CALLBACK(idle) {}
 
 char buf[1024];
 

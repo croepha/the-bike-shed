@@ -74,7 +74,7 @@ static int const test_timer_type_count = 8;
  _(test7) \
 
 
-
+IO_TIMEOUT_CALLBACK(idle) {}
 
 #define _(name) \
 static void timeout_set_ ## name (u64 value) { IO_TIMER_SET_MS(name, value); } \

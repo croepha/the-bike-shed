@@ -13,6 +13,8 @@ void serial_line_handler(char* line) {
     INFO_BUFFER(line, strlen(line));
 }
 
+IO_TIMEOUT_CALLBACK(idle) {}
+
 IO_TIMEOUT_CALLBACK(logging_send) {
     INFO();
     dprintf(serial_fd, "TEST TEST\n");
