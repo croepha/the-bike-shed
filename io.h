@@ -3,39 +3,14 @@
 #include <sys/epoll.h>
 #include "common.h"
 
-
-
 #define IO_TIMEOUT_CALLBACK(m_name) void m_name ## _timeout(void); void m_name ## _timeout()
-//#define IO_EVENT_CALLBACK(m_name, m_arg0) void m_name ## _io_event(struct epoll_event); void m_name ## _io_event(struct epoll_event m_arg0)
 #define IO_EVENT_CALLBACK(m_name, m_arg_epoll_events, m_arg_id) void m_name ## _io_event(u32, s32); void m_name ## _io_event(u32 m_arg_epoll_events, s32 m_arg_id)
-
-
-extern u64 io_timers_epoch_ms[];
-//#define IO_TIMER_MS(name) io_timers_epoch_ms[_io_timer_ ## name]
-// #define IO_TIMER_SET_MS(name, value_ms) ({ io_timers_epoch_ms[_io_timer_ ## name] = value_ms; })
-// #define IO_DEBUG_TIMER_MS_GET(name) io_timers_epoch_ms[_io_timer_ ## name]
 #define IO_TIMER_SET_MS(name, value_ms) ({ void __io_timer_ms_set__ ## name (u64); __io_timer_ms_set__ ## name (value_ms); })
 #define IO_DEBUG_TIMER_MS_GET(name) ({ u64 __io_debug_timer_ms_get__ ## name (void); __io_debug_timer_ms_get__ ## name (); })
 #define IO_NOW_MS() now_ms()
 
-
-// #define _(name) void name ## _io_event(struct epoll_event) __attribute__((weak_import));
-// _IO_SOCKET_TYPES
-// #undef  _
-
-
-
-#include <errno.h>
-#include <sys/epoll.h>
-#include "logging.h"
-
-
-//#define io_ADD_R(fd) io_fd_ctl(EPOLLIN, EPOLL_CTL_ADD, _io_socket_type_ ## fd, 0, fd)
 #define io_ADD_R(fd) io_ctl(fd, fd, 0, EPOLLIN, EPOLL_CTL_ADD)
-//void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
-
 #define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)
-
 
 
 void io_initialize(void);

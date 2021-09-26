@@ -1,5 +1,6 @@
 #pragma once
 #include <stdarg.h>
+#include <errno.h>
 #include "common.h"
 
 enum _log_options {

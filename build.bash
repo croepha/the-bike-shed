@@ -188,7 +188,7 @@ link_exec  mount_squash_root -fno-sanitize=address -static
 # compile    logging -D 'LOGGING_USE_EMAIL=1'
 reset
 depends_on logging
-compile    io_core
+compile    io_core -D $'_IO_SOCKET_TYPES=_\(io_curl\)_\(supr_signal\)_\(supr_read_from_child\)_\(test1\)_\(serial\)_\(test0\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)' -D $'_IO_TIMERS=_\(logging_send\)_\(shed_pwm\)_\(io_curl\)_\(config_download\)_\(clear_display\)_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)'
 compile    io_curl
 compile    io_curl_test
 depends_on config_download
@@ -266,7 +266,7 @@ do_test    config_nodiag_test /build/config_nodiag_test.dbg.exec
 
 reset
 depends_on logging
-depends_on io_core
+FLAVOR=io_core_test compile io_core -D $'_IO_SOCKET_TYPES=_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)' -D $'_IO_TIMERS=_\(test0\)_\(test1\)_\(test2\)_\(test3\)_\(test4\)_\(test5\)_\(test6\)_\(test7\)'
 depends_on misc
 compile    io_core_test
 link_exec  io_core_test

@@ -10,47 +10,23 @@
 #include "io.h"
 
 
-#define _IO_TIMERS \
- _(logging_send) \
- _(shed_pwm) \
- _(io_curl) \
- _(config_download) \
- _(clear_display) \
- _(idle) \
- _(test0) \
- _(test1) \
- _(test2) \
- _(test3) \
- _(test4) \
- _(test5) \
- _(test6) \
- _(test7) \
 
-
+/* _IO_SOCKET_TYPES and _IO_TIMERS Defined on command line, like this:
+#define _IO_SOCKET_TYPES \
+//  _(io_curl) \
+//  _(supr_signal) \
+// ...
+*/
 
 #define _(name) _io_timer_ ## name,
-enum _io_timers { _(INVALID) _IO_TIMERS _(COUNT) _(NO_TIMER) };
+enum _io_timers { _(INVALID) _IO_TIMERS _(idle) _(COUNT) _(NO_TIMER) };
 #undef _
 
 #define _(name) void name ## _timeout(void) __attribute__((weak_import));
-_IO_TIMERS
+_IO_TIMERS _(idle)
 #undef _
 
 
-//#define _io_socket_type_FIRST _io_socket_type_io_curl
-#define _IO_SOCKET_TYPES \
- _(io_curl) \
- _(supr_signal) \
- _(supr_read_from_child) \
- _(test1) \
- _(serial) \
- _(test0) \
- _(test2) \
- _(test3) \
- _(test4) \
- _(test5) \
- _(test6) \
- _(test7) \
 
 
 #define _(name) _io_socket_type_ ## name ## _fd,
@@ -63,7 +39,7 @@ _IO_SOCKET_TYPES
 #undef  _
 
 #define _(name) [ _io_timer_ ## name ] = -1,
-u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS};
+u64 io_timers_epoch_ms[] = { _(INVALID) _IO_TIMERS  _(idle)};
 #undef  _
 
 
@@ -73,11 +49,10 @@ void __io_timer_ms_set__ ## name (u64 value_ms) { io_timers_epoch_ms[_io_timer_ 
 u64 __io_debug_timer_ms_get__ ## name (void); \
 u64 __io_debug_timer_ms_get__ ## name () { return io_timers_epoch_ms[_io_timer_ ## name]; }
 
-_IO_TIMERS
+_IO_TIMERS _(idle)
 #undef  _
 
 static void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
-
 
 #define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)
 
@@ -205,7 +180,7 @@ void io_process_events() { start:;
     switch (running_timer) {
       #define _(name) case _io_timer_ ## name: { LOGCTX(" timeout:"#name); DEBUG(); \
          io_timers_epoch_ms[_io_timer_ ## name] = -1; assert(name ## _timeout);   name ## _timeout(); } break;
-      _IO_TIMERS
+      _IO_TIMERS _(idle)
       #undef  _
       case _io_timer_NO_TIMER: { WARN("edge case: timer wake up for no timer"); } break;
       case _io_timer_COUNT: case _io_timer_INVALID: default: {
