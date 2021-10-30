@@ -395,11 +395,6 @@ link_exec serial_hw_test
 
 reset
 depends_on logging
-compile simple_keyboard_access2
-link_exec simple_keyboard_access2
-
-reset
-depends_on logging
 io_compile shed3 io_curl serial -- config_download clear_display shed_pwm io_curl
 depends_on serial_open
 depends_on misc
