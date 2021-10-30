@@ -45,7 +45,6 @@ IO_EVENT_CALLBACK(console, events, ignored_id) {
 
 int main () { int r;
   io_initialize();
-  fprintf(stderr, "ASDFASDFA\n");
   gpio_pwm_initialize();
 
   console_fd = open("/dev/tty1", O_RDWR);
