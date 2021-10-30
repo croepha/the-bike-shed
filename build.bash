@@ -376,6 +376,12 @@ compile exterior/exterior
 io_compile exterior_sim_lcd sim_stdin serial -- sim_loop
 link_exec exterior_sim_lcd
 
+reset
+depends_on logging
+compile simple_keyboard_access
+io_compile simple_keyboard_access console -- shed_pwm
+depends_on pwm
+link_exec simple_keyboard_access
 
 reset
 depends_on logging
@@ -386,6 +392,11 @@ depends_on line_accumulator
 compile serial_hw_test
 compile serial_io
 link_exec serial_hw_test
+
+reset
+depends_on logging
+compile simple_keyboard_access2
+link_exec simple_keyboard_access2
 
 reset
 depends_on logging

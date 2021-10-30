@@ -62,7 +62,7 @@ _IO_TIMERS _(idle)
 #undef  _
 
 
-static void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
+void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd);
 
 #define io_ctl(type, fd, id, flags, op) void __io_ctl__ ## type (s32, s32, s32, s32); __io_ctl__ ## type (fd, id, flags, op)
 
