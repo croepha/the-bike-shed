@@ -36,7 +36,7 @@ IO_EVENT_CALLBACK(console, events, ignored_id) {
   error_check(r);
 
   enterred_pin[3] = data;
-  INFO_BUFFER(enterred_pin, sizeof enterred_pin, "key %c", data);
+  DEBUG_BUFFER(enterred_pin, sizeof enterred_pin, "key %c", data);
 
   if (memcmp(enterred_pin, "\0\0\0\0", sizeof enterred_pin) == 0) {
       unlock_door();
