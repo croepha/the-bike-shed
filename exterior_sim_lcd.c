@@ -13,6 +13,7 @@
 #include "logging.h"
 #include "io.h"
 #include "serial.h"
+#include <inttypes.h>
 
 
 
@@ -132,6 +133,18 @@ void pin_backlight_pwm_set(u32 value) {
   _pin_backlight_pwm_value = value;
 }
 
+void _log_lite(const char* severity, const char*file, const char*func, int line, char* fmt, ...)
+    __attribute__((__format__ (__printf__, 5, 6)));
+void _log_lite(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
+  char log_buffer[1024];
+  va_list va; va_start(va, fmt);
+  int r = snprintf(log_buffer, sizeof log_buffer, fmt, va);
+  va_end(va);
+  error_check(r);
+  assert(r < sizeof log_buffer);
+  u64 now_ms_ = now_ms();
+  fprintf(stderr, "%06"PRIx64".%03"PRIu64": %s: %s ", now_ms_ / 1000, now_ms_ % 1000, severity, log_buffer);
+}
 
 
 IO_EVENT_CALLBACK(sim_stdin, events, unused) {
@@ -169,7 +182,7 @@ IO_EVENT_CALLBACK(sim_stdin, events, unused) {
 }
 
 IO_TIMEOUT_CALLBACK(sim_loop) {
-  loop();
+  exterior_loop();
 }
 
 IO_EVENT_CALLBACK(serial, events, ignored_id) {
@@ -304,7 +317,7 @@ int main () { int r;
 
   io_ctl(sim_stdin_fd, 0, 0, EPOLLIN, EPOLL_CTL_ADD);
 
-  setup();
+  exterior_setup();
 
   for (;;) {
 

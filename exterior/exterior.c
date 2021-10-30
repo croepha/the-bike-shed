@@ -1,13 +1,11 @@
 
-#include "../common.h"
-#include "../logging.h"
-#include "exterior.h"
 #include <stdio.h>
 #include <string.h>
 
+#include "exterior.h"
+#include "log_lite.h"
 
-
-static const u32 line_accumulator_Data_SIZE = 512;
+#define line_accumulator_Data_SIZE 512
 struct line_accumulator_Data {
   usz used;
   char data[line_accumulator_Data_SIZE];
@@ -142,12 +140,12 @@ void got_keypad_input(char key) {
 }
 
 
-void setup() {
+void exterior_setup() {
     serial_printf("INFO Started Up");
     serial_printf("EXTERIOR_RESTART\n");
 }
 
-void loop() {
+void exterior_loop() {
 
   unsigned long uptime_delta_ms_old = last_uptime_ms;
   last_uptime_ms = now_ms();
@@ -200,7 +198,6 @@ void loop() {
   char rfid_id[1024];
   s16 rfid_id_len = rfid_id_scan(rfid_id, sizeof rfid_id);
   if (rfid_id_len) {
-    INFO_HEXBUFFER(rfid_id, rfid_id_len, "got rifd scan:");
     serial_printf("GOT_RFID\n");
 
   }

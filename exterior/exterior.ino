@@ -3,12 +3,17 @@
 #include <MFRC522.h>
 #include <HardwareSerial.h>
 #include <LiquidCrystal.h>
+#include <cstdarg>
+#include <stdarg.h>
+#include <stdio.h>
+
+#define MIN(a,b) (a < b ? a : b)
 
 
 //#define LCD_DB4_GPIO   15
 //#define KP_R0_GPIO     15
 //
-//#define LCD_DB5_GPIO    2
+//#define LCD_DB5_GPIO
 //#define KP_R1_GPIO      2
 //
 //#define LCD_DB6_GPIO    0
@@ -74,17 +79,14 @@
 #define LCD_LED_CHAN    0
 #define SPK_CHAN        1
 
+extern "C" {
+#include "exterior.h"
+}
 
-typedef  uint8_t   u8;
-typedef  uint16_t u16;
-typedef  uint32_t u32;
-typedef  uint64_t u64;
-typedef   int8_t   s8;
-typedef   int16_t s16;
-typedef   int32_t s32;
-typedef   int64_t s64;
-typedef  ssize_t  ssz;
-typedef   size_t  usz;
+extern "C" u64 now_ms() { return millis(); }
+extern "C" void pin_backlight_pwm_set(u32 value) {
+    ledcWrite(LCD_LED_CHAN, value);
+}
 
 
 #define col_pins _(KP_C0_GPIO) _(KP_C1_GPIO) _(KP_C2_GPIO) _(KP_C3_GPIO)
@@ -94,8 +96,8 @@ typedef   size_t  usz;
 volatile int pressed_col = -1;
 
 #define _(n) if (pin == n) { return ret; } else { ret++; }
-int row_i(int pin) { int ret = 0; row_pins }
-int col_i(int pin) { int ret = 0; col_pins }
+static int row_i(int pin) { int ret = 0; row_pins }
+static int col_i(int pin) { int ret = 0; col_pins }
 #undef _
 
 
@@ -137,45 +139,24 @@ void setup_keypad() {
 #undef _
 }
 
-#define ERROR(...) Serial.printf("ERROR " __VA_ARGS__); Serial.printf("\n")
-
-static const u32 line_accumulator_Data_SIZE = 512;
-
-struct line_accumulator_Data {
-  usz used;
-  char data[line_accumulator_Data_SIZE];
-};
-
-long till_autosleep_ms = 0;
-
-void line_accumulator(struct line_accumulator_Data * leftover, char* data, usz data_len, void(*line_handler)(char*)) {
-  for (;;) {
-    if (!data_len) break;
-    char c = *data++;
-    data_len--;
-    if (c == '\n') {
-      if (leftover->used == line_accumulator_Data_SIZE) {
-        ERROR("Line too long, throwing it out");
-        leftover->used = 0;
-      } else {
-        leftover->data[leftover->used] = 0;
-        line_handler(leftover->data);
-        leftover->used = 0;
-      }
-    } else if (leftover->used != line_accumulator_Data_SIZE) {
-      if (leftover->used >= line_accumulator_Data_SIZE - 1) {
-        ERROR("Couldn't find end of line, and out of space, throw out continued first line in next data set");
-        leftover->used = line_accumulator_Data_SIZE;
-      } else {
-        leftover->data[leftover->used++] = c;
-      }
-    }
-  }
+void serial_printf(const char *fmt, ...) {
+  va_list va;
+  va_start(va, fmt);
+  char buf[1024];
+  vsnprintf(buf, sizeof buf, fmt, va);
+  InteriorSerial.print(buf);
+  va_end(va);
 }
 
-
-
-struct line_accumulator_Data interior_line;
+extern "C" void _log_lite(const char* severity, const char*file, const char*func, int line, char* fmt, ...) {
+  char log_buffer[1024];
+  va_list va; va_start(va, fmt);
+  int r = snprintf(log_buffer, sizeof log_buffer, fmt, va);
+  va_end(va);
+  assert(r < sizeof log_buffer);
+  u64 now_ms_ = now_ms();
+  fprintf(stderr, "%06"PRIx64".%03"PRIu64": %s: %s ", now_ms_ / 1000, now_ms_ % 1000, severity, log_buffer);
+}
 
 
 void setup() {
@@ -188,8 +169,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("INFO Started UP");
   InteriorSerial.begin(115200, SERIAL_8N1, SERIAL_RX_GPIO, SERIAL_TX_GPIO);
-  InteriorSerial.println("INFO Started UP");
-
 
   lcd.begin(20, 4);
   setup_keypad();
@@ -205,7 +184,7 @@ void setup() {
   ledcAttachPin(SPK_GPIO, SPK_CHAN);
   ledcWrite(SPK_GPIO, 0);
 
-  InteriorSerial.printf("EXTERIOR_RESTART\n");
+  exterior_setup();
 
 }
 
@@ -215,158 +194,32 @@ void pullup_rows() {
 #undef _
 }
 
-
-unsigned int backlight_level = 0;
-unsigned int backlight_level_MAX = 32 * 4 * 256;
-
-void got_interior_line(char*line) {
-
-  if (strncmp(line, "TEXT_SHOW1 ", 11) == 0) {
-    #define _(n) pinMode(n, OUTPUT);
-    row_pins
-    #undef _
-    lcd.setCursor(0,2);
-    lcd.printf("%20s", line+11);
-    setup_keypad();
-    delay(10);
-    pressed_col = -1;
-    backlight_level = backlight_level_MAX;
-    till_autosleep_ms = 5000;
-  } else if (strncmp(line, "TEXT_SHOW2 ", 11) == 0) {
-    #define _(n) pinMode(n, OUTPUT);
-    row_pins
-    #undef _
-    lcd.setCursor(0,3);
-    lcd.printf("%20s", line+11);
-    setup_keypad();
-    delay(10);
-    pressed_col = -1;
-    backlight_level = backlight_level_MAX;
-    till_autosleep_ms = 5000;
-  } else if (strncmp(line, "SLEEP", 5) == 0) {
-    till_autosleep_ms = 0;
-  } else {
-    Serial.printf("got_interior_line unkown %s\n", line);
-  }
-}
-
-u8 entering_option = 0;
-char entered_pin[11];
-int  entered_pin_used = 0;
-char entered_option[4];
-int  entered_option_used = 0;
-
-void reset_input() {
-    entering_option = 0;
-    entered_pin_used = 0;
-    entered_option_used = 0;
-    memset(entered_pin, 0, sizeof entered_pin);
-    memset(entered_option, 0, sizeof entered_option);
-
-    #define _(n) pinMode(n, OUTPUT);
-    row_pins
-    #undef _
-    lcd.setCursor(0,0);
-    lcd.printf("                    ");
-    lcd.setCursor(0,1);
-    lcd.printf("                    ");
-    setup_keypad();
-    delay(10);
-}
-
-void draw_input_lines() {
-  #define _(n) pinMode(n, OUTPUT);
-  row_pins
-  #undef _
-  lcd.setCursor(0,0);
-  if (0) {
-    // Show pin
-    lcd.printf("PIN:%12s%c", entered_pin, entering_option?' ':'<');
-  } else {
-    // Hide pin
-    char buf[24];
-    for (int i = 0; i < entered_pin_used; i++) {
-      buf[i] = '*';
-    }
-    buf[entered_pin_used] = 0;
-    lcd.printf("PIN:%12s%c", buf, entering_option?' ':'<');
-  }
-  lcd.setCursor(0,1);
-  if (entered_option_used || entering_option) {
-    lcd.printf("OPT:%12s%c", entered_option, entering_option?'<':' ');
-  } else {
-    lcd.printf("                   ");
-  }
+void _lcd_set_linenf(u8 line_i, const char *fmt, ...) {
+  lcd.setCursor(0,line_i);
+  va_list va;
+  va_start(va, fmt);
+  char buf[1024];
+  vsnprintf(buf, sizeof buf, fmt, va);
+  va_end(va);
+  lcd.print(buf);
   setup_keypad();
   delay(10);
   pressed_col = -1;
-
 }
 
 
-void got_keypad_input(char key) {
-  till_autosleep_ms = 5000;
-  backlight_level = backlight_level_MAX;
-
-  if (key == '*') {
-    reset_input();
-  } else if (entering_option) {
-    if (key == '#') {
-      entering_option = 0;
-    } else {
-      entered_option[entered_option_used++] = key;
-      if (entered_option_used >= 3) {
-        entering_option = 0;
-      }
-    }
+int rfid_id_scan(char * dest, s32 size) {
+  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+    assert(size >= mfrc522.uid.size);
+    size = MIN(size, mfrc522.uid.size);
+    memcpy(dest, mfrc522.uid.uidByte, size);
+    return size;
   } else {
-    if (key == '#') {
-      entering_option = 1;
-      if (entered_option[0]) {
-        memset(entered_option, 0, sizeof entered_option);
-        entered_option_used = 0;
-      }
-    } else {
-      if (entered_pin_used < 10) {
-        entered_pin[entered_pin_used++] = key;
-      }
-    }
+    return 0;
   }
-  draw_input_lines();
-
 }
-
-
-
-unsigned long last_uptime_ms = 0;
 
 void loop() {
-
-  unsigned long uptime_delta_ms_old = last_uptime_ms;
-  last_uptime_ms = millis();
-  long uptime_delta_ms = last_uptime_ms - uptime_delta_ms_old;
-  if (uptime_delta_ms > 10000) { uptime_delta_ms = 10; } // Overflow or reset...
-  if (till_autosleep_ms > 0) {
-    till_autosleep_ms -= uptime_delta_ms;
-    if (till_autosleep_ms <= 0) {
-       till_autosleep_ms = 0;
-       reset_input();
-    }
-  }
-
-  ledcWrite(LCD_LED_CHAN, backlight_level);
-  if (till_autosleep_ms <= 0 && backlight_level > 0) {
-    unsigned long delta_level = (backlight_level_MAX / 1000) * uptime_delta_ms;
-    if (delta_level > backlight_level) {
-      backlight_level = 0;
-    } else {
-      backlight_level -= delta_level;
-    }
-  }
-
-  int tone_key = -1;
-
-  delay(1);
   if (pressed_col != -1) {
     int hit_col = pressed_col;
 
@@ -389,7 +242,6 @@ void loop() {
         }
         hits++;
       }
-      tone_key = row_i(pressed_row)*4+col_i(hit_col);
       char c = "123A456B789C*0#D"[row_i(pressed_row)*4+col_i(hit_col)];
       if (hits == 20) {
 
@@ -401,63 +253,15 @@ void loop() {
     pressed_col = -1;
     //Serial.printf("pressed row:%d col:%d hits:%d\n", pressed_row, hit_col, hits);
   }
-//  static int _i = 0;
-//  if (_i++ > 100) {
-//    _i = 0;
-//  //#define _(n)  detachInterrupt(digitalPinToInterrupt(n)); pinMode(n, INPUT);
-//  //    col_pins
-//  //#undef _
-//  #define _(n) pinMode(n, OUTPUT);
-//    row_pins
-//  #undef _
-//      Serial.printf("poo\n");
-//      lcd.printf("33333333333333333333333333333333333333333333333333333333333333333333ABC");
-//      pressed_col = -1;
-//  }
-  setup_keypad();
 
-  if (0) {
-    if (tone_key == -1) {
-        //ledcWrite(SPK_CHAN, 0);
-    } else {
-        ledcWrite(SPK_CHAN, 32 * 4 * 256);
-        ledcWriteTone(SPK_CHAN, notes[tone_key]);
-    }
-  }
+  setup_keypad();
 
   while (InteriorSerial.available() > 0) {
     char in_byte = InteriorSerial.read();
     if (in_byte == -1) break;
-
-    line_accumulator(&interior_line, &in_byte, 1, got_interior_line);
+    serial_got_char(in_byte);
   }
 
-  if (entered_pin_used &&
-      mfrc522.PICC_IsNewCardPresent() &&
-      mfrc522.PICC_ReadCardSerial() ) {
+  exterior_loop();
 
-      char rfid_str[21];
-      for (int i = 0; i< mfrc522.uid.size; i ++ ) {
-        sprintf(rfid_str + i*2, "%02x", mfrc522.uid.uidByte[i]);
-      }
-
-      Serial.printf("RFID %s\n", rfid_str);
-
-      InteriorSerial.printf("SCAN_START\n");
-      if (entered_option_used) {
-        InteriorSerial.printf("OPTION %s\n", entered_option);
-      }
-      InteriorSerial.printf("PIN %s\n", entered_pin);
-      InteriorSerial.printf("RFID %s\n", rfid_str);
-      InteriorSerial.printf("SCAN_FINISHED\n");
-
-      reset_input();
-
-  }
-
-
-
-
-	// Dump debug info about the card; PICC_HaltA() is automatically called
-	//mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 }
