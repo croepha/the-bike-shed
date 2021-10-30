@@ -1,4 +1,4 @@
-
+// This is an alternative to shed that uses a USB keyboard connected to a PI0 to use a simple 4digit pin to unlock
 
 #include <stdio.h>
 #include <termios.h>
@@ -12,22 +12,20 @@
 #include "io.h"
 #include "pwm.h"
 
-int console_fd = -1;
-
-char enterred_pin[4] = {};
-
+// Copied straight out of shed
 u32 shed_door_unlock_ms = 2500;
-
 IO_TIMEOUT_CALLBACK(shed_pwm) {
     gpio_pwm_set(0);
 }
-
 static void unlock_door() {
     gpio_pwm_set(1);
-    //DEBUG("shed_door_unlock_ms:%u", shed_door_unlock_ms);
     IO_TIMER_MS_SET(shed_pwm, IO_NOW_MS() + shed_door_unlock_ms);
 }
 
+u64 now_ms() { return real_now_ms(); }
+IO_TIMEOUT_CALLBACK(idle) {}
+int console_fd = -1;
+char enterred_pin[4] = {};
 
 IO_EVENT_CALLBACK(console, events, ignored_id) {
 
@@ -40,14 +38,10 @@ IO_EVENT_CALLBACK(console, events, ignored_id) {
   enterred_pin[3] = data;
   INFO_BUFFER(enterred_pin, sizeof enterred_pin, "key %c", data);
 
-  if (memcmp(enterred_pin, "1848", sizeof enterred_pin) == 0) {
+  if (memcmp(enterred_pin, "\0\0\0\0", sizeof enterred_pin) == 0) {
       unlock_door();
   }
 }
-
-u64 now_ms() { return real_now_ms(); }
-IO_TIMEOUT_CALLBACK(idle) {}
-
 
 int main () { int r;
   io_initialize();
@@ -72,7 +66,4 @@ int main () { int r;
   for (;;) {
     io_process_events();
   }
-
-
-
 }
