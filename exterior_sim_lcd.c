@@ -1,6 +1,8 @@
 
+#define LOG_DEBUG
 
 
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,12 +12,8 @@
 #include "common.h"
 #include "logging.h"
 #include "io.h"
+#include "serial.h"
 
-static void _lcd_set_linenf(u8 line_i, char const *fmt, ...) __attribute__ ((format (printf, 2, 3)));
-#define lcd_set_line0(fmt, ...) _lcd_set_linenf(0, fmt, ##__VA_ARGS__)
-#define lcd_set_line1(fmt, ...) _lcd_set_linenf(1, fmt, ##__VA_ARGS__)
-#define lcd_set_line2(fmt, ...) _lcd_set_linenf(2, fmt, ##__VA_ARGS__)
-#define lcd_set_line3(fmt, ...) _lcd_set_linenf(3, fmt, ##__VA_ARGS__)
 
 
 #include <termios.h>
@@ -23,26 +21,6 @@ static void _lcd_set_linenf(u8 line_i, char const *fmt, ...) __attribute__ ((for
 
 u64 now_ms() { return real_now_ms(); }
 IO_TIMEOUT_CALLBACK(idle) {}
-
-
-static char lcd_buffer[4][20];
-void _lcd_set_linenf(u8 line_i, char const *fmt, ...) {
-
-  assert(line_i < 4);
-
-  char buf[21];
-  memset(buf, ' ', sizeof buf);
-
-  va_list va;
-  va_start(va, fmt);
-  int needed_len = vsnprintf(buf, sizeof buf, fmt, va);
-  va_end(va);
-
-  if (needed_len > sizeof lcd_buffer[line_i]) {
-    WARN("lcd line too long");
-  }
-  memcpy(lcd_buffer[line_i], buf, 20);
-}
 
 u16 ansi_used;
 char ansi_buf[1<<15];
@@ -78,69 +56,114 @@ static void ansi_clear_lines(int line_count) {
   ansi_cursor_move_up(line_count);
 }
 
+#include "exterior/exterior.h"
 
+static char lcd_buffer[4][20];
+void _lcd_set_linenf(u8 line_i, char const *fmt, ...) {
 
-void pin_backlight_pwm_set(u32 value);
+  assert(line_i < 4);
 
-void got_keypad_input(char key);
-void loop(void);
+  char buf[21];
+  memset(buf, ' ', sizeof buf);
 
-long till_autosleep_ms = 0;
-unsigned int backlight_level = 0;
-unsigned int backlight_level_MAX = 32 * 4 * 256;
+  va_list va;
+  va_start(va, fmt);
+  int needed_len = vsnprintf(buf, sizeof buf, fmt, va);
+  va_end(va);
 
-
-void got_keypad_input(char key) {
-  till_autosleep_ms = 5000;
-  backlight_level = backlight_level_MAX;
-}
-
-unsigned long last_uptime_ms = 0;
-
-void loop() {
-
-  unsigned long uptime_delta_ms_old = last_uptime_ms;
-  last_uptime_ms = now_ms();
-  long uptime_delta_ms = last_uptime_ms - uptime_delta_ms_old;
-  if (uptime_delta_ms > 10000) { uptime_delta_ms = 10; } // Overflow or reset...
-
-  if (till_autosleep_ms > 0) {
-    till_autosleep_ms -= uptime_delta_ms;
-    if (till_autosleep_ms <= 0) {
-       till_autosleep_ms = 0;
-       //reset_input();
-    }
+  if (needed_len > sizeof lcd_buffer[line_i]) {
+    WARN("lcd line too long");
   }
-
-  pin_backlight_pwm_set(backlight_level);
-
-  if (till_autosleep_ms <= 0 && backlight_level > 0) {
-    unsigned long delta_level = (backlight_level_MAX / 1000) * uptime_delta_ms;
-    if (delta_level > backlight_level) {
-      backlight_level = 0;
-    } else {
-      backlight_level -= delta_level;
-    }
-  }
-
-  fprintf(stderr, "sim loop\n");
+  memcpy(lcd_buffer[line_i], buf, 20);
 }
 
 // --------------
 
+
+s32 serial_fd;
 u32 _pin_backlight_pwm_value;
 char last_input[20];
+enum ui_mode {
+  UI_MODE_NORMAL,
+  UI_MODE_RFID,
+} current_ui_mode;
+char quick_hashes[10][128];
+s32 quick_hashes_recently_selected; // idx + 1, zero indicates no selection
+
+static const char quick_hashes_path[] = "/build/quick_hashes.text";
+
+static int base16_to_int(char c) {
+    if ('A' <= c && c <= 'F') {
+        return 10 + c - 'A';
+    } else if ('a' <= c && c <= 'f') {
+        return 10 + c - 'a';
+    } else if ('0' <= c && c <= '9') {
+        return c - '0';
+    } else {
+        ERROR("bad char: %c", c);
+        return 0;
+    }
+}
+
+static s32 buf_from_hex(void* buf_, usz buf_len, char * hex) {
+    u8 * buf = buf_;
+    for (int i = 0; i < buf_len; i++) {
+        if (!hex[2*i+0] || !hex[2*i+1]) {
+            return i;
+        }
+        buf[i] = (base16_to_int(hex[2*i+0]) << 4)
+          | (base16_to_int(hex[2*i+1]) << 0);
+    }
+    return 0;
+}
+
+s32 rfid_id_scan(char* buf, s32 buf_len) {
+  memset(buf, 0, buf_len);
+  if (quick_hashes_recently_selected) {
+    s32 entry = quick_hashes_recently_selected - 1;
+    s32 len = buf_from_hex(buf, buf_len, quick_hashes[entry]);
+    quick_hashes_recently_selected = 0;
+    return len;
+  }
+  return 0;
+}
 
 void pin_backlight_pwm_set(u32 value) {
   _pin_backlight_pwm_value = value;
-
 }
+
+
 
 IO_EVENT_CALLBACK(sim_stdin, events, unused) {
   int r = read(0, last_input, sizeof last_input);
   error_check(r);
   last_input[r] = 0;
-  got_keypad_input(last_input[0]);
+  char c = last_input[0];
+
+  switch (current_ui_mode) {
+    case UI_MODE_NORMAL: {
+      if (c >= '0' && c <= '9' ) {
+        got_keypad_input(c);
+      } else if (c == '-') {
+        got_keypad_input('#');
+      } else if (c == '*') {
+        got_keypad_input('*');
+      } else if (c == 'r') {
+        current_ui_mode = UI_MODE_RFID;
+        IO_TIMER_MS_SET(sim_loop, -1);
+      }
+    } break;
+    case UI_MODE_RFID: {
+      if (c >= '0' && c <= '9' ) {
+        s32 entry = c - '0';
+        INFO("RFID Scan: %s", quick_hashes[entry]);
+        quick_hashes_recently_selected = entry + 1;
+        //got_keypad_input(c);
+        current_ui_mode = UI_MODE_NORMAL;
+        ansi_clear_lines(12);
+      }
+    } break;
+  }
 
   //INFO_HEXBUFFER(last_input, r);
 }
@@ -149,49 +172,113 @@ IO_TIMEOUT_CALLBACK(sim_loop) {
   loop();
 }
 
-static void print_state() {
+IO_EVENT_CALLBACK(serial, events, ignored_id) {
 
-  for (int li = 0; li < 4; li++) {
-    for (int ci = 0; ci < 20; ci++) {
-        if (!isprint(lcd_buffer[li][ci])) {
-          if (lcd_buffer[li][ci]) {
-            WARN("Non printing character in LCD buffer...");
-          }
-          lcd_buffer[li][ci] = ' ';
-        }
-    }
-  }
+  u8 data = -1;
+  int r = read(serial_fd, &data, 1);
+  error_check(r);
+  assert(r == 1);
 
-  const u64 backlight_columns_total = 30;
-  u64 backlight_columns_filled = _pin_backlight_pwm_value * backlight_columns_total / backlight_level_MAX;
-  char backlight_colums[backlight_columns_total + 1];
-  for (int i = 0; i < backlight_columns_total; i++) {
-    if (i < backlight_columns_filled) {
-      backlight_colums[i] = '#';
-    } else {
-      backlight_colums[i] = ' ';
-    }
-  }
-  backlight_colums[backlight_columns_total] = 0;
+  serial_got_char(data);
 
+}
 
-  ansi_clear_lines(8);
-  ansi_fmt("\n");
-  //            |12345678901234567890|
-  ansi_fmt("    |----LCD SCREEN------|\n");
-  // _pin_backlight_pwm_value
-  ansi_fmt("    |%.20s"             "|  backlight: %s\n", lcd_buffer[0], backlight_colums);
-  ansi_fmt("    |%.20s"             "|\n", lcd_buffer[1]);
-  ansi_fmt("    |%.20s"             "|\n", lcd_buffer[2]);
-  ansi_fmt("    |%.20s"             "|\n", lcd_buffer[3]);
-  ansi_fmt("    |--------------------|\n");
-  ansi_fmt("\n");
-  ansi_cursor_move_up(8);
-  ansi_flush();
+void serial_printf(const char * fmt, ...) {
+  va_list va;
+  va_start(va, fmt);
+  vdprintf(serial_fd, fmt, va);
+  dprintf(serial_fd, "\n");
+  va_end(va);
 }
 
 
+
+
+static void print_state() {
+
+  switch (current_ui_mode) {
+    case UI_MODE_NORMAL: {
+      for (int li = 0; li < 4; li++) {
+        for (int ci = 0; ci < 20; ci++) {
+            if (!isprint(lcd_buffer[li][ci])) {
+              if (lcd_buffer[li][ci]) {
+                WARN("Non printing character in LCD buffer...");
+              }
+              lcd_buffer[li][ci] = ' ';
+            }
+        }
+      }
+
+      const u64 backlight_columns_total = 30;
+      u64 backlight_columns_filled = _pin_backlight_pwm_value * backlight_columns_total / backlight_level_MAX;
+      char backlight_colums[backlight_columns_total + 1];
+      for (int i = 0; i < backlight_columns_total; i++) {
+        if (i < backlight_columns_filled) {
+          backlight_colums[i] = '#';
+        } else {
+          backlight_colums[i] = ' ';
+        }
+      }
+      backlight_colums[backlight_columns_total] = 0;
+
+
+      ansi_clear_lines(8);
+      ansi_fmt("\n");
+      //            |12345678901234567890|
+      ansi_fmt("    |----LCD SCREEN------|\n");
+      ansi_fmt("    |%.20s"             "|  backlight: %s\n", lcd_buffer[0], backlight_colums);
+      ansi_fmt("    |%.20s"             "|\n", lcd_buffer[1]);
+      ansi_fmt("    |%.20s"             "|\n", lcd_buffer[2]);
+      ansi_fmt("    |%.20s"             "|\n", lcd_buffer[3]);
+      ansi_fmt("    |--------------------|\n");
+      ansi_fmt("\n");
+      ansi_cursor_move_up(8);
+    } break;
+    case UI_MODE_RFID: {
+      FILE* f = fopen(quick_hashes_path, "r");
+      if (f) {
+        while (!feof(f)) {
+          char buf[1024] = "";
+          int entry;
+          int r = fscanf(f, "%1000d: %s\n", &entry, buf);
+          if (r != 2) {
+            fscanf(f, "%*[^\n]\n"); // Read through to the end of the line
+          }
+          //DEBUG("scan: %d, tell:%ld, entry:%d buf:%s", r, ftell(f), entry, buf);
+          if (entry < 10) {
+            snprintf(quick_hashes[entry], sizeof quick_hashes[entry], "%s", buf);
+          }
+        }
+        fclose(f);
+        //DEBUG("done");
+      }
+
+      ansi_clear_lines(12);
+      ansi_fmt("\n");
+      for (int i = 0; i < 10; i++) {
+        ansi_fmt("    %d: %s\n", i, quick_hashes[i]);
+      }
+      ansi_fmt("\n");
+      ansi_cursor_move_up(12);
+    } break;
+  }
+
+  ansi_flush();
+
+}
+
+// static void debug_describe_fd(s32 fd) {
+//   char path_buf[128] = {};
+//   snprintf(path_buf, sizeof path_buf - 1, "/proc/self/fd/%d", fd);
+//   char rl_buf[1024] = {};
+//   readlink(path_buf, rl_buf, sizeof(rl_buf) -1 );
+//   DEBUG("FD: %d: %s", fd, rl_buf);
+// }
+
 int main () { int r;
+
+  io_initialize();
+  fprintf(stderr, "ASDFASDFA\n");
 
   { // get term settings, and then update them
     static struct termios ts;
@@ -203,17 +290,23 @@ int main () { int r;
     error_check(r);
   }
 
-  io_initialize();
-  fprintf(stderr, "ASDFASDFA\n");
+  serial_fd = open("/build/sim_exterior.pts", O_RDWR);
 
-  int i = 0;
+  {
+    char buf[1024];
+    snprintf(buf, sizeof buf, "lsof -p %d", getpid());
+    system(buf);
+  }
+  DEBUG("FD: %d", serial_fd);
+
+  error_check(serial_fd);
+  io_ADD_R(serial_fd);
+
   io_ctl(sim_stdin_fd, 0, 0, EPOLLIN, EPOLL_CTL_ADD);
-  for (;;) {
 
-    lcd_set_line0("test %d", i++);
-    lcd_set_line1("d %02x%02x", last_input[0], last_input[1]);
-    lcd_set_line2("test2 %d", 4333);
-    lcd_set_line3("12345678901234567890");
+  setup();
+
+  for (;;) {
 
     print_state();
     IO_TIMER_MS_SET(sim_loop, IO_NOW_MS() + 20);

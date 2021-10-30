@@ -95,6 +95,7 @@ void io_initialize() {
 }
 
 void io_fd_ctl(int flags, int op, enum _io_socket_types type, s32 id, int fd) { int r;
+    assert(_epfd != -1);
     io_EPData data = {.my_data = {.id = id, .event_type = type }};
     struct epoll_event epe = {.data = data.data, .events = flags};
     r = epoll_ctl(_epfd, op, fd, &epe);
