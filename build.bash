@@ -371,10 +371,10 @@ do_test serial_test /build/serial_test.dbg.exec
 
 reset
 depends_on logging
-compile exterior_sim_lcd
+compile exterior_sim
 compile exterior/exterior
-io_compile exterior_sim_lcd sim_stdin serial -- sim_loop
-link_exec exterior_sim_lcd
+io_compile exterior_sim sim_stdin serial -- sim_loop
+link_exec exterior_sim
 
 reset
 depends_on logging

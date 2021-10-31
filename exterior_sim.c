@@ -1,4 +1,46 @@
 
+/*
+
+This is a tool that will run the exterior code on a dev machine
+
+Here are some shell commands to run the simulator:
+
+# Set some variables
+exterior_serial_dev="/build/sim_exterior.pts"
+interior_serial_dev="/build/sim_interior.pts"
+shed=/build/shed3.dbg.exec
+config_location=/workspaces/the-bike-shed/sim-shed-config
+serial_log="/build/sim_serial.log"
+shed_log="/build/sim_shed.log"
+
+# Tail all relavant logs in the background
+tail -f /build/sim_*.log &
+
+# Startup the simulated serial port, using socat
+socat -d -d -v PTY,link="$exterior_serial_dev",rawer,echo=0 PTY,link="$interior_serial_dev",rawer,echo=0 >> $serial_log 2>&1  &
+
+# Start a SHED instance on your dev machine:
+SHED_TRACE=1 $shed $config_location &> $shed_log & shed_pid=$
+
+# run the actual simulator:
+/build/exterior_sim.dbg.exec
+
+
+
+When the simulator is running, you can use the number keys as your keypad
+To simulate scanning an RFID card, press r, and then select a number to pick
+a simulated RFID card
+
+The simulated RFID cards are pulled from the `/build/quick_hashes.text` file, it's content is like this:
+
+2: 000000000000003
+4: 000000000000001
+6: f00ba4
+9: 000000000000002
+
+
+*/
+
 #define LOG_DEBUG
 
 
