@@ -830,7 +830,7 @@ SLEEP
 -- Emails:
 
 =====================================================
-=== remove 11 hash from dl
+=== Remove admin: remove 11 hash from dl
 
 -- Setting dl config:
 
@@ -838,7 +838,7 @@ UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 
 
 =====================================================
-=== 00 badge, opt 301, expect download
+=== Forcing config download
 
 -- Shed output:
 TRACE: io_event:serial start	(./access_hash.c __access_hash)
@@ -891,7 +891,7 @@ SLEEP
 -- Emails:
 
 =====================================================
-=== Salt migration: 11 badge, expect unknown user
+=== Remove admin: 11 badge, expect unknown user
 
 -- Shed output:
 TRACE: io_event:serial start	(./access_hash.c __access_hash)
