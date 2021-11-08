@@ -489,7 +489,7 @@ dump_state
 
 echo
 echo "====================================================="
-echo "=== remove 11 hash from dl"
+echo "=== Remove admin: remove 11 hash from dl"
 echo
 set_dl_config '
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
@@ -497,7 +497,7 @@ UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 
 echo
 echo "====================================================="
-echo "=== 00 badge, opt 301, expect download"
+echo "=== Forcing config download"
 echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
@@ -513,7 +513,7 @@ dump_state
 
 echo
 echo "====================================================="
-echo "=== Salt migration: 11 badge, expect unknown user"
+echo "=== Remove admin: 11 badge, expect unknown user"
 echo
 cat << EOF > $exterior_serial_dev
 SCAN_START
