@@ -10,22 +10,18 @@ exterior_serial_dev="/build/sim_exterior.pts"
 interior_serial_dev="/build/sim_interior.pts"
 shed=/build/shed3.dbg.exec
 config_location=/workspaces/the-bike-shed/sim-shed-config
-serial_log="/build/sim_serial.log"
-shed_log="/build/sim_shed.log"
-
-# Tail all relavant logs in the background
-tail -f /build/sim_*.log &
 
 # Startup the simulated serial port, using socat
-socat -d -d -v PTY,link="$exterior_serial_dev",rawer,echo=0 PTY,link="$interior_serial_dev",rawer,echo=0 >> $serial_log 2>&1  &
+socat -d -d -v PTY,link="$exterior_serial_dev",rawer,echo=0 \
+               PTY,link="$interior_serial_dev",rawer,echo=0 &
 
 # Start a SHED instance on your dev machine:
-SHED_TRACE=1 $shed $config_location &> $shed_log & shed_pid=$
+SHED_TRACE=1 $shed $config_location & shed_pid=$
 
-# run the actual simulator:
+# run the actual simulator (Best to run in a separate terminal tab):
 /build/exterior_sim.dbg.exec
 
-
+You can use `-` as an alternative to the option/pound key
 
 When the simulator is running, you can use the number keys as your keypad
 To simulate scanning an RFID card, press r, and then select a number to pick
@@ -200,6 +196,8 @@ IO_EVENT_CALLBACK(sim_stdin, events, unused) {
       if (c >= '0' && c <= '9' ) {
         got_keypad_input(c);
       } else if (c == '-') {
+        got_keypad_input('#');
+      } else if (c == '#') {
         got_keypad_input('#');
       } else if (c == '*') {
         got_keypad_input('*');
