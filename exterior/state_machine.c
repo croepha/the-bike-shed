@@ -55,19 +55,21 @@ void print_door_pin(const enum USER user, const char *pin_so_far, char output[][
     sprintf(output[3], "ENTER %s PIN", user_title);
 }
 
-void print_rpi_output(const enum USER user, char const rpi_output[2][20], char output[][20]) {
-    sprintf(output[3], "%s", rpi_output[0]);
-    sprintf(output[4], "%s", rpi_output[1]);
+void print_rpi_output(const enum USER user, char const rpi_output[2][CODE_LEN], char output[][CODE_LEN]) {
+    memset(output[0], '\0', CODE_LEN);
+    memset(output[1], '\0', CODE_LEN);
+    sprintf(output[3], "%.20s", rpi_output[0]);
+    sprintf(output[4], "%.20s", rpi_output[1]);
 }
 
-void print_rfid_sign(const enum USER user, const char *pin_so_far, char output[][20]) {
+void print_rfid_sign(const enum USER user, const char *pin_so_far, char output[][CODE_LEN]) {
     sprintf(output[0], "PIN:  %s", pin_so_far); 
     sprintf(output[1], "");
     easter_eggs(pin_so_far, output[2]);
     sprintf(output[3], "BADGE RFID");
 }
 
-void print_option(const enum USER user, const char *pin_so_far, char output[][20]) {
+void print_option(const enum USER user, const char *pin_so_far, char output[][CODE_LEN]) {
     sprintf(output[0], "OPT:  %s", pin_so_far); 
     easter_eggs(pin_so_far, output[1]);
     // TODO : Reference a centralized place where the options are known.
@@ -75,13 +77,14 @@ void print_option(const enum USER user, const char *pin_so_far, char output[][20
     sprintf(output[3], "ADD 30 DAY: %d", DAY_30_OPT);
 }
 
-void display(const enum STATE state, const enum USER user, const struct internal_state shed_state, char output[][20]) {
+void display(const enum STATE state, const enum USER user, const struct internal_state shed_state, char output[][CODE_LEN]) {
     switch (state) {
         case MAIN_MENU: {print_main_menu(output); break;}
         case DOOR_PIN: {print_door_pin(user, shed_state.pin_so_far, output); break;}
         case RFID_BADGE: {print_rfid_sign(user, shed_state.pin_so_far, output); break;}
-        case OPTIONS: {print_option(user, shed_state.pin_so_far, output); break;}
+        case OPTIONS: {print_option(user, shed_state.option_so_far, output); break;}
         case ACCESS_PAGE: {print_rpi_output(user, shed_state.rpi_output, output); break;}
+        case ADDING_NEXT_USER: {print_rpi_output(user, shed_state.rpi_output, output); break;}
         default: {print_main_menu(output); break;}
     }
 }
@@ -122,12 +125,10 @@ enum STATE determine_next_state(const enum STATE state, const enum USER user, co
             }
        }
        case ADDING_NEXT_USER: {
-           return DOOR_PIN;
+           return ADDING_NEXT_USER;
        }
        case OPTIONS: {
-           if (strlen(shed_state.option_so_far) >= 3) {
-               return DOOR_PIN;
-           } else if (shed_state.key == '*') {
+           if (shed_state.key == '*') {
                return DOOR_PIN;
            } else {
                return OPTIONS;

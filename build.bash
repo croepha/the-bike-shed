@@ -373,6 +373,7 @@ reset
 depends_on logging
 compile exterior_sim
 compile exterior/exterior
+compile exterior/state_machine
 io_compile exterior_sim sim_stdin serial -- sim_loop
 link_exec exterior_sim
 

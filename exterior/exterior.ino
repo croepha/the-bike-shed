@@ -101,6 +101,7 @@ static int col_i(int pin) { int ret = 0; col_pins }
 #undef _
 
 
+// Bass-ed
 int notes[] = {
   220, // A3
   247, // B3
@@ -194,18 +195,18 @@ void pullup_rows() {
 #undef _
 }
 
-void _lcd_set_linenf(u8 line_i, const char *fmt, ...) {
-  lcd.setCursor(0,line_i);
-  va_list va;
-  va_start(va, fmt);
-  char buf[1024];
-  vsnprintf(buf, sizeof buf, fmt, va);
-  va_end(va);
-  lcd.print(buf);
-  setup_keypad();
-  delay(10);
-  pressed_col = -1;
-}
+// void _lcd_set_linenf(u8 line_i, const char *fmt, ...) {
+//   lcd.setCursor(0,line_i);
+//   va_list va;
+//   va_start(va, fmt);
+//   char buf[1024];
+//   vsnprintf(buf, sizeof buf, fmt, va);
+//   va_end(va);
+//   lcd.print(buf);
+//   setup_keypad();
+//   delay(10);
+//   pressed_col = -1;
+// }
 
 
 int rfid_id_scan(char * dest, s32 size) {

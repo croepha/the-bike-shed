@@ -1,8 +1,8 @@
-
 #include <stdio.h>
 #include <string.h>
 
 #include "exterior.h"
+#include "state_machine.h"
 #include "log_lite.h"
 
 #define line_accumulator_Data_SIZE 512
@@ -44,14 +44,19 @@ unsigned int backlight_level = 0;
 unsigned long last_uptime_ms = 0;
 struct line_accumulator_Data interior_line;
 
+enum STATE current_state = MAIN_MENU;
+enum USER user = GENERAL_DOOR;
+struct internal_state shed_data;
+char output[4][20];
+
 
 static void got_interior_line(char*line) {
   if (strncmp(line, "TEXT_SHOW1 ", 11) == 0) {
-    lcd_set_line2("%20s", line+11);
+    sprintf(shed_data.rpi_output[0], "%.20s", line+11);
     backlight_level = backlight_level_MAX;
     till_autosleep_ms = 5000;
   } else if (strncmp(line, "TEXT_SHOW2 ", 11) == 0) {
-    lcd_set_line3("%20s", line+11);
+    sprintf(shed_data.rpi_output[1], "%.20s", line+11);
     backlight_level = backlight_level_MAX;
     till_autosleep_ms = 5000;
   } else if (strncmp(line, "SLEEP", 5) == 0) {
@@ -61,44 +66,38 @@ static void got_interior_line(char*line) {
   }
 }
 
+// u8 entering_option = 0;
+// char entered_pin[11];
+// int  entered_pin_used = 0;
+// char entered_option[4];
+// int  entered_option_used = 0;
 
-u8 entering_option = 0;
-char entered_pin[11];
-int  entered_pin_used = 0;
-char entered_option[4];
-int  entered_option_used = 0;
-
+// Sets the internal data to null values. (NOTE: sometimes individual values are replaced in code)
 static void reset_input() {
-    entering_option = 0;
-    entered_pin_used = 0;
-    entered_option_used = 0;
-    memset(entered_pin, 0, sizeof entered_pin);
-    memset(entered_option, 0, sizeof entered_option);
-
-    lcd_set_line0("                    ");
-    lcd_set_line1("                    ");
-
+    shed_data.key = ' ';
+    memset(shed_data.pin_so_far, '\0', sizeof shed_data.pin_so_far);
+    memset(shed_data.option_so_far, '\0', sizeof shed_data.option_so_far);
 }
 
-static void draw_input_lines() {
-  if (1) {
-    // Show pin
-    lcd_set_line0("PIN:%12s%c", entered_pin, entering_option?' ':'<');
-  } else {
-    // Hide pin
-    char buf[24];
-    for (int i = 0; i < entered_pin_used; i++) {
-      buf[i] = '*';
-    }
-    buf[entered_pin_used] = 0;
-    lcd_set_line0("PIN:%12s%c", buf, entering_option?' ':'<');
-  }
-  if (entered_option_used || entering_option) {
-    lcd_set_line1("OPT:%12s%c", entered_option, entering_option?'<':' ');
-  } else {
-    lcd_set_line1("                   ");
-  }
-}
+// static void draw_input_lines() {
+//   if (1) {
+//     // Show pin
+//     lcd_set_line0("PIN:%12s%c", entered_pin, entering_option?' ':'<');
+//   } else {
+//     // Hide pin
+//     char buf[24];
+//     for (int i = 0; i < entered_pin_used; i++) {
+//       buf[i] = '*';
+//     }
+//     buf[entered_pin_used] = 0;
+//     lcd_set_line0("PIN:%12s%c", buf, entering_option?' ':'<');
+//   }
+//   if (entered_option_used || entering_option) {
+//     lcd_set_line1("OPT:%12s%c", entered_option, entering_option?'<':' ');
+//   } else {
+//     lcd_set_line1("                   ");
+//   }
+// }
 
 
 
@@ -110,33 +109,39 @@ void serial_got_char(char data) {
 void got_keypad_input(char key) {
   till_autosleep_ms = 5000;
   backlight_level = backlight_level_MAX;
+  // We can use strlen because the array is reset to '\0's.
+  size_t entered_option_used = strlen(shed_data.option_so_far);
+  size_t entered_pin_used = strlen(shed_data.pin_so_far);
+  u8 entering_option = shed_data.key == '#';
 
   if (key == '*') {
     reset_input();
+    shed_data.key = '*';
   } else if (entering_option) {
     if (key == '#') {
-      entering_option = 0;
+      reset_input();
+      shed_data.key = '#';
     } else {
-      entered_option[entered_option_used++] = key;
+      shed_data.option_so_far[entered_option_used++] = key;
       if (entered_option_used >= 3) {
-        entering_option = 0;
+        // NOTE: I'm doing this to change the state machine in what I think is the cleanest way. 
+        // Otherwise this conditional is duplicated.
+        shed_data.key = '*';
       }
     }
   } else {
     if (key == '#') {
-      entering_option = 1;
-      if (entered_option[0]) {
-        memset(entered_option, 0, sizeof entered_option);
+      shed_data.key = '#';
+      if (shed_data.option_so_far[0]) {
+        memset(shed_data.option_so_far, 0, sizeof shed_data.option_so_far);
         entered_option_used = 0;
       }
     } else {
       if (entered_pin_used < 10) {
-        entered_pin[entered_pin_used++] = key;
+        shed_data.pin_so_far[entered_pin_used++] = key;
       }
     }
   }
-  draw_input_lines();
-
 }
 
 
@@ -155,14 +160,14 @@ void exterior_loop() {
   if (till_autosleep_ms > 0) {
     till_autosleep_ms -= uptime_delta_ms;
     if (till_autosleep_ms <= 0) {
-       till_autosleep_ms = 0;
-       reset_input();
+      till_autosleep_ms = 0;
     }
   }
 
-  pin_backlight_pwm_set(backlight_level);
 
   if (till_autosleep_ms <= 0 && backlight_level > 0) {
+    reset_input();
+    shed_data.reset = 1;
     unsigned long delta_level = (backlight_level_MAX / 1000) * uptime_delta_ms;
     if (delta_level > backlight_level) {
       backlight_level = 0;
@@ -171,36 +176,47 @@ void exterior_loop() {
     }
   }
 
-  if (entered_pin_used) {
+  /// fill in shed data
+  // shed_data.rfid
+  // shed_data.rpi_output
+  user = determine_user(current_state, user, shed_data);
+  current_state = determine_next_state(current_state, user, shed_data);
+  pin_backlight_pwm_set(backlight_level);
+
+  // Output scan data to RPi.
+  if (current_state == RFID_BADGE) {
     char rfid_id[1024];
     s16 rfid_id_len = rfid_id_scan(rfid_id, sizeof rfid_id);
     if (rfid_id_len) {
-    char rfid_str[21];
-    for (int i = 0; i< rfid_id_len; i ++ ) {
-      sprintf(rfid_str + i*2, "%02x", rfid_id[i]);
-    }
+      char rfid_str[21];
+      for (int i = 0; i< rfid_id_len; i ++ ) {
+        sprintf(rfid_str + i*2, "%02x", rfid_id[i]);
+      }
 
-    INFO("RFID %s\n", rfid_str);
+      INFO("RFID %s\n", rfid_str);
 
-    serial_printf("SCAN_START\n");
-    if (entered_option_used) {
-        serial_printf("OPTION %s\n", entered_option);
+      serial_printf("SCAN_START\n");
+      if (strlen(shed_data.option_so_far) > 0) {
+          serial_printf("OPTION %s\n", shed_data.option_so_far);
+      }
+      serial_printf("PIN %s\n", shed_data.pin_so_far);
+      serial_printf("RFID %s\n", rfid_str);
+      serial_printf("SCAN_FINISHED\n");
+      shed_data.rfid_set = 1;
     }
-    serial_printf("PIN %s\n", entered_pin);
-    serial_printf("RFID %s\n", rfid_str);
-    serial_printf("SCAN_FINISHED\n");
-    reset_input();
-    }
+  } else {
+    shed_data.rfid_set = 0;
   }
 
+  // Set output string.
+  display(current_state, user, shed_data, output);
 
+  // Set LCD output.
+  lcd_set_line0("%s", output[0]);
+  lcd_set_line1("%s", output[1]);
+  lcd_set_line2("%s", output[2]);
+  lcd_set_line3("%s", output[3]);
 
-  char rfid_id[1024];
-  s16 rfid_id_len = rfid_id_scan(rfid_id, sizeof rfid_id);
-  if (rfid_id_len) {
-    serial_printf("GOT_RFID\n");
-
-  }
-
+  shed_data.reset = 0;
   //fprintf(stderr, "sim loop\n");
 }
