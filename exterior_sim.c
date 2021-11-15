@@ -345,13 +345,6 @@ int main () { int r;
 
   serial_fd = open("/build/sim_exterior.pts", O_RDWR);
 
-  {
-    char buf[1024];
-    snprintf(buf, sizeof buf, "lsof -p %d", getpid());
-    system(buf);
-  }
-  DEBUG("FD: %d", serial_fd);
-
   error_check(serial_fd);
   io_ADD_R(serial_fd);
 
