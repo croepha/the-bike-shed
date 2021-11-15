@@ -175,32 +175,22 @@ void exterior_loop() {
     char rfid_id[1024];
     s16 rfid_id_len = rfid_id_scan(rfid_id, sizeof rfid_id);
     if (rfid_id_len) {
-    char rfid_str[21];
-    for (int i = 0; i< rfid_id_len; i ++ ) {
-      sprintf(rfid_str + i*2, "%02x", rfid_id[i]);
-    }
+      char rfid_str[21];
+      for (int i = 0; i< rfid_id_len; i ++ ) {
+        sprintf(rfid_str + i*2, "%02x", rfid_id[i]);
+      }
 
-    INFO("RFID %s\n", rfid_str);
+      INFO("RFID %s\n", rfid_str);
 
-    serial_printf("SCAN_START\n");
-    if (entered_option_used) {
+      serial_printf("SCAN_START\n");
+      if (entered_option_used) {
         serial_printf("OPTION %s\n", entered_option);
-    }
-    serial_printf("PIN %s\n", entered_pin);
-    serial_printf("RFID %s\n", rfid_str);
-    serial_printf("SCAN_FINISHED\n");
-    reset_input();
+      }
+      serial_printf("PIN %s\n", entered_pin);
+      serial_printf("RFID %s\n", rfid_str);
+      serial_printf("SCAN_FINISHED\n");
+      reset_input();
     }
   }
 
-
-
-  char rfid_id[1024];
-  s16 rfid_id_len = rfid_id_scan(rfid_id, sizeof rfid_id);
-  if (rfid_id_len) {
-    serial_printf("GOT_RFID\n");
-
-  }
-
-  //fprintf(stderr, "sim loop\n");
 }
