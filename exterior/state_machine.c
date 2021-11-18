@@ -58,8 +58,8 @@ void print_door_pin(const enum USER user, const char *pin_so_far, char output[][
 void print_rpi_output(const enum USER user, char const rpi_output[2][CODE_LEN], char output[][CODE_LEN]) {
     memset(output[0], '\0', CODE_LEN);
     memset(output[1], '\0', CODE_LEN);
-    sprintf(output[3], "%.20s", rpi_output[0]);
-    sprintf(output[4], "%.20s", rpi_output[1]);
+    sprintf(output[2], "%.20s", rpi_output[0]);
+    sprintf(output[3], "%.20s", rpi_output[1]);
 }
 
 void print_rfid_sign(const enum USER user, const char *pin_so_far, char output[][CODE_LEN]) {

@@ -66,39 +66,12 @@ static void got_interior_line(char*line) {
   }
 }
 
-// u8 entering_option = 0;
-// char entered_pin[11];
-// int  entered_pin_used = 0;
-// char entered_option[4];
-// int  entered_option_used = 0;
-
 // Sets the internal data to null values. (NOTE: sometimes individual values are replaced in code)
 static void reset_input() {
     shed_data.key = ' ';
     memset(shed_data.pin_so_far, '\0', sizeof shed_data.pin_so_far);
     memset(shed_data.option_so_far, '\0', sizeof shed_data.option_so_far);
 }
-
-// static void draw_input_lines() {
-//   if (1) {
-//     // Show pin
-//     lcd_set_line0("PIN:%12s%c", entered_pin, entering_option?' ':'<');
-//   } else {
-//     // Hide pin
-//     char buf[24];
-//     for (int i = 0; i < entered_pin_used; i++) {
-//       buf[i] = '*';
-//     }
-//     buf[entered_pin_used] = 0;
-//     lcd_set_line0("PIN:%12s%c", buf, entering_option?' ':'<');
-//   }
-//   if (entered_option_used || entering_option) {
-//     lcd_set_line1("OPT:%12s%c", entered_option, entering_option?'<':' ');
-//   } else {
-//     lcd_set_line1("                   ");
-//   }
-// }
-
 
 
 void serial_got_char(char data) {
