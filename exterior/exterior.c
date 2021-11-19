@@ -169,7 +169,6 @@ void exterior_loop() {
       INFO("RFID %s\n", rfid_str);
 
       serial_printf("SCAN_START\n");
-<<<<<<< HEAD
       if (strlen(shed_data.option_so_far) > 0) {
           serial_printf("OPTION %s\n", shed_data.option_so_far);
       }
@@ -193,16 +192,4 @@ void exterior_loop() {
 
   shed_data.reset = 0;
   //fprintf(stderr, "sim loop\n");
-=======
-      if (entered_option_used) {
-        serial_printf("OPTION %s\n", entered_option);
-      }
-      serial_printf("PIN %s\n", entered_pin);
-      serial_printf("RFID %s\n", rfid_str);
-      serial_printf("SCAN_FINISHED\n");
-      reset_input();
-    }
-  }
-
->>>>>>> 527d9c7095ed13069e4020b406d22b85edc8a054
 }
