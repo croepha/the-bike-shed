@@ -830,6 +830,106 @@ SLEEP
 -- Emails:
 
 =====================================================
+=== Remove admin: remove 11 hash from dl
+
+-- Setting dl config:
+
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+
+
+=====================================================
+=== Forcing config download
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [70a2496dc4f634ea]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:1a270 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: start	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: lookup hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: User was found with an old salt, we should migrate their hash to the new salt	(./shed3.c exterior_scan_finished)
+TRACE: io_event:serial Salt Migration: add hash: [70a2496dc4f634ea]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add MAP_idx:1a270 Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: add expire_day:FILTERED require_existing:0 overwrite_admin:0 map_idx:107120 [70a2496dc4f634ea41c086d080e35993a32bd65ffdb3282a71c507dd1d0f298e]	(./access_data.c access_user_add)
+TRACE: io_event:serial Salt Migration: lookup hash: [70a2496dc4f634ea]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup returning MAP_idx:1a270	(./access_data.c __user_map_lookup)
+ INFO: io_event:serial Salt Migration: Old hash: [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./shed3.c exterior_scan_finished)
+ INFO: io_event:serial Salt Migration: New hash: [70a2496dc4f634ea41c086d080e35993a32bd65ffdb3282a71c507dd1d0f298e]	(./shed3.c exterior_scan_finished)
+ WARN: io_event:serial Salt Migration: An admin's hash needs to be manually updated, details preceed	(./shed3.c exterior_scan_finished)
+ INFO: io_event:serial Forcing config refresh	(./shed3.c exterior_scan_finished)
+ WARN: FILTERED:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+TRACE: FILTERED:io_curl parse add hash: [d2db0e01045de5d6]	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add returning MAP_idx:2dbd2	(./access_data.c __user_map_lookup)
+TRACE: FILTERED:io_curl parse add expire_day:FILTERED require_existing:0 overwrite_admin:1 map_idx:187346 [d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2]	(./access_data.c access_user_add)
+TRACE: FILTERED:io_curl parse add MAP_idx:2dbd2 USER_idx:1ffd Update existing	(./access_data.c access_user_add)
+ WARN: FILTERED:io_curl parse ignoring unknown config line: ''	(config.re config_parse_line)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+UserNormal: FILTERED a3f21be28e9c1b6263894d0e45b9d77a2c9610a178eaaa3b3a40a15fd305a86f
+-- Serial output:
+TEXT_SHOW1 Forcing config
+TEXT_SHOW2 refresh
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
+=== Remove admin: 11 badge, expect unknown user
+
+-- Shed output:
+TRACE: io_event:serial start	(./access_hash.c __access_hash)
+TRACE: io_event:serial finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial lookup hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:3632a Hit first tombstone 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial lookup MAP_idx:3632b Hash not in our map 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: start	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: finish	(./access_hash.c __access_hash)
+TRACE: io_event:serial Salt Migration: lookup hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup MAP_idx:36182 Hit first tombstone 	(./access_data.c __user_map_lookup)
+TRACE: io_event:serial Salt Migration: lookup MAP_idx:36183 Hash not in our map 	(./access_data.c __user_map_lookup)
+-- Config on disk:
+CloseAtSec: FILTERED
+ConfigDownloadStartupDelayMS: 0
+ConfigURL: http://127.0.0.1:9161/build/shed_test/dl-config
+DebugClearTimeoutMS: 0
+DebugSerialPath: /build/shed_test/interior.pts
+DestinationEmailAddress: shed-test-local@tmp-test.test
+DoorUnlockMS: 0
+EmailAddress: tmp-from@testtest.test
+EmailServer: smtp://127.0.0.1:8025
+EmailUserPass: user:pass
+OpenAtSec: FILTERED
+Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
+SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
+UserNormal: FILTERED a3f21be28e9c1b6263894d0e45b9d77a2c9610a178eaaa3b3a40a15fd305a86f
+-- Serial output:
+TEXT_SHOW1 ACCESS DENIED
+TEXT_SHOW2 Unknown User
+TEXT_SHOW1
+TEXT_SHOW2
+SLEEP
+-- Emails:
+
+=====================================================
 === shutdown and final state
 
 -- Shed output:
@@ -847,8 +947,6 @@ EmailUserPass: user:pass
 OpenAtSec: FILTERED
 Salt: f429cd6c433523422d22dfafc7bfcad8937f02efbed2d35109aae93322486f8086d8337de83a74c39a085e41f70df28fe043748fa76945736c00fb32641e4c2c
 SaltOld: 73616c747973616c7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-UserAdder: 2a6337cb6611ffdacd52e43fc233a1333aabb58605ab1128ffacf686adde2093
-UserAdder: 82611bb175a3ee6e0d851c5116638a73de2c91c4f146348f9097902a6e798cb0
 UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
 UserNormal: FILTERED 8ae74f6df0f030679938d0edb2f908e767c7565855400234e54d42f4863fc431
 UserNormal: FILTERED a3f21be28e9c1b6263894d0e45b9d77a2c9610a178eaaa3b3a40a15fd305a86f
@@ -859,3 +957,13 @@ UserNormal: FILTERED a3f21be28e9c1b6263894d0e45b9d77a2c9610a178eaaa3b3a40a15fd30
  INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
 ERROR: io_curl:config_download test_sort:id:00 CURL_ERROR:Couldn't connect to server	(./config_download.c is_download_successful)
  INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
+ INFO: io_curl:config_download test_sort:id:00 Download finished successfully	(./config_download.c config_download_io_curl_complete)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user hash: [70a2496dc4f634ea]	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user returning MAP_idx:1a270	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user MAP_idx:1a270  	(./access_data.c __delete_user)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user hash: [2a6337cb6611ffda]	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user returning MAP_idx:3632a	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user MAP_idx:3632a  	(./access_data.c __delete_user)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user hash: [82611bb175a3ee6e]	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user returning MAP_idx:36182	(./access_data.c __user_map_lookup)
+TRACE: io_curl:config_download test_sort:id:00 download_finished prunedelete_user MAP_idx:36182  	(./access_data.c __delete_user)

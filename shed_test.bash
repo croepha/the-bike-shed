@@ -487,6 +487,43 @@ wait_line $exterior_serial_file 'TEXT_SHOW2 $'
 dump_state
 
 
+echo
+echo "====================================================="
+echo "=== Remove admin: remove 11 hash from dl"
+echo
+set_dl_config '
+UserAdder: d2db0e01045de5d6c9bcb95ba549bcdf024bf2db2f7974538cb5983fa4d86db2
+'
+
+echo
+echo "====================================================="
+echo "=== Forcing config download"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+OPTION 301
+PIN 123456
+RFID 000102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $shed_out_file 'Download finished'
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+sleep 0.01
+dump_state
+
+echo
+echo "====================================================="
+echo "=== Remove admin: 11 badge, expect unknown user"
+echo
+cat << EOF > $exterior_serial_dev
+SCAN_START
+PIN 123456
+RFID 110102030405060708090a0b0c0d0e0f1011121314151617
+SCAN_FINISHED
+EOF
+wait_line $exterior_serial_file 'TEXT_SHOW2 $'
+dump_state
+
 
 echo
 echo "====================================================="
